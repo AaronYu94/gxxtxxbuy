@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Env / secrets (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# Backend runtime data & backups
+backend/.data/
+backend/backups/
+backups/
+
+# Logs / pids
+*.log
+*.pid
+.preview-server.log
+.preview-server.pid
+
+# Local frontend env override (keep config.example.js)
+app/config.js
+
+# OS
+.DS_Store

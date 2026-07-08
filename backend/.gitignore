@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+coverage/
+npm-debug.log*
+deploy/staging/current-release.json
+deploy/staging/last-smoke.json

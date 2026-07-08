@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GOATEDBUY 执行包预览</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #171b21;
+      --muted: #667085;
+      --line: #d8dde6;
+      --accent: #1463ff;
+      --accent-soft: #eaf1ff;
+      --warn: #8a4b00;
+      --warn-soft: #fff4db;
+      --code: #111827;
+      --code-bg: #f0f2f5;
+      --ok: #0f766e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .brand {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .search {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search input {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+    }
+
+    nav {
+      padding: 10px 8px 24px;
+    }
+
+    .phase {
+      margin: 6px 0 12px;
+    }
+
+    .phase-title {
+      padding: 8px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .doc-link {
+      display: block;
+      width: 100%;
+      margin: 1px 0;
+      border: 0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .doc-link:hover {
+      background: #f2f4f7;
+    }
+
+    .doc-link.active {
+      background: var(--accent-soft);
+      color: #0d47c5;
+      font-weight: 700;
+    }
+
+    main {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .reader {
+      max-width: 1180px;
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .toolbar-title {
+      min-width: 0;
+    }
+
+    .toolbar-title strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 15px;
+    }
+
+    .toolbar-title span {
+      display: block;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar a {
+      flex: 0 0 auto;
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    article {
+      padding: 24px 28px 48px;
+    }
+
+    article h1,
+    article h2,
+    article h3 {
+      letter-spacing: 0;
+      line-height: 1.25;
+    }
+
+    article h1 {
+      margin: 0 0 20px;
+      font-size: 28px;
+    }
+
+    article h2 {
+      margin: 30px 0 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 20px;
+    }
+
+    article h3 {
+      margin: 24px 0 10px;
+      font-size: 16px;
+    }
+
+    article p {
+      margin: 10px 0;
+    }
+
+    article ul,
+    article ol {
+      padding-left: 22px;
+    }
+
+    article blockquote {
+      margin: 16px 0;
+      border-left: 4px solid var(--accent);
+      padding: 10px 14px;
+      background: var(--accent-soft);
+      color: #1f2937;
+    }
+
+    article code {
+      border-radius: 4px;
+      padding: 2px 5px;
+      background: var(--code-bg);
+      color: var(--code);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    article pre {
+      overflow: auto;
+      border-radius: 8px;
+      padding: 14px;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    article pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow: auto;
+      margin: 16px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 9px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: 0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th {
+      background: #f2f4f7;
+      font-weight: 700;
+    }
+
+    .status {
+      margin: 0;
+      padding: 18px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-block;
+      margin-left: 8px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: var(--warn-soft);
+      color: var(--warn);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: relative;
+        height: auto;
+        max-height: 46vh;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        padding: 12px;
+      }
+
+      article {
+        padding: 20px 16px 34px;
+      }
+
+      .toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <h1>GOATEDBUY 执行包</h1>
+        <p>P0-P4 文档预览</p>
+      </div>
+      <div class="search">
+        <input id="search" type="search" placeholder="搜索文档">
+      </div>
+      <nav id="nav"></nav>
+    </aside>
+    <main>
+      <section class="reader">
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <strong id="doc-title">加载中</strong>
+            <span id="doc-path"></span>
+          </div>
+          <a id="raw-link" href="#" target="_blank" rel="noreferrer">打开原文</a>
+        </div>
+        <article id="content">
+          <p class="status">正在加载文档。</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const groups = [
+      {
+        title: "总览",
+        docs: [
+          ["Phase 总拆解", "GOATEDBUY_实施Phase拆解.md"],
+          ["产品需求 DOCX", "GOATEDBUY_产品分析与需求文档_V1.0.docx"]
+        ]
+      },
+      {
+        title: "P0 上线收口",
+        base: "P0_上线收口执行包",
+        docs: [
+          "README.md",
+          "01_P0_主控台.md",
+          "02_字段与状态映射表.md",
+          "03_权限与数据安全检查表.md",
+          "04_mock与测试数据清理表.md",
+          "05_不稳定模块降级与隐藏清单.md",
+          "06_P0_上线签核表.md"
+        ]
+      },
+      {
+        title: "P1 V1.0 收口上线",
+        base: "P1_V1.0收口上线执行包",
+        docs: [
+          "README.md",
+          "01_P1_主控台.md",
+          "02_Home首页执行单.md",
+          "03_LinkIntake执行单.md",
+          "04_MyHaul执行单.md",
+          "05_Orders执行单.md",
+          "06_QCCenter执行单.md",
+          "07_ShippingParcel执行单.md",
+          "08_WalletCoupon执行单.md",
+          "09_TrustCenterCommunity执行单.md",
+          "10_埋点与数据看板.md",
+          "11_QA回归与上线验收.md"
+        ]
+      },
+      {
+        title: "P2 V1.1 体验降噪",
+        base: "P2_V1.1体验降噪执行包",
+        docs: [
+          "README.md",
+          "01_P2_主控台.md",
+          "02_FirstHaulGuide执行单.md",
+          "03_QC决策流程执行单.md",
+          "04_RefundTimeline执行单.md",
+          "05_ShippingFAQByCountry执行单.md",
+          "06_Coupon使用解释执行单.md",
+          "07_异常订单优化执行单.md",
+          "08_社群置顶规则执行单.md",
+          "09_CreatorLandingPage模板.md",
+          "10_客服运营话术与SOP.md",
+          "11_埋点与降噪看板.md",
+          "12_QA回归与验收.md"
+        ]
+      },
+      {
+        title: "P3 V1.2 工作台增强",
+        base: "P3_V1.2工作台增强执行包",
+        docs: [
+          "README.md",
+          "01_P3_主控台.md",
+          "02_LinkInbox执行单.md",
+          "03_HaulBuilder完整版执行单.md",
+          "04_ShippingPreview增强执行单.md",
+          "05_SavingsStack执行单.md",
+          "06_HaulHistory执行单.md",
+          "07_ShareableHaulRecap执行单.md",
+          "08_CreatorCampaignTracking执行单.md",
+          "09_工作台信息架构与导航.md",
+          "10_数据模型与接口清单.md",
+          "11_埋点与复购看板.md",
+          "12_QA回归与验收.md"
+        ]
+      },
+      {
+        title: "P4 V2.0 平台化",
+        base: "P4_V2.0平台化执行包",
+        docs: [
+          "README.md",
+          "01_P4_主控台.md",
+          "02_CreatorDashboard执行单.md",
+          "03_UserShippingProfile执行单.md",
+          "04_QCPreferences执行单.md",
+          "05_CountryShippingHub执行单.md",
+          "06_HaulStories内容平台执行单.md",
+          "07_风控后台执行单.md",
+          "08_审计日志执行单.md",
+          "09_后台角色权限治理.md",
+          "10_内容审核与合规SOP.md",
+          "11_数据模型与接口清单.md",
+          "12_埋点与平台看板.md",
+          "13_QA回归与验收.md"
+        ]
+      }
+    ];
+
+    const nav = document.querySelector("#nav");
+    const search = document.querySelector("#search");
+    const content = document.querySelector("#content");
+    const docTitle = document.querySelector("#doc-title");
+    const docPath = document.querySelector("#doc-path");
+    const rawLink = document.querySelector("#raw-link");
+
+    const docs = groups.flatMap((group) => {
+      return group.docs.map((entry) => {
+        const label = Array.isArray(entry) ? entry[0] : entry.replace(/\.md$/, "");
+        const path = Array.isArray(entry) ? entry[1] : `${group.base}/${entry}`;
+        return { group: group.title, label, path };
+      });
+    });
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function inlineMarkdown(value) {
+      return escapeHtml(value)
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, href) => {
+          const safeHref = escapeHtml(href);
+          return `<a href="${safeHref}" target="_blank" rel="noreferrer">${text}</a>`;
+        });
+    }
+
+    function renderTable(lines) {
+      const rows = lines.map((line) => line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => inlineMarkdown(cell.trim())));
+      const head = rows[0] || [];
+      const body = rows.slice(2);
+      const headHtml = `<thead><tr>${head.map((cell) => `<th>${cell}</th>`).join("")}</tr></thead>`;
+      const bodyHtml = `<tbody>${body.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody>`;
+      return `<div class="table-wrap"><table>${headHtml}${bodyHtml}</table></div>`;
+    }
+
+    function isTableStart(lines, index) {
+      return lines[index]?.includes("|") && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[index + 1] || "");
+    }
+
+    function renderMarkdown(markdown) {
+      const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+      const html = [];
+      let inCode = false;
+      let code = [];
+      let list = null;
+
+      function closeList() {
+        if (list) {
+          html.push(`</${list}>`);
+          list = null;
+        }
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (line.startsWith("```")) {
+          if (inCode) {
+            html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+            code = [];
+            inCode = false;
+          } else {
+            closeList();
+            inCode = true;
+          }
+          continue;
+        }
+
+        if (inCode) {
+          code.push(line);
+          continue;
+        }
+
+        if (isTableStart(lines, i)) {
+          closeList();
+          const tableLines = [];
+          while (i < lines.length && lines[i].includes("|") && lines[i].trim()) {
+            tableLines.push(lines[i]);
+            i++;
+          }
+          i--;
+          html.push(renderTable(tableLines));
+          continue;
+        }
+
+        if (!line.trim()) {
+          closeList();
+          continue;
+        }
+
+        const heading = line.match(/^(#{1,3})\s+(.+)$/);
+        if (heading) {
+          closeList();
+          const level = heading[1].length;
+          html.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
+          continue;
+        }
+
+        if (line.startsWith(">")) {
+          closeList();
+          html.push(`<blockquote>${inlineMarkdown(line.replace(/^>\s?/, ""))}</blockquote>`);
+          continue;
+        }
+
+        const unordered = line.match(/^\s*-\s+(.+)$/);
+        if (unordered) {
+          if (list !== "ul") {
+            closeList();
+            list = "ul";
+            html.push("<ul>");
+          }
+          html.push(`<li>${inlineMarkdown(unordered[1])}</li>`);
+          continue;
+        }
+
+        const ordered = line.match(/^\s*\d+\.\s+(.+)$/);
+        if (ordered) {
+          if (list !== "ol") {
+            closeList();
+            list = "ol";
+            html.push("<ol>");
+          }
+          html.push(`<li>${inlineMarkdown(ordered[1])}</li>`);
+          continue;
+        }
+
+        closeList();
+        html.push(`<p>${inlineMarkdown(line)}</p>`);
+      }
+
+      closeList();
+      return html.join("\n");
+    }
+
+    function renderNav(filter = "") {
+      nav.innerHTML = "";
+      const query = filter.trim().toLowerCase();
+      groups.forEach((group) => {
+        const phase = document.createElement("div");
+        phase.className = "phase";
+        const title = document.createElement("div");
+        title.className = "phase-title";
+        title.textContent = group.title;
+        phase.appendChild(title);
+
+        group.docs.forEach((entry) => {
+          const label = Array.isArray(entry) ? entry[0] : entry.replace(/\.md$/, "");
+          const path = Array.isArray(entry) ? entry[1] : `${group.base}/${entry}`;
+          const haystack = `${group.title} ${label} ${path}`.toLowerCase();
+          if (query && !haystack.includes(query)) return;
+          const button = document.createElement("button");
+          button.className = "doc-link";
+          button.textContent = label;
+          button.dataset.path = path;
+          button.addEventListener("click", () => selectDoc(path));
+          phase.appendChild(button);
+        });
+
+        if (phase.children.length > 1) nav.appendChild(phase);
+      });
+      markActive();
+    }
+
+    function markActive() {
+      const current = decodeURIComponent(location.hash.slice(1));
+      document.querySelectorAll(".doc-link").forEach((button) => {
+        button.classList.toggle("active", button.dataset.path === current);
+      });
+    }
+
+    async function selectDoc(path) {
+      location.hash = encodeURIComponent(path);
+      markActive();
+      const doc = docs.find((item) => item.path === path);
+      docTitle.textContent = doc?.label || path;
+      docPath.textContent = path;
+      rawLink.href = encodeURI(path);
+
+      if (!path.endsWith(".md")) {
+        content.innerHTML = `<p class="status">这是原始文件。请点击右上角“打开原文”查看或下载。<span class="badge">DOCX</span></p>`;
+        return;
+      }
+
+      content.innerHTML = `<p class="status">正在加载 ${escapeHtml(path)}。</p>`;
+      try {
+        const response = await fetch(encodeURI(path), { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const markdown = await response.text();
+        content.innerHTML = renderMarkdown(markdown);
+      } catch (error) {
+        content.innerHTML = `<p class="status">加载失败：${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    search.addEventListener("input", () => renderNav(search.value));
+    renderNav();
+    selectDoc(decodeURIComponent(location.hash.slice(1)) || "GOATEDBUY_实施Phase拆解.md");
+  </script>
+</body>
+</html>

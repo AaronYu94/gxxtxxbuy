@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GOATEDBUY Admin Console</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="admin-body">
+  <div class="shell">
+    <aside class="sidebar admin-sidebar">
+      <div class="brand">
+        <div class="brand-mark admin-mark">A</div>
+        <div>
+          <strong>GOATEDBUY</strong>
+          <span>Admin console</span>
+        </div>
+      </div>
+      <nav class="nav admin-nav" id="admin-nav"></nav>
+      <div class="side-note">
+        <strong>Internal backend</strong>
+        <span>Operations surface for order, warehouse, shipping, wallet, policy, risk, and audit workflows.</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Internal operations console</p>
+          <h1 id="admin-title">Overview</h1>
+        </div>
+        <div class="top-actions">
+          <a class="ghost-button" href="./client.html">Client</a>
+          <a class="ghost-button" href="./index.html">Switch</a>
+          <a class="ghost-button" href="../index.html">Docs</a>
+        </div>
+      </header>
+
+      <section class="notice admin-notice">
+        <span>Backend MVP</span>
+        <p>Login to the backend API to load permission-gated admin queues.</p>
+      </section>
+
+      <section id="admin-view" class="view" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script src="./admin.js"></script>
+</body>
+</html>

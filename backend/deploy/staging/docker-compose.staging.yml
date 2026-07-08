@@ -1,0 +1,23 @@
+services:
+  app:
+    image: "${STAGING_IMAGE:-goatedbuy-backend:staging}"
+    environment:
+      NODE_ENV: staging
+      SERVICE_NAME: goatedbuy-backend
+      APP_VERSION: "${APP_VERSION:-0.1.0}"
+      PORT: 3000
+      REQUEST_LOG_LEVEL: info
+      READY_REQUIRES_DATABASE: "${READY_REQUIRES_DATABASE:-false}"
+      READY_REQUIRES_REDIS: "${READY_REQUIRES_REDIS:-false}"
+      DATABASE_URL: "${DATABASE_URL:-}"
+      REDIS_URL: "${REDIS_URL:-}"
+    ports:
+      - "${STAGING_PORT:-3091}:3000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "node -e \"fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped

@@ -1,0 +1,37 @@
+{
+  "name": "goatedbuy-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "GOATEDBUY backend service foundation.",
+  "scripts": {
+    "build": "node scripts/build-check.mjs",
+    "ci": "npm run lint && npm run openapi:check && npm test && npm run build",
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "healthcheck": "node scripts/healthcheck.mjs",
+    "lint": "node scripts/lint.mjs",
+    "openapi:check": "node scripts/validate-openapi.mjs",
+    "db:ping": "node scripts/db-ping.mjs",
+    "redis:ping": "node scripts/redis-ping.mjs",
+    "seed:rbac": "node scripts/seed-rbac.mjs",
+    "shipping-lines:import": "node scripts/import-shipping-lines.mjs",
+    "migrate": "node src/db/migrate.js",
+    "migrate:status": "node src/db/migrate.js --status",
+    "migrate:dry-run": "node scripts/migrate-dry-run.mjs",
+    "env:check": "node scripts/check-production-env.mjs",
+    "db:backup": "node scripts/db-backup.mjs",
+    "smoke": "node scripts/production-smoke.mjs",
+    "staging:smoke": "node scripts/deploy-staging.mjs --smoke",
+    "staging:rollback": "node scripts/deploy-staging.mjs --rollback",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "redis": "^5.6.1"
+  }
+}

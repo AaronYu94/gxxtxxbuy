@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GOATEDBUY Client Workspace</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">G</div>
+        <div>
+          <strong>GOATEDBUY</strong>
+          <span>Client workspace</span>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="side-note">
+        <strong>Client surface</strong>
+        <span>No official finds. Users bring links from anywhere and manage the haul workflow here.</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Find it anywhere. Paste it here. Ship it with us.</p>
+          <h1 id="page-title">Dashboard</h1>
+        </div>
+        <form class="top-search" data-action="paste" aria-label="Submit shopping link">
+          <input name="url" type="url" placeholder="Paste Taobao, 1688, Weidian/Micro, Yupoo link">
+          <button class="primary-button" type="submit">Submit order</button>
+        </form>
+        <div class="top-actions">
+          <button class="icon-button" id="reset-demo" title="Clear local workspace" aria-label="Clear local workspace">×</button>
+          <a class="ghost-button" href="./admin.html">Backend</a>
+          <a class="ghost-button" href="./index.html">Switch</a>
+          <a class="ghost-button" href="../index.html">Docs</a>
+        </div>
+      </header>
+
+      <section class="notice">
+        <span>Client MVP</span>
+        <p>User-facing haul workflow. This surface should never expose internal notes, cost controls, risk flags, or other users' data.</p>
+      </section>
+
+      <section id="view" class="view" aria-live="polite"></section>
+    </main>
+    <aside class="quick-rail" id="quick-rail" aria-label="Quick actions"></aside>
+  </div>
+
+  <template id="empty-template">
+    <div class="empty">
+      <div class="empty-visual"></div>
+      <h3></h3>
+      <p></p>
+    </div>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GOATEDBUY 后端真实部署 Checklist</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #141922;
+      --muted: #647084;
+      --line: #d8dee9;
+      --line-strong: #b9c3d2;
+      --accent: #0e6f68;
+      --accent-2: #1d4ed8;
+      --accent-soft: #e7f5f2;
+      --done: #0f766e;
+      --todo: #7a4a08;
+      --todo-soft: #fff4dd;
+      --danger: #b42318;
+      --shadow: 0 18px 50px rgba(18, 29, 48, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .brand {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+      line-height: 1.25;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sidebar-section {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .field-label {
+      display: block;
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .search-input,
+    .select {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .phase-nav {
+      padding: 10px 8px 22px;
+    }
+
+    .phase-link {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .phase-link:hover,
+    .phase-link.active {
+      background: var(--accent-soft);
+    }
+
+    .phase-link strong {
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .phase-link span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .phase-link small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    main {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .hero {
+      max-width: 1280px;
+      margin: 0 auto 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stat {
+      padding: 14px 18px;
+      border-right: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .stat:last-child {
+      border-right: 0;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .progress-wrap {
+      padding: 16px 18px 18px;
+    }
+
+    .progress-track {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e6ebf3;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 180ms ease;
+    }
+
+    .progress-note {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .content {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .status {
+      margin: 0 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .status.error {
+      border-color: #f2b8b5;
+      background: #fff2f1;
+      color: var(--danger);
+    }
+
+    .phase-block {
+      margin: 16px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .phase-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .phase-header h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .phase-meta {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .task-list {
+      display: grid;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 2px;
+      min-height: 92px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .task:last-child {
+      border-bottom: 0;
+    }
+
+    .task.done {
+      background: #f4fbfa;
+    }
+
+    .check-cell {
+      display: flex;
+      align-items: start;
+      justify-content: center;
+      padding-top: 18px;
+      background: rgba(245, 247, 251, 0.64);
+    }
+
+    .task-check {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--done);
+    }
+
+    .task-body {
+      min-width: 0;
+      padding: 14px 16px 15px 8px;
+    }
+
+    .task-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .task-id {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      height: 24px;
+      border-radius: 999px;
+      background: #e8eef8;
+      color: #24456f;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .done .task-id {
+      background: #dff4f1;
+      color: var(--done);
+    }
+
+    .task-title strong {
+      min-width: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      border-radius: 999px;
+      padding: 0 8px;
+      background: var(--todo-soft);
+      color: var(--todo);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badge.done {
+      background: #dff4f1;
+      color: var(--done);
+    }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1fr 1.25fr;
+      gap: 10px;
+    }
+
+    .task-field {
+      min-width: 0;
+      border-left: 2px solid #e5eaf2;
+      padding-left: 10px;
+    }
+
+    .task-field span {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .task-field p {
+      margin: 0;
+      overflow-wrap: anywhere;
+      color: #2f3847;
+      font-size: 13px;
+    }
+
+    code {
+      border-radius: 4px;
+      padding: 2px 5px;
+      background: #eef2f7;
+      color: #101828;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .empty {
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      padding: 24px;
+      background: #fff;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 10;
+      max-width: min(440px, calc(100vw - 36px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #172033;
+      color: #fff;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        max-height: 54vh;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        padding: 12px;
+      }
+
+      .hero-top,
+      .phase-header {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions {
+        justify-content: flex-start;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stat:nth-child(2) {
+        border-right: 0;
+      }
+
+      .stat:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .task-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stat {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .stat:last-child {
+        border-bottom: 0;
+      }
+
+      .task {
+        grid-template-columns: 36px minmax(0, 1fr);
+      }
+
+      .task-body {
+        padding-right: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Backend Deploy Checklist</h1>
+        <p>从原子任务文档自动生成，可逐项勾选。</p>
+      </div>
+
+      <div class="sidebar-section">
+        <label class="field-label" for="search">搜索任务</label>
+        <input id="search" class="search-input" type="search" placeholder="例如 B0-01、QC、payment">
+        <div class="filter-row">
+          <div>
+            <label class="field-label" for="phase-filter">阶段</label>
+            <select id="phase-filter" class="select">
+              <option value="all">全部</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="status-filter">状态</label>
+            <select id="status-filter" class="select">
+              <option value="all">全部</option>
+              <option value="todo">未完成</option>
+              <option value="done">已完成</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <nav id="phase-nav" class="phase-nav" aria-label="阶段导航"></nav>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <h2>GOATEDBUY 后端真实部署 Checklist</h2>
+            <p>勾选会保存在当前浏览器；Codex 完成部署任务后会同步更新 <code>backend-deployment-status.json</code> 作为官方完成状态。</p>
+          </div>
+          <div class="hero-actions">
+            <a class="btn" href="BACKEND_真实部署原子任务拆解.md" target="_blank" rel="noreferrer">打开原子任务</a>
+            <button id="copy-status" class="btn" type="button">复制状态 JSON</button>
+            <button id="reset-local" class="btn" type="button">清空本地勾选</button>
+          </div>
+        </div>
+
+        <div class="stats" aria-label="完成统计">
+          <div class="stat">
+            <strong id="total-count">0</strong>
+            <span>总任务</span>
+          </div>
+          <div class="stat">
+            <strong id="done-count">0</strong>
+            <span>已完成</span>
+          </div>
+          <div class="stat">
+            <strong id="todo-count">0</strong>
+            <span>未完成</span>
+          </div>
+          <div class="stat">
+            <strong id="rate-count">0%</strong>
+            <span>完成率</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-track" aria-hidden="true">
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
+          <div class="progress-note">
+            <span id="status-note">正在读取任务清单。</span>
+            <span id="updated-note"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="content">
+        <p id="load-status" class="status">正在加载 <code>BACKEND_真实部署原子任务拆解.md</code>。</p>
+        <div id="checklist"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const TASK_DOC = "BACKEND_真实部署原子任务拆解.md";
+    const STATUS_DOC = "backend-deployment-status.json";
+    const LOCAL_KEY = "goatedbuy-backend-deploy-checklist-v1";
+
+    const state = {
+      tasks: [],
+      phases: [],
+      officialCompleted: new Set(),
+      officialNotes: {},
+      localCompleted: new Set(),
+      updatedAt: "",
+      search: "",
+      phase: "all",
+      status: "all"
+    };
+
+    const els = {
+      search: document.querySelector("#search"),
+      phaseFilter: document.querySelector("#phase-filter"),
+      statusFilter: document.querySelector("#status-filter"),
+      phaseNav: document.querySelector("#phase-nav"),
+      checklist: document.querySelector("#checklist"),
+      loadStatus: document.querySelector("#load-status"),
+      totalCount: document.querySelector("#total-count"),
+      doneCount: document.querySelector("#done-count"),
+      todoCount: document.querySelector("#todo-count"),
+      rateCount: document.querySelector("#rate-count"),
+      progressBar: document.querySelector("#progress-bar"),
+      statusNote: document.querySelector("#status-note"),
+      updatedNote: document.querySelector("#updated-note"),
+      resetLocal: document.querySelector("#reset-local"),
+      copyStatus: document.querySelector("#copy-status"),
+      toast: document.querySelector("#toast")
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function inlineMarkdown(value) {
+      return escapeHtml(value)
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => {
+        els.toast.classList.remove("show");
+      }, 1800);
+    }
+
+    function splitRow(line) {
+      return line
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/\|$/, "")
+        .split("|")
+        .map((cell) => cell.trim());
+    }
+
+    function parseTasks(markdown) {
+      const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+      const tasks = [];
+      const phaseMap = new Map();
+      let currentPhase = null;
+
+      lines.forEach((line) => {
+        const phaseMatch = line.match(/^##\s+(B[0-8])[:：]\s*(.+)$/);
+        if (phaseMatch) {
+          currentPhase = {
+            id: phaseMatch[1],
+            name: phaseMatch[2].trim()
+          };
+          phaseMap.set(currentPhase.id, currentPhase);
+          return;
+        }
+
+        if (!/^\|\s*B[0-8]-\d{2}\s*\|/.test(line) || !currentPhase) {
+          return;
+        }
+
+        const [id, title, dependency, deliverable, acceptance] = splitRow(line);
+        tasks.push({
+          id,
+          title,
+          dependency,
+          deliverable,
+          acceptance,
+          phaseId: currentPhase.id,
+          phaseName: currentPhase.name
+        });
+      });
+
+      return {
+        tasks,
+        phases: Array.from(phaseMap.values())
+      };
+    }
+
+    function loadLocalCompleted() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]");
+        if (Array.isArray(parsed)) {
+          state.localCompleted = new Set(parsed);
+        }
+      } catch (error) {
+        state.localCompleted = new Set();
+      }
+    }
+
+    function saveLocalCompleted() {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(Array.from(state.localCompleted).sort()));
+    }
+
+    function isDone(taskId) {
+      return state.officialCompleted.has(taskId) || state.localCompleted.has(taskId);
+    }
+
+    function doneSource(taskId) {
+      if (state.officialCompleted.has(taskId)) {
+        return "已部署";
+      }
+      if (state.localCompleted.has(taskId)) {
+        return "本地勾选";
+      }
+      return "待执行";
+    }
+
+    function taskSearchText(task) {
+      return [
+        task.id,
+        task.title,
+        task.dependency,
+        task.deliverable,
+        task.acceptance,
+        task.phaseName
+      ].join(" ").toLowerCase();
+    }
+
+    function getVisibleTasks() {
+      const query = state.search.trim().toLowerCase();
+      return state.tasks.filter((task) => {
+        if (state.phase !== "all" && task.phaseId !== state.phase) {
+          return false;
+        }
+        if (state.status === "done" && !isDone(task.id)) {
+          return false;
+        }
+        if (state.status === "todo" && isDone(task.id)) {
+          return false;
+        }
+        if (query && !taskSearchText(task).includes(query)) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    function renderPhaseFilter() {
+      const current = state.phase || "all";
+      els.phaseFilter.innerHTML = [
+        `<option value="all">全部</option>`,
+        ...state.phases.map((phase) => {
+          return `<option value="${phase.id}">${phase.id} ${escapeHtml(phase.name)}</option>`;
+        })
+      ].join("");
+      els.phaseFilter.value = current;
+    }
+
+    function renderPhaseNav() {
+      els.phaseNav.innerHTML = state.phases.map((phase) => {
+        const phaseTasks = state.tasks.filter((task) => task.phaseId === phase.id);
+        const completed = phaseTasks.filter((task) => isDone(task.id)).length;
+        const active = state.phase === phase.id ? " active" : "";
+        return `
+          <button class="phase-link${active}" type="button" data-phase="${phase.id}">
+            <strong>${phase.id}</strong>
+            <span>${escapeHtml(phase.name)}</span>
+            <small>${completed}/${phaseTasks.length}</small>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderStats() {
+      const total = state.tasks.length;
+      const done = state.tasks.filter((task) => isDone(task.id)).length;
+      const todo = total - done;
+      const rate = total ? Math.round((done / total) * 100) : 0;
+      const officialCount = state.officialCompleted.size;
+      const localOnlyCount = Array.from(state.localCompleted).filter((id) => !state.officialCompleted.has(id)).length;
+
+      els.totalCount.textContent = total;
+      els.doneCount.textContent = done;
+      els.todoCount.textContent = todo;
+      els.rateCount.textContent = `${rate}%`;
+      els.progressBar.style.width = `${rate}%`;
+      els.statusNote.textContent = `官方完成 ${officialCount} 项，本地额外勾选 ${localOnlyCount} 项。`;
+      els.updatedNote.textContent = state.updatedAt ? `状态更新时间：${state.updatedAt}` : "";
+    }
+
+    function renderChecklist() {
+      const visible = getVisibleTasks();
+      if (!visible.length) {
+        els.checklist.innerHTML = `<div class="empty">没有匹配的任务。</div>`;
+        return;
+      }
+
+      const grouped = visible.reduce((result, task) => {
+        if (!result.has(task.phaseId)) {
+          result.set(task.phaseId, []);
+        }
+        result.get(task.phaseId).push(task);
+        return result;
+      }, new Map());
+
+      els.checklist.innerHTML = Array.from(grouped.entries()).map(([phaseId, tasks]) => {
+        const phase = state.phases.find((item) => item.id === phaseId);
+        const completed = tasks.filter((task) => isDone(task.id)).length;
+        return `
+          <section class="phase-block" id="${phaseId}">
+            <div class="phase-header">
+              <h3>${phaseId}：${escapeHtml(phase?.name || "")}</h3>
+              <div class="phase-meta">当前筛选 ${completed}/${tasks.length} 完成</div>
+            </div>
+            <div class="task-list">
+              ${tasks.map(renderTask).join("")}
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function renderTask(task) {
+      const done = isDone(task.id);
+      const badgeClass = done ? "badge done" : "badge";
+      const note = state.officialNotes[task.id] ? `<div class="task-field"><span>备注</span><p>${inlineMarkdown(state.officialNotes[task.id])}</p></div>` : "";
+      return `
+        <article class="task${done ? " done" : ""}" data-task-id="${task.id}">
+          <div class="check-cell">
+            <input class="task-check" type="checkbox" data-id="${task.id}" ${done ? "checked" : ""} aria-label="${task.id} ${escapeHtml(task.title)}">
+          </div>
+          <div class="task-body">
+            <div class="task-title">
+              <span class="task-id">${task.id}</span>
+              <strong>${inlineMarkdown(task.title)}</strong>
+              <span class="${badgeClass}">${doneSource(task.id)}</span>
+            </div>
+            <div class="task-grid">
+              <div class="task-field">
+                <span>依赖</span>
+                <p>${inlineMarkdown(task.dependency || "无")}</p>
+              </div>
+              <div class="task-field">
+                <span>交付物</span>
+                <p>${inlineMarkdown(task.deliverable || "-")}</p>
+              </div>
+              <div class="task-field">
+                <span>鲁棒性验收</span>
+                <p>${inlineMarkdown(task.acceptance || "-")}</p>
+              </div>
+              ${note}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderAll() {
+      renderPhaseFilter();
+      renderPhaseNav();
+      renderStats();
+      renderChecklist();
+    }
+
+    async function copyStatusJson() {
+      const completed = state.tasks.filter((task) => isDone(task.id)).map((task) => task.id);
+      const payload = {
+        updatedAt: new Date().toISOString(),
+        completed,
+        notes: state.officialNotes
+      };
+      const text = JSON.stringify(payload, null, 2);
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("当前状态 JSON 已复制。");
+      } catch (error) {
+        showToast("复制失败，可以从控制台读取状态。");
+        console.log(text);
+      }
+    }
+
+    async function load() {
+      loadLocalCompleted();
+      try {
+        const [taskResponse, statusResponse] = await Promise.all([
+          fetch(`${TASK_DOC}?v=${Date.now()}`, { cache: "no-store" }),
+          fetch(`${STATUS_DOC}?v=${Date.now()}`, { cache: "no-store" })
+        ]);
+
+        if (!taskResponse.ok) {
+          throw new Error(`任务文档读取失败：${taskResponse.status}`);
+        }
+
+        const markdown = await taskResponse.text();
+        const parsed = parseTasks(markdown);
+        state.tasks = parsed.tasks;
+        state.phases = parsed.phases;
+
+        if (statusResponse.ok) {
+          const status = await statusResponse.json();
+          const completed = Array.isArray(status.completed) ? status.completed : [];
+          state.officialCompleted = new Set(completed);
+          state.officialNotes = status.notes && typeof status.notes === "object" ? status.notes : {};
+          state.updatedAt = status.updatedAt || "";
+        }
+
+        if (!state.tasks.length) {
+          throw new Error("没有从原子任务文档解析到任务。");
+        }
+
+        els.loadStatus.hidden = true;
+        renderAll();
+      } catch (error) {
+        els.loadStatus.className = "status error";
+        els.loadStatus.textContent = error.message;
+      }
+    }
+
+    els.search.addEventListener("input", (event) => {
+      state.search = event.target.value;
+      renderChecklist();
+    });
+
+    els.phaseFilter.addEventListener("change", (event) => {
+      state.phase = event.target.value;
+      renderPhaseNav();
+      renderChecklist();
+    });
+
+    els.statusFilter.addEventListener("change", (event) => {
+      state.status = event.target.value;
+      renderChecklist();
+    });
+
+    els.phaseNav.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-phase]");
+      if (!button) {
+        return;
+      }
+      state.phase = state.phase === button.dataset.phase ? "all" : button.dataset.phase;
+      els.phaseFilter.value = state.phase;
+      renderPhaseNav();
+      renderChecklist();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    els.checklist.addEventListener("change", (event) => {
+      if (!event.target.matches(".task-check")) {
+        return;
+      }
+      const id = event.target.dataset.id;
+      if (event.target.checked) {
+        state.localCompleted.add(id);
+      } else {
+        if (state.officialCompleted.has(id)) {
+          showToast(`${id} 是官方已完成项，请更新 ${STATUS_DOC} 才能取消。`);
+          renderAll();
+          return;
+        }
+        state.localCompleted.delete(id);
+      }
+      saveLocalCompleted();
+      renderAll();
+      showToast(`${id} 已${event.target.checked ? "勾选" : "取消"}。`);
+    });
+
+    els.resetLocal.addEventListener("click", () => {
+      state.localCompleted.clear();
+      saveLocalCompleted();
+      renderAll();
+      showToast("本地勾选已清空，官方完成状态保留。");
+    });
+
+    els.copyStatus.addEventListener("click", copyStatusJson);
+
+    load();
+  </script>
+</body>
+</html>

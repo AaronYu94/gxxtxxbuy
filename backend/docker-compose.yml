@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+    environment:
+      NODE_ENV: development
+      SERVICE_NAME: goatedbuy-backend
+      APP_VERSION: 0.1.0
+      PORT: 3000
+      DATABASE_URL: postgres://goatedbuy:goatedbuy_dev_password@db:5432/goatedbuy
+      REDIS_URL: redis://redis:6379
+      READY_REQUIRES_DATABASE: "true"
+      READY_REQUIRES_REDIS: "true"
+    ports:
+      - "${APP_PORT:-3001}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: goatedbuy
+      POSTGRES_USER: goatedbuy
+      POSTGRES_PASSWORD: goatedbuy_dev_password
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - goatedbuy_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goatedbuy -d goatedbuy"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - goatedbuy_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  goatedbuy_postgres_data:
+  goatedbuy_redis_data:
