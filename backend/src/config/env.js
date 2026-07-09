@@ -74,6 +74,7 @@ export function parseEnv(source = process.env, options = {}) {
     welcomeGiftEnabled: readBoolean(source, "WELCOME_GIFT_ENABLED", true),
     welcomeGiftCode: readString(source, "WELCOME_GIFT_CODE", "WELCOME10"),
     welcomeGiftAmountCents: readInteger(source, "WELCOME_GIFT_AMOUNT_CENTS", 1000, { min: 0, max: 100000 }),
+    linkParseInline: readBoolean(source, "LINK_PARSE_INLINE", false),
     riskCouponAbuseEnabled: readBoolean(source, "RISK_COUPON_ABUSE_ENABLED", false),
     riskCouponAbuseThreshold: readInteger(source, "RISK_COUPON_ABUSE_THRESHOLD", 5, { min: 1, max: 1000 }),
     features: Object.freeze({

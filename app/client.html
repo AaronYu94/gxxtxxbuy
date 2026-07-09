@@ -3,53 +3,133 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GOATEDBUY Client Workspace</title>
-  <link rel="stylesheet" href="./styles.css">
+  <title>GOATEDBUY | Shop China, Ship Worldwide</title>
+  <link rel="stylesheet" href="./styles.css?v=20260709-six-step-journey">
 </head>
-<body>
-  <div class="shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">G</div>
+<body class="client-body" data-view="dashboard">
+  <div class="announcement">
+    <p><strong>New buyer bonus:</strong> welcome coupon + 90 days free storage.</p>
+    <button type="button" data-route-button="guide">View guide</button>
+  </div>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <button class="brand brand-button" type="button" data-route-button="dashboard" aria-label="GOATEDBUY home">
+        <div class="brand-mark has-logo" aria-hidden="true"><img src="./assets/goatedbuy-symbol.jpg" alt=""></div>
         <div>
           <strong>GOATEDBUY</strong>
-          <span>Client workspace</span>
+          <span>China shopping agent</span>
         </div>
+      </button>
+
+      <form class="top-search" data-action="paste" aria-label="Submit shopping link">
+        <i data-lucide="link-2" aria-hidden="true"></i>
+        <input name="url" type="url" placeholder="Paste a Taobao, 1688 or Weidian product link">
+        <button class="search-submit" type="submit" aria-label="Search product link" title="Search product link">
+          <i data-lucide="search" aria-hidden="true"></i>
+        </button>
+      </form>
+
+      <div class="top-actions">
+        <button class="currency-button" type="button" title="Display currency">
+          <i data-lucide="globe-2" aria-hidden="true"></i>
+          <span>USD</span>
+        </button>
+        <button class="header-icon" type="button" data-route-button="wallet" title="Wallet" aria-label="Wallet">
+          <i data-lucide="wallet-cards" aria-hidden="true"></i>
+        </button>
+        <button class="header-icon" type="button" data-route-button="haul" title="My Haul" aria-label="My Haul">
+          <i data-lucide="shopping-bag" aria-hidden="true"></i>
+        </button>
+        <button class="account-button" type="button" data-focus-account>
+          <i data-lucide="circle-user-round" aria-hidden="true"></i>
+          <span>Account</span>
+        </button>
       </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Client navigation">
       <nav class="nav" id="nav"></nav>
       <div class="side-note">
-        <strong>Client surface</strong>
-        <span>No official finds. Users bring links from anywhere and manage the haul workflow here.</span>
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+        <strong>Buyer protection</strong>
+        <span>Every warehouse item is photographed before international shipping.</span>
       </div>
     </aside>
 
     <main class="main">
-      <header class="topbar">
+      <header class="topbar workspace-heading">
         <div>
-          <p class="eyebrow">Find it anywhere. Paste it here. Ship it with us.</p>
+          <p class="eyebrow">Your GOATEDBUY workspace</p>
           <h1 id="page-title">Dashboard</h1>
         </div>
-        <form class="top-search" data-action="paste" aria-label="Submit shopping link">
-          <input name="url" type="url" placeholder="Paste Taobao, 1688, Weidian/Micro, Yupoo link">
-          <button class="primary-button" type="submit">Submit order</button>
-        </form>
-        <div class="top-actions">
-          <button class="icon-button" id="reset-demo" title="Clear local workspace" aria-label="Clear local workspace">×</button>
-          <a class="ghost-button" href="./admin.html">Backend</a>
-          <a class="ghost-button" href="./index.html">Switch</a>
-          <a class="ghost-button" href="../index.html">Docs</a>
+        <div class="workspace-actions">
+          <button class="icon-button" id="reset-demo" title="Clear local workspace" aria-label="Clear local workspace">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          </button>
+          <a class="ghost-button" href="./admin.html"><i data-lucide="panels-top-left" aria-hidden="true"></i>Admin</a>
         </div>
       </header>
-
-      <section class="notice">
-        <span>Client MVP</span>
-        <p>User-facing haul workflow. This surface should never expose internal notes, cost controls, risk flags, or other users' data.</p>
-      </section>
 
       <section id="view" class="view" aria-live="polite"></section>
     </main>
     <aside class="quick-rail" id="quick-rail" aria-label="Quick actions"></aside>
   </div>
+
+  <footer class="site-footer">
+    <div class="footer-nav-grid">
+      <div class="footer-column">
+        <h2>Shopping Agent Guide</h2>
+        <button type="button" data-route-button="guide">Buying Process</button>
+        <button type="button" data-route-button="trust">Services and fees</button>
+        <button type="button" data-route-button="trust">Returns &amp; Refunds</button>
+        <button type="button" data-route-button="wallet">Payments &amp; Withdrawals</button>
+      </div>
+      <div class="footer-column">
+        <h2>Delivery</h2>
+        <button type="button" data-route-button="trust">Shipping Restrictions</button>
+        <button type="button" data-route-button="trust">Customs &amp; Taxes</button>
+        <button type="button" data-route-button="shipping">Delivery Notes</button>
+      </div>
+      <div class="footer-column">
+        <h2>Warehouse and after-sales</h2>
+        <button type="button" data-route-button="trust">Storage Period</button>
+        <button type="button" data-route-button="qc">Inspection Policy</button>
+      </div>
+      <div class="footer-column">
+        <h2>Customer Service</h2>
+        <button type="button" data-route-button="community">Contact Us</button>
+        <button type="button" data-route-button="trust">GoatedBuy Service Terms</button>
+        <a href="mailto:business@goatedbuy.com">Business Inquiries: business@goatedbuy.com</a>
+      </div>
+    </div>
+    <div class="footer-lower">
+      <address class="company-details">
+        <span>Company Name: GOATED BUY LIMITED</span>
+        <span>Company Address: WORKSHOP251 ON 3RD FLOOR, JOIN-IN HANG SING CENTRE, NOS. 2-16 KWAI FUNG CRESCENT, KWAI CHUNG, HONG KONG</span>
+        <span>Contact Email: <a href="mailto:goated@goatedbuy.com">goated@goatedbuy.com</a></span>
+        <span>Copyright© 2021-2026 www.goatedbuy.com All Rights Reserved</span>
+      </address>
+      <div class="footer-legal-payment">
+        <nav class="footer-policy-links" aria-label="Legal policies">
+          <button type="button" data-route-button="trust">About US</button>
+          <button type="button" data-route-button="trust">User Registration Agreement</button>
+          <button type="button" data-route-button="trust">User Privacy Policy</button>
+          <button type="button" data-route-button="trust">Privacy Policy Regarding GDPR</button>
+        </nav>
+        <div class="real-payment-logos" aria-label="Accepted payment networks">
+          <span class="real-payment-logo"><img src="./assets/payment/visa.svg" alt="Visa"></span>
+          <span class="real-payment-logo"><img src="./assets/payment/mastercard.svg" alt="Mastercard"></span>
+          <span class="real-payment-logo"><img src="./assets/payment/discover.svg" alt="Discover"></span>
+          <span class="real-payment-logo"><img src="./assets/payment/diners-club.svg" alt="Diners Club"></span>
+          <span class="real-payment-logo"><img src="./assets/payment/unionpay.svg" alt="UnionPay"></span>
+          <span class="real-payment-logo"><img src="./assets/payment/jcb.svg" alt="JCB"></span>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <template id="empty-template">
     <div class="empty">
@@ -59,6 +139,7 @@
     </div>
   </template>
 
-  <script src="./app.js"></script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="./app.js?v=20260709-six-step-journey"></script>
 </body>
 </html>

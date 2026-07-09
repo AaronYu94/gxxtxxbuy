@@ -48,5 +48,6 @@ Status: current
 - [[GOATEDBUY Requirements Decomposition Complete]]
 - [[P1 V1.0 Launch Execution Package Ready for Startup]]
 - [[P4 V2.0 Platformization Execution Package]]
+- [[Product Link Data Extraction Strategy]]
 
 <!-- /nodi:related -->

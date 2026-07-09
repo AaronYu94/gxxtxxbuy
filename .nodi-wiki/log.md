@@ -86,3 +86,35 @@ _Append-only timeline of wiki operations. One line each:
 ## [2026-07-08] ingest | Handoff 功能请求
 
 ## [2026-07-08] lint | 2 back-links
+
+## [2026-07-08] ingest | Deployment checklist work complete
+
+## [2026-07-08] lint | 4 back-links
+
+## [2026-07-08] ingest | 部署完成
+
+## [2026-07-08] lint | 2 back-links
+
+## [2026-07-08] ingest | 不用 Artifact。我改成直接描述设计方案,你决定执行。
+
+## [2026-07-08] lint | maintenance
+
+## [2026-07-08] ingest | 回到我们实际要做的。你现在项目处于**链接解析的 2.5 阶段**(平台识别有了、ID 解析没完成),如果要把"抓商品数据"整成自建方案,时间成本会很高,而且一上量就需要代理、IP 池、签名维护。
+
+## [2026-07-08] lint | 8 back-links
+
+## [2026-07-08] ingest | Deployment checklist status update
+
+## [2026-07-08] lint | 4 back-links
+
+## [2026-07-08] ingest | 完整修补计划已写好:**`GOATEDBUY_PRD修补计划_V1.0.md`**(和你们 `BACKEND_真实部署原子任务拆解.md` 同一套原子任务格式,可逐项执行/验收/回滚)。
+
+## [2026-07-08] lint | 3 back-links
+
+## [2026-07-08] ingest | 我已经用浏览器测完整个流程了。现在下载 zip 分享给你检查。
+
+## [2026-07-08] lint | maintenance
+
+## [2026-07-09] ingest | 浏览器里发现是静态服务器缓存了旧 CSS：标志内容已经出现，但样式没刷新，所以暂时挤成纯文本。我会给样式表加版本号触发刷新，然后重新检查实际成品。
+
+## [2026-07-09] lint | maintenance

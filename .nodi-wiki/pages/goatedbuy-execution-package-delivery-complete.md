@@ -40,6 +40,7 @@ Relation: relates to -> GOATEDBUY Product Phases
 
 ## Related
 
+- [[Deployment Complete — Backend Running]]
 - [[GOATEDBUY Phase and Execution Plan Complete]]
 
 <!-- /nodi:related -->

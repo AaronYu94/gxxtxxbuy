@@ -49,6 +49,7 @@ Relation: depends on -> GOATEDBUY Requirements Decomposition Complete
 ## Related
 
 - [[Authentication and Authorization Foundation Build (B1)]]
+- [[GOATEDBUY Comprehensive Patch Plan V1.0]]
 - [[Handoff File Location Unclear]]
 
 <!-- /nodi:related -->

@@ -10,6 +10,7 @@ import {
   validateStatus
 } from "./core-input.js";
 import { normalizeProductUrl } from "./link-platform.js";
+import { parseSavedLinkRecord } from "../parsing/parse-worker.js";
 import { FALLBACK_POLICIES } from "./policies.js";
 
 const HAUL_STATUSES = [
@@ -24,7 +25,14 @@ const HAUL_STATUSES = [
   "cancelled"
 ];
 
-export function createCoreService({ repository, env, queue = null, auditLogger = null } = {}) {
+export function createCoreService({
+  repository,
+  env,
+  queue = null,
+  auditLogger = null,
+  productSource = null,
+  parseInline = false
+} = {}) {
   if (!repository) {
     throw new Error("Core repository is required.");
   }
@@ -79,6 +87,16 @@ export function createCoreService({ repository, env, queue = null, auditLogger =
           platform: link.platform,
           request_id: requestMeta.requestId
         });
+        // Inline mode (no async worker / demo): resolve the product now so the link fills
+        // in immediately. With Redis + a running worker, parseInline is off and the queued
+        // job is processed out of band.
+        if (parseInline && productSource) {
+          const processed = await parseSavedLinkRecord(
+            { repository, source: productSource },
+            { url: link.url, platform: link.platform, userId: user.id, linkId: link.id }
+          );
+          return { link: publicSavedLink(processed), job };
+        }
         const updated = await repository.updateSavedLink(user.id, link.id, { status: "parsing" });
         return { link: publicSavedLink(updated), job };
       } catch (error) {

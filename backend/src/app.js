@@ -14,6 +14,7 @@ import { createPgCountryRepository } from "./country/country-repository.js";
 import { createCountryService } from "./country/country-service.js";
 import { createPgCreatorRepository } from "./creators/creator-repository.js";
 import { createCreatorService } from "./creators/creator-service.js";
+import { createPlaceholderProductSource } from "./parsing/product-source.js";
 import { createPgRiskRepository } from "./risk/risk-repository.js";
 import { createRiskService } from "./risk/risk-service.js";
 import { checkDatabase } from "./db/pool.js";
@@ -71,11 +72,14 @@ export function createApp(options = {}) {
     repository: repositories.auth,
     auditLogger
   });
+  const productSource = options.productSource || createPlaceholderProductSource();
   const coreService = options.coreService || createCoreService({
     repository: repositories.core,
     env,
     queue: options.queue,
-    auditLogger
+    auditLogger,
+    productSource,
+    parseInline: options.parseInline ?? env.linkParseInline
   });
   const warehouseService = options.warehouseService || createWarehouseService({
     repository: repositories.warehouse,

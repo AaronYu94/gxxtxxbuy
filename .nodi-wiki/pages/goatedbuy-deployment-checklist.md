@@ -42,7 +42,9 @@ Relation: depends on -> Backend Real-Deployment Atomic Task Decomposition
 
 ## Related
 
+- [[Deployment Checklist Verification Complete]]
 - [[GOATEDBUY Backend Handoff Complete]]
+- [[Link Parsing Atomic Task Complete]]
 - [[P0 Haul Agent Demo Validation Complete]]
 
 <!-- /nodi:related -->

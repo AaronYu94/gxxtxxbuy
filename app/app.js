@@ -5,17 +5,11 @@ const API_STORAGE_KEY = "goatedbuy-client-api-v1";
 const DEFAULT_API_BASE_URL = (typeof window !== "undefined" && window.GOATEDBUY_API_BASE_URL) || "http://127.0.0.1:3000";
 
 const navItems = [
-  ["dashboard", "Dashboard"],
-  ["links", "Link Intake"],
-  ["haul", "My Haul"],
-  ["orders", "Orders"],
-  ["qc", "QC Center"],
-  ["shipping", "Shipping"],
-  ["wallet", "Wallet"],
-  ["creator", "Creator"],
-  ["guide", "New User Guide"],
-  ["community", "Community"],
-  ["trust", "Trust Center"]
+  ["dashboard", "Home", "house"],
+  ["shipping", "Shipping Estimation", "calculator"],
+  ["haul", "Forwarding", "package-open"],
+  ["guide", "Help Center", "circle-help"],
+  ["creator", "Affiliate", "badge-percent"]
 ];
 
 const journey = [
@@ -220,7 +214,10 @@ async function apiRequest(path, options = {}) {
 }
 
 async function connectApiAccount(mode, formData) {
-  apiState.baseUrl = formData.get("baseUrl").trim().replace(/\/+$/, "") || defaultApiState().baseUrl;
+  const submittedBaseUrl = formData.get("baseUrl");
+  if (typeof submittedBaseUrl === "string" && submittedBaseUrl.trim()) {
+    apiState.baseUrl = submittedBaseUrl.trim().replace(/\/+$/, "");
+  }
   apiState.loading = true;
   apiState.error = "";
   saveApiState();
@@ -1002,9 +999,10 @@ function renderNav() {
     shipping: c.shipping,
     wallet: c.coupons
   };
-  nav.innerHTML = navItems.map(([id, label]) => `
+  nav.innerHTML = navItems.map(([id, label, icon]) => `
     <button class="${id === currentView ? "active" : ""}" data-route="${id}">
-      <span>${label}</span>
+      <i data-lucide="${icon}" aria-hidden="true"></i>
+      <span class="nav-label">${label}</span>
       ${countMap[id] ? `<span class="count">${countMap[id]}</span>` : ""}
     </button>
   `).join("");
@@ -1016,6 +1014,7 @@ function renderNav() {
 function route(id) {
   currentView = id;
   render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function empty(title, body) {
@@ -1055,61 +1054,137 @@ function renderDashboard() {
   const c = counts();
   const nextAction = nextActionMarkup();
   return `
-    <div class="grid">
-      <section class="panel hero-panel">
+    <div class="home-page">
+      <section class="home-hero">
         <div class="hero-copy">
+          <span class="hero-kicker"><i data-lucide="package-open" aria-hidden="true"></i>One link. One warehouse. Your world.</span>
           <div>
-            <h2>Start with an item link, then manage the full haul workflow.</h2>
-            <p>Paste Taobao, 1688, Weidian/Micro, Yupoo, or other Chinese marketplace links. GOATEDBUY purchases for you, receives the item in China, takes QC photos, stores it, combines parcels, and ships overseas.</p>
+            <h2>Shop China.<br><em>Ship your way.</em></h2>
+            <p>Paste any product link. We buy it, inspect it at our China warehouse, combine your haul, and send it worldwide.</p>
           </div>
-          <form class="paste-row" data-action="paste">
-            <input name="url" type="url" placeholder="Paste Taobao, 1688, Weidian/Micro, Yupoo, or other item link" aria-label="Item link">
-            <button class="primary-button" type="submit">Submit order</button>
-            <button class="secondary-button" type="button" data-save-link>Save link</button>
+          <form class="hero-search" data-action="paste">
+            <i data-lucide="link-2" aria-hidden="true"></i>
+            <input name="url" type="url" placeholder="Paste a Taobao, 1688, Weidian or Yupoo link" aria-label="Item link">
+            <button class="primary-button" type="submit"><i data-lucide="search" aria-hidden="true"></i>Start order</button>
+            <button class="save-link-button" type="button" data-save-link title="Save link" aria-label="Save link"><i data-lucide="bookmark" aria-hidden="true"></i></button>
           </form>
-          <div class="chips">${sourceLabels.map((label) => `<span class="chip">${label}</span>`).join("")}</div>
-          <div class="actions">
-            <button class="secondary-button" data-route-button="guide">New User Guide</button>
-            <button class="secondary-button" data-welcome-gift>Claim Welcome Gift</button>
-            <button class="secondary-button" data-route-button="community">Join Discord</button>
+          <div class="platform-row">
+            <span>Works with</span>
+            ${["Taobao", "1688", "Weidian", "Yupoo"].map((label) => `<strong>${label}</strong>`).join("")}
           </div>
-        </div>
-        <div class="visual-stack" aria-hidden="true">
-          <div class="visual-card"><strong>Link search/order</strong><span>Paste Chinese product links</span></div>
-          <div class="visual-card"><strong>QC + 90-day storage</strong><span>3-5 warehouse photos after arrival</span></div>
-          <div class="visual-card"><strong>150+ shipping lines</strong><span>Choose international transport</span></div>
+          <div class="hero-actions">
+            <button type="button" data-route-button="guide"><i data-lucide="play-circle" aria-hidden="true"></i>How it works</button>
+            <button type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Welcome gift</button>
+          </div>
         </div>
       </section>
 
-      <section class="metric-row">
-        <div class="metric"><strong>${c.links}</strong><span>Saved links</span></div>
-        <div class="metric"><strong>${c.haul}</strong><span>Haul items</span></div>
-        <div class="metric"><strong>90</strong><span>Free storage days</span></div>
-        <div class="metric"><strong>150+</strong><span>Shipping lines</span></div>
+      <section class="proof-strip" aria-label="Service highlights">
+        <div><i data-lucide="camera" aria-hidden="true"></i><span><strong>3-5 QC photos</strong> before you ship</span></div>
+        <div><i data-lucide="warehouse" aria-hidden="true"></i><span><strong>90 days</strong> free storage</span></div>
+        <div><i data-lucide="route" aria-hidden="true"></i><span><strong>700+ routes</strong> across the world</span></div>
+        <div><i data-lucide="layers-3" aria-hidden="true"></i><span><strong>One parcel</strong> from many orders</span></div>
       </section>
 
-      <div class="grid two">
-        <section class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Haul Journey</h2>
-              <p class="subtle">Paste Chinese product link -> GOATEDBUY buys -> seller ships to China warehouse -> warehouse QC/weight -> combine parcel -> pay international shipping -> ship overseas.</p>
-            </div>
+      <section class="home-section services-section">
+        <div class="section-heading">
+          <span class="section-index">01</span>
+          <div>
+            <p class="eyebrow">From checkout to doorstep</p>
+            <h2>Everything your haul needs</h2>
           </div>
-          <div class="timeline">
-            ${journey.map((step, index) => `<div class="step"><b>${index + 1}</b><span>${step}</span></div>`).join("")}
+          <p>Clear checkpoints, visible costs, and control at every stage.</p>
+        </div>
+        <div class="service-grid">
+          <article class="service-card service-buy">
+            <div class="service-icon"><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></div>
+            <span>BUY</span>
+            <h3>Paste it. We purchase it.</h3>
+            <p>Submit links from leading Chinese marketplaces and track each order from one workspace.</p>
+            <button type="button" data-route-button="links">Submit a link <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+          </article>
+          <article class="service-card service-qc">
+            <div class="service-icon"><i data-lucide="scan-search" aria-hidden="true"></i></div>
+            <span>CHECK</span>
+            <h3>See it before it leaves.</h3>
+            <p>Review warehouse weight and detailed QC photos before approving an item for shipping.</p>
+            <button type="button" data-route-button="qc">Open QC Center <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+          </article>
+          <article class="service-card service-ship">
+            <div class="service-icon"><i data-lucide="package-check" aria-hidden="true"></i></div>
+            <span>SHIP</span>
+            <h3>Build one smarter parcel.</h3>
+            <p>Combine ready items, compare international routes, pay, and follow tracking updates.</p>
+            <button type="button" data-route-button="shipping">Plan shipping <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+          </article>
+        </div>
+      </section>
+
+      <section class="home-section process-section">
+        <div class="section-heading process-heading">
+          <span class="section-index">02</span>
+          <div>
+            <p class="eyebrow">China to your doorstep</p>
+            <h2>One journey. Six clear moves.</h2>
           </div>
-        </section>
-        <section class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Next action</h2>
-              <p class="subtle">The workspace prioritizes the next user decision.</p>
-            </div>
+          <p>Follow the parcel from the first product search to final delivery, with every payment, photo, and status in one place.</p>
+        </div>
+        <div class="journey-lane" aria-hidden="true">
+          <span><i data-lucide="search" aria-hidden="true"></i>China marketplaces</span>
+          <div><i data-lucide="chevrons-right" aria-hidden="true"></i></div>
+          <strong>GOATEDBUY ROUTE 01</strong>
+          <div><i data-lucide="chevrons-right" aria-hidden="true"></i></div>
+          <span><i data-lucide="map-pin" aria-hidden="true"></i>220+ countries</span>
+        </div>
+        <div class="process-track">
+          ${[
+            ["search", "Search and Match", "搜索商品", ["Search across platforms and suppliers", "Paste Taobao and other product links", "Match and import product details"]],
+            ["credit-card", "Pay for Goods", "支付商品", ["Choose the product specification", "Add to cart or buy directly", "Pay with multiple payment methods"]],
+            ["handshake", "Order Reception and Transfer", "采购与转运", ["One-to-one purchasing agent service", "We complete the purchase for you", "Seller ships to our China warehouse"]],
+            ["scan-search", "Quality Check and Warehousing", "质检与入库", ["Warehouse inspection after arrival", "Approved goods enter free storage", "Defects are reported with QC photos"]],
+            ["plane", "Submit International Shipping", "提交国际运输", ["Confirm and combine your parcel", "Pay the international shipping fee", "700+ routes to 220+ countries", "Follow real-time tracking updates"]],
+            ["layout-dashboard", "Efficient Management", "订单管理", ["View every order and payment status", "Track international logistics", "Monitor warehouse status", "Contact customer service in one place"]]
+          ].map(([icon, title, chineseTitle, details], index) => `
+            <article class="process-step process-step-${index + 1}">
+              <div class="process-step-head">
+                <span class="process-number">${String(index + 1).padStart(2, "0")}</span>
+                <span class="process-icon"><i data-lucide="${icon}" aria-hidden="true"></i></span>
+                <span class="process-status">${index < 4 ? "CHINA" : "GLOBAL"}</span>
+              </div>
+              <h3>${title}<small>${chineseTitle}</small></h3>
+              <ul>
+                ${details.map((detail) => `<li>${detail}</li>`).join("")}
+              </ul>
+              ${index < 5 ? `<span class="process-connector" aria-hidden="true"><i data-lucide="arrow-right"></i></span>` : ""}
+            </article>
+          `).join("")}
+        </div>
+      </section>
+
+      <section class="home-section action-section">
+        <div class="next-action-copy">
+          <span class="section-index">03</span>
+          <div>
+            <p class="eyebrow">Your workspace</p>
+            <h2>Keep the next move obvious.</h2>
           </div>
-          ${nextAction}
-        </section>
-      </div>
+        </div>
+        <div class="next-action">${nextAction}</div>
+        <div class="workspace-metrics">
+          <div><strong>${c.links}</strong><span>Saved links</span></div>
+          <div><strong>${c.haul}</strong><span>Haul items</span></div>
+          <div><strong>${c.orders}</strong><span>Orders</span></div>
+          <div><strong>${c.parcels}</strong><span>Parcels</span></div>
+        </div>
+      </section>
+
+      <section class="community-banner">
+        <div>
+          <i data-lucide="messages-square" aria-hidden="true"></i>
+          <div><span>GOATEDBUY COMMUNITY</span><h2>First haul questions are welcome.</h2><p>Talk through QC details, shipping routes, and parcel planning with other buyers.</p></div>
+        </div>
+        <button class="light-button" type="button" data-route-button="community">Explore community <i data-lucide="arrow-right" aria-hidden="true"></i></button>
+      </section>
     </div>
   `;
 }
@@ -1131,7 +1206,7 @@ function renderGuide() {
             "Seller ships to the China warehouse",
             "Warehouse takes 3-5 QC photos and weighs it",
             "You combine arrived items into one parcel",
-            "Choose from 150+ international shipping lines",
+            "Choose from 700+ international shipping routes",
             "Pay final international shipping",
             "Track the parcel overseas"
           ].map((step, index) => `<div class="step"><b>${index + 1}</b><span>${step}</span></div>`).join("")}
@@ -1221,12 +1296,12 @@ function renderCommunity() {
 
 function nextActionMarkup() {
   const qc = state.items.find((item) => item.status === "qc_ready" || item.qcStatus === "extra_photo_requested");
-  if (qc) return `<div class="card"><h3>Review QC photos</h3><p class="subtle">${escapeHtml(qc.title)} is waiting for QC action.</p><div class="actions"><button class="primary-button" data-route-button="qc">Open QC Center</button></div></div>`;
+  if (qc) return `<div class="next-action-icon"><i data-lucide="scan-search" aria-hidden="true"></i></div><div><h3>Review QC photos</h3><p>${escapeHtml(qc.title)} is waiting for your approval.</p></div><button class="primary-button" data-route-button="qc">Open QC Center</button>`;
   const ship = state.items.find((item) => item.status === "ready_to_ship");
-  if (ship) return `<div class="card"><h3>Build your parcel</h3><p class="subtle">At least one item is ready for international shipping.</p><div class="actions"><button class="primary-button" data-route-button="shipping">Open Shipping</button></div></div>`;
+  if (ship) return `<div class="next-action-icon"><i data-lucide="package-plus" aria-hidden="true"></i></div><div><h3>Build your parcel</h3><p>At least one item is ready for international shipping.</p></div><button class="primary-button" data-route-button="shipping">Open Shipping</button>`;
   const saved = state.links.find((link) => link.status === "needs_details");
-  if (saved) return `<div class="card"><h3>Complete item details</h3><p class="subtle">${escapeHtml(saved.domain)} needs title, spec, price, and quantity.</p><div class="actions"><button class="primary-button" data-route-button="links">Open Link Intake</button></div></div>`;
-  return `<div class="card"><h3>Paste your first item link</h3><p class="subtle">Links can come from social, creator spreadsheets, or Chinese marketplaces.</p><div class="actions"><button class="primary-button" data-focus-paste>Paste link</button></div></div>`;
+  if (saved) return `<div class="next-action-icon"><i data-lucide="list-plus" aria-hidden="true"></i></div><div><h3>Complete item details</h3><p>${escapeHtml(saved.domain)} needs a title, spec, price, and quantity.</p></div><button class="primary-button" data-route-button="links">Open Link Intake</button>`;
+  return `<div class="next-action-icon"><i data-lucide="link-2" aria-hidden="true"></i></div><div><h3>Paste your first item link</h3><p>Start with a product URL from your favorite Chinese marketplace.</p></div><button class="primary-button" data-focus-paste>Paste link</button>`;
 }
 
 function renderLinks() {
@@ -1481,11 +1556,11 @@ function renderShipping() {
         <div class="panel-head">
           <div>
             <h2>Shipping / Parcel</h2>
-            <p class="subtle">Combine multiple warehouse items, inspect the parcel, then choose from 150+ international shipping lines from China to overseas.</p>
+            <p class="subtle">Combine multiple warehouse items, inspect the parcel, then choose from 700+ international shipping routes from China to overseas.</p>
           </div>
         </div>
         <div class="metric-row" style="margin-bottom:14px">
-          <div class="metric"><strong>150+</strong><span>Shipping lines</span></div>
+          <div class="metric"><strong>700+</strong><span>Shipping routes</span></div>
           <div class="metric"><strong>3</strong><span>Demo line groups</span></div>
           <div class="metric"><strong>90</strong><span>Free storage days</span></div>
           <div class="metric"><strong>Final</strong><span>Confirmed before payment</span></div>
@@ -1776,12 +1851,12 @@ function renderApiBanner() {
   const statusClassName = apiState.connected ? "good" : apiState.error ? "bad" : "warn";
   return `
     <section class="notice api-banner">
-      <span>API</span>
+      <div class="api-icon"><i data-lucide="${apiState.connected ? "cloud-check" : "user-round-check"}" aria-hidden="true"></i></div>
       <div style="flex:1;min-width:220px">
-        <strong>${escapeHtml(status)}</strong>
-        <p>${escapeHtml(apiState.error || (hasApiSession() ? `Using ${apiState.baseUrl}` : "Connect a client account to use live link, haul, order, and policy APIs."))}</p>
+        <strong>${escapeHtml(apiState.connected ? "Your account is connected" : "Connect your buyer account")}</strong>
+        <p>${escapeHtml(apiState.error || (hasApiSession() ? "Your order, warehouse, parcel, and wallet data are synced." : "Sign in to save links and use live order, QC, parcel, and wallet data."))}</p>
       </div>
-      <span class="status ${statusClassName}">${escapeHtml(apiState.userEmail || "Client API")}</span>
+      <span class="status ${statusClassName}">${escapeHtml(apiState.userEmail || status)}</span>
       ${hasApiSession() ? `
         <div class="actions" style="margin:0">
           <button class="secondary-button" type="button" data-api-sync ${apiState.loading ? "disabled" : ""}>Retry sync</button>
@@ -1789,7 +1864,6 @@ function renderApiBanner() {
         </div>
       ` : `
         <form class="api-form" data-action="api-connect">
-          <input name="baseUrl" value="${escapeHtml(apiState.baseUrl)}" aria-label="API base URL">
           <input name="email" type="email" placeholder="buyer@example.com" aria-label="Email">
           <input name="password" type="password" placeholder="Password" aria-label="Password">
           <button class="primary-button" type="submit" name="mode" value="login" ${apiState.loading ? "disabled" : ""}>Sign in</button>
@@ -1803,10 +1877,10 @@ function renderApiBanner() {
 function renderQuickRail() {
   if (!quickRail) return;
   quickRail.innerHTML = `
-    <button class="quick-button" data-route-button="haul" title="My Haul" aria-label="My Haul">Cart</button>
-    <a class="quick-button" href="https://telegram.org" target="_blank" rel="noreferrer" title="Telegram" aria-label="Telegram">TG</a>
-    <a class="quick-button" href="https://discord.com" target="_blank" rel="noreferrer" title="Discord" aria-label="Discord">DC</a>
-    <button class="quick-button" data-scroll-top title="Back to top" aria-label="Back to top">Top</button>
+    <button class="quick-button" data-route-button="haul" title="My Haul" aria-label="My Haul"><i data-lucide="shopping-bag" aria-hidden="true"></i><span>Haul</span></button>
+    <a class="quick-button" href="https://telegram.org" target="_blank" rel="noreferrer" title="Telegram" aria-label="Telegram"><i data-lucide="send" aria-hidden="true"></i><span>Chat</span></a>
+    <a class="quick-button" href="https://discord.com" target="_blank" rel="noreferrer" title="Discord" aria-label="Discord"><i data-lucide="message-circle" aria-hidden="true"></i><span>Discord</span></a>
+    <button class="quick-button" data-scroll-top title="Back to top" aria-label="Back to top"><i data-lucide="arrow-up" aria-hidden="true"></i><span>Top</span></button>
   `;
 }
 
@@ -1829,6 +1903,16 @@ function attachHandlers() {
   document.querySelector("[data-focus-paste]")?.addEventListener("click", () => {
     route("dashboard");
     setTimeout(() => document.querySelector('input[name="url"]')?.focus(), 0);
+  });
+
+  document.querySelectorAll("[data-focus-account]").forEach((button) => {
+    if (button.dataset.boundAccount) return;
+    button.dataset.boundAccount = "true";
+    button.addEventListener("click", () => {
+      if (currentView === "dashboard") route("wallet");
+      document.querySelector(".api-banner")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => document.querySelector('.api-form input[name="email"]')?.focus(), 350);
+    });
   });
 
   document.querySelectorAll('form[data-action="paste"]').forEach((form) => {
@@ -2013,12 +2097,14 @@ function render() {
     trust: ["Trust Center", renderTrust]
   };
   const [title, renderer] = viewMap[currentView] || viewMap.dashboard;
+  document.body.dataset.view = currentView;
   pageTitle.textContent = title;
-  view.innerHTML = `${renderApiBanner()}${renderer()}`;
+  view.innerHTML = currentView === "dashboard" ? renderer() : `${renderApiBanner()}${renderer()}`;
   renderNav();
   renderQuickRail();
   attachHandlers();
   renderToast();
+  window.lucide?.createIcons({ attrs: { "stroke-width": 1.8 } });
 }
 
 document.querySelector("#reset-demo").addEventListener("click", resetWorkspace);
