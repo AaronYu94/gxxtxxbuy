@@ -1,0 +1,49 @@
+name: Deploy frontend to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare public site
+        run: |
+          mkdir _site
+          cp -R app/. _site/
+          cp app/index.html _site/portal.html
+          cp app/client.html _site/index.html
+
+      - name: Upload frontend
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

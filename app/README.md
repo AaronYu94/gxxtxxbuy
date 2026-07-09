@@ -38,7 +38,7 @@ Client:
 - My Haul with user-facing status groups.
 - Orders with local status progression and exception reasons.
 - QC Center with 3-5 QC photo placeholders, warehouse weight, and 90-day free storage messaging.
-- Shipping / Parcel with combined parcel submission, estimated/final shipping language, and 150+ shipping lines messaging.
+- Shipping / Parcel with combined parcel submission, estimated/final shipping language, and 700+ shipping routes messaging.
 - Wallet / Coupon with local code entry.
 - New User Guide and Welcome Gift.
 - Community page with Discord and Telegram placeholders.
