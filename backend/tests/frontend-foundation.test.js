@@ -13,7 +13,9 @@ function runBrowserScript(file, window = {}) {
 }
 
 test("frontend runtime config validates public eight-slot framework without secrets", () => {
-  const window = runBrowserScript("config.js", {});
+  // config.js is a gitignored per-environment override; validate the tracked
+  // public template that ships as the deployed config.js instead.
+  const window = runBrowserScript("config.example.js", {});
   runBrowserScript("runtime-config.js", window);
   assert.equal(window.GoatedBuyRuntime.valid, true);
   assert.equal(window.GoatedBuyRuntime.config.frameworkLocales.length, 8);

@@ -36,6 +36,10 @@ jobs:
         run: |
           mkdir _site
           cp -R app/. _site/
+          # config.js is a gitignored per-environment override, so it is absent
+          # from the checkout. Materialize the public template so client.html's
+          # ./config.js reference resolves instead of 404ing.
+          cp app/config.example.js _site/config.js
           cp app/index.html _site/portal.html
           cp app/client.html _site/index.html
 
