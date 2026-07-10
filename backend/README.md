@@ -2,30 +2,17 @@
 
 This folder contains the production backend foundation for GOATEDBUY.
 
-## Completed Scope
+## Current Baseline
 
-- B0-01: backend project skeleton, scripts, and README.
-- B0-02: environment loader and schema validation.
-- B0-03: `/health`, `/ready`, and `/version`.
-- B0-04: PostgreSQL pool client with timeout and redaction.
-- B0-05: SQL migration runner.
-- B0-06: base schema migration and migration metadata.
-- B0-07: local Docker Compose for app, PostgreSQL, and Redis.
-- B0-08: Redis client and queue abstraction.
-- B0-09: standard error response middleware.
-- B0-10: request logger with request id and sensitive header redaction.
-- B0-11: OpenAPI document served at `/openapi.json` and validated in CI.
-- B0-12: Node test runner with system, env, error, and OpenAPI tests.
-- B0-13: backend CI workflow for lint, OpenAPI check, tests, and build check.
-- B0-14: minimal staging smoke deploy script and Docker staging rollback path.
-- B1-01 to B1-16: user/admin identity, password hashing, sessions, auth APIs, RBAC, audit logs, permission seed, and auth/RBAC regression tests.
-- B2-01 to B2-15: saved links, marketplace recognition, parse queue handoff, My Haul, purchase orders, order history, Trust Center policies, CORS, and client API adapter.
-- B3-01 to B3-13: private storage adapter, signed QC photo URLs, warehouse receiving, item weight, 3-5 QC photo upload, user QC approval, extra-photo requests, 90-day storage status, and client QC/storage API adapter.
-- B4-01 to B4-15: shipping lines/import, parcel draft/submit, quote preview, shipping payments, signed payment webhook, tracking events, admin shipment status, and client Shipping API adapter.
-- B5-01 to B5-13: wallets, wallet transactions, coupon definitions, user coupons, code redemption, Welcome Gift, checkout coupon locks, payment failure rollback, admin coupon creation, admin credit adjustment, and client Wallet API adapter.
-- B6-01 to B6-10: permission-scoped Admin Console overview, order queue/status/exception APIs, warehouse queue, parcel queue with finance redaction, Policy CMS list/update APIs, admin frontend API adapter, and admin permission regression tests.
-- B7-01 to B7-15: creators/campaigns/attribution with a public touch endpoint and aggregate-only creator dashboard, Haul Stories with a content moderation queue and author withdraw, risk cases with legal transitions and a disabled-by-default coupon-abuse scan, a public Country Shipping Hub with expiry flagging, and the creator/content/risk frontends.
-- B8-01 to B8-10: production env checklist (`env:check`), database backup (`db:backup`) and restore drill, migration dry-run (`migrate:dry-run`), frontend API base URL switching, production smoke test (`smoke`), monitoring/alerts, feature-flag kill switches, rollback runbook, P0 security regression checklist, and release report template. See `deploy/production/`.
+- Node.js service foundation, environment validation, health/readiness/version endpoints, PostgreSQL migrations, Redis queues, structured errors, request logging, OpenAPI, tests, CI, Docker Compose, and staging smoke tooling.
+- Separate user and employee identity systems with email/device verification, password hashing, sessions, RBAC, TOTP, audit logs, permission seeds, and regression tests.
+- Versioned buyer profiles, display preferences, owner-scoped multi-address CRUD, password rotation, deletion eligibility, and asynchronous PII anonymization.
+- Saved links, marketplace recognition, parsing queue, haul items, purchase orders, order history, policy content, CORS, and client API integration.
+- Private storage, signed QC URLs, warehouse receiving, weight, QC upload and approval, extra-photo requests, and storage status.
+- Shipping lines, parcels, quote calculation, shipping payments, signed webhooks, tracking, and admin shipment operations.
+- Wallets, transactions, coupons, welcome gifts, coupon locks and rollback, and finance adjustments.
+- Permission-scoped admin queues, policy management, risk cases, content moderation, creator attribution, and country shipping content.
+- Production environment checks, backup and restore guidance, migration dry runs, smoke tests, monitoring, feature flags, rollback, security checks, and release reporting. See `deploy/production/`.
 
 ## Local Setup
 
@@ -114,6 +101,29 @@ Session endpoints:
 - `POST /admin/auth/refresh`
 - `POST /admin/auth/logout`
 - `GET /admin/me`
+
+## Buyer Account And Addresses
+
+V2 account endpoints use the `{ data, meta }` response envelope and require a user Bearer token:
+
+- `GET /api/v2/account`
+- `PATCH /api/v2/account` with `expected_version`
+- `POST /api/v2/account/password`
+- `GET` and `POST /api/v2/addresses`
+- `PATCH` and `DELETE /api/v2/addresses/:addressId`
+- `GET /api/v2/account/deletion-eligibility`
+- `POST /api/v2/account/deletion-requests`
+
+Profiles and addresses use optimistic versions. Address reads are owner-scoped, normalized fingerprints never leave the service, and one database index enforces at most one default address per buyer. Parcels retain their immutable address JSON snapshot after a saved address is changed or removed.
+
+Deletion requests are rejected while a wallet balance, warehouse item, active order, active parcel, or active after-sales case exists. Eligible requests revoke sessions immediately and are processed asynchronously:
+
+```bash
+cd backend
+npm run worker:account-deletion
+```
+
+The worker anonymizes account/address PII while preserving order, money, parcel, and immutable audit records.
 
 RBAC roles and permissions are seeded by migration `000004_rbac.sql`. To re-run the idempotent seed against an existing database:
 

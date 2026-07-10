@@ -14,7 +14,7 @@ export function createRiskService({ repository, env, auditLogger = null } = {}) 
   if (!repository) throw new Error("Risk repository is required.");
 
   return {
-    // B7-11: create a risk case.
+    // Create a risk case.
     async createCase(adminUser, input = {}, requestMeta = {}) {
       const riskType = requiredText(input.risk_type ?? input.riskType, "risk_type", 60);
       const severity = normalizeSeverity(input.severity);
@@ -54,7 +54,7 @@ export function createRiskService({ repository, env, auditLogger = null } = {}) 
       };
     },
 
-    // B7-11: update a case with a legal status transition.
+    // Update a case with a legal status transition.
     async updateCase(adminUser, caseId, input = {}, requestMeta = {}) {
       const current = await repository.findCaseById(requiredText(caseId, "case_id", 80));
       if (!current) throw notFound("Risk case not found.");
@@ -84,7 +84,7 @@ export function createRiskService({ repository, env, auditLogger = null } = {}) 
       return { case: publicRiskCase(updated) };
     },
 
-    // B7-12: coupon-abuse rule. Disabled by default (RISK_COUPON_ABUSE_ENABLED) so it
+    // Coupon-abuse rule. Disabled by default (RISK_COUPON_ABUSE_ENABLED) so it
     // never opens cases without an operator turning it on; threshold is configurable.
     async scanCouponAbuse(candidates = [], options = {}) {
       if (!env?.riskCouponAbuseEnabled && !options.force) {

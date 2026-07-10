@@ -5,7 +5,7 @@ import { normalizeEmail } from "../src/auth/input.js";
 import { parseEnv } from "../src/config/env.js";
 import { hashPassword } from "../src/security/password.js";
 import { MemoryAdminRepository } from "./helpers/memory-admin-repository.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { loginAdminWithTotp, MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
 import { MemoryCoreRepository } from "./helpers/memory-core-repository.js";
 import { MemoryShippingRepository } from "./helpers/memory-shipping-repository.js";
 import { MemoryWalletRepository } from "./helpers/memory-wallet-repository.js";
@@ -66,12 +66,7 @@ async function createAdmin(repository, { email, roles = [], permissions = [] }) 
 }
 
 async function loginAdmin(baseUrl, email) {
-  const result = await requestJson(baseUrl, "/admin/auth/login", {
-    method: "POST",
-    body: { email, password: "AdminPass123" }
-  });
-  assert.equal(result.response.status, 200);
-  return result.body.session.access_token;
+  return (await loginAdminWithTotp(baseUrl, email)).session.access_token;
 }
 
 test("admin overview and order queue are permission scoped and paginated", async () => {
@@ -85,7 +80,7 @@ test("admin overview and order queue are permission scoped and paginated", async
 
     await createAdmin(repositories.auth, {
       email: "buyerops@example.com",
-      roles: ["procurement"],
+      roles: ["procurement_agent"],
       permissions: ["orders:read", "orders:write"]
     });
     const token = await loginAdmin(baseUrl, "buyerops@example.com");
@@ -124,12 +119,12 @@ test("admin order status and exception updates enforce transitions and audit wri
     const order = repositories.admin.seedOrder({ status: "submitted" });
     await createAdmin(repositories.auth, {
       email: "procurement@example.com",
-      roles: ["procurement"],
+      roles: ["procurement_agent"],
       permissions: ["orders:read", "orders:write"]
     });
     await createAdmin(repositories.auth, {
       email: "support@example.com",
-      roles: ["support"],
+      roles: ["support_agent"],
       permissions: ["support:write"]
     });
     const procurementToken = await loginAdmin(baseUrl, "procurement@example.com");
@@ -186,27 +181,27 @@ test("warehouse, parcel, and policy admin APIs enforce role boundaries", async (
   try {
     repositories.admin.seedWarehouseItem({ title: "Ready item", status: "ready_to_ship", photoCount: 4 });
     repositories.admin.seedWarehouseItem({ title: "QC item", status: "qc_ready", photoCount: 3 });
-    repositories.admin.seedParcel({ status: "shipping_due", finalFeeCents: 2400, paymentStatus: "requires_payment" });
+    const parcel = repositories.admin.seedParcel({ status: "shipping_due", finalFeeCents: 2400, paymentStatus: "requires_payment" });
     const policy = repositories.admin.seedPolicy({ policyType: "storage", status: "draft", version: 2 });
 
     await createAdmin(repositories.auth, {
       email: "warehouse@example.com",
-      roles: ["warehouse"],
+      roles: ["warehouse_operator"],
       permissions: ["warehouse:read"]
     });
     await createAdmin(repositories.auth, {
       email: "shipper@example.com",
-      roles: ["operations"],
+      roles: ["warehouse_operator"],
       permissions: ["shipping:read"]
     });
     await createAdmin(repositories.auth, {
       email: "support2@example.com",
-      roles: ["support"],
+      roles: ["support_agent"],
       permissions: ["support:read"]
     });
     await createAdmin(repositories.auth, {
       email: "ops@example.com",
-      roles: ["operations"],
+      roles: ["campaign_operator"],
       permissions: ["ops:policy:write"]
     });
 
@@ -229,10 +224,15 @@ test("warehouse, parcel, and policy admin APIs enforce role boundaries", async (
     assert.equal(shippingParcels.body.redacted, false);
 
     const supportParcels = await requestJson(baseUrl, "/admin/parcels", { token: supportToken });
-    assert.equal(supportParcels.response.status, 200);
-    assert.equal(supportParcels.body.parcels[0].final_fee_cents, undefined);
-    assert.equal(supportParcels.body.parcels[0].payment_status, undefined);
-    assert.equal(supportParcels.body.redacted, true);
+    assert.equal(supportParcels.response.status, 400);
+    const searchedSupportParcels = await requestJson(baseUrl, `/admin/parcels?id=${parcel.id}`, { token: supportToken });
+    assert.equal(searchedSupportParcels.response.status, 200);
+    assert.equal(searchedSupportParcels.body.parcels[0].final_fee_cents, undefined);
+    assert.equal(searchedSupportParcels.body.parcels[0].payment_status, undefined);
+    assert.equal(searchedSupportParcels.body.redacted, true);
+    const sensitiveQueryAudit = repositories.audit.logs.find((log) => log.action === "admin.sensitive_query");
+    assert.deepEqual(sensitiveQueryAudit.metadata.filter_keys, ["id"]);
+    assert.equal(JSON.stringify(sensitiveQueryAudit.metadata).includes(parcel.id), false);
 
     const policies = await requestJson(baseUrl, "/admin/policies?status=draft", { token: opsToken });
     assert.equal(policies.response.status, 200);

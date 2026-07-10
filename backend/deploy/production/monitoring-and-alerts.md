@@ -1,4 +1,4 @@
-# B8-06 Monitoring & Alerts
+# Monitoring & Alerts
 
 Signals are emitted as structured JSON logs (request logger + `request_error` events) and
 health endpoints. Wire the following into the platform monitor (Datadog/Grafana/CloudWatch).

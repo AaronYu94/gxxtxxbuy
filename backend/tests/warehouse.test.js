@@ -7,7 +7,7 @@ import { hashPassword } from "../src/security/password.js";
 import { createMemoryStorageAdapter } from "../src/storage/storage-adapter.js";
 import { signPrivateObjectUrl } from "../src/storage/signed-url.js";
 import { calculateStorageDeadline } from "../src/warehouse/storage-deadline.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { loginAdminWithTotp, MemoryAuditRepository, MemoryAuthRepository, registerVerifiedUser } from "./helpers/memory-auth-repository.js";
 import { MemoryCoreRepository } from "./helpers/memory-core-repository.js";
 import { MemoryWarehouseRepository } from "./helpers/memory-warehouse-repository.js";
 
@@ -55,15 +55,7 @@ async function requestJson(baseUrl, path, { method = "GET", token = "", body = n
 }
 
 async function registerUser(baseUrl, email = "buyer@example.com") {
-  const result = await requestJson(baseUrl, "/auth/register", {
-    method: "POST",
-    body: { email, password: "CorrectHorse123" }
-  });
-  assert.equal(result.response.status, 201);
-  return {
-    token: result.body.session.access_token,
-    user: result.body.user
-  };
+  return registerVerifiedUser(baseUrl, email);
 }
 
 async function createAdmin(repository, permissions = ["warehouse:write"]) {
@@ -71,18 +63,13 @@ async function createAdmin(repository, permissions = ["warehouse:write"]) {
     email: "warehouse@example.com",
     emailNormalized: normalizeEmail("warehouse@example.com"),
     passwordHash: await hashPassword("AdminPass123"),
-    roles: ["warehouse"],
+    roles: ["warehouse_operator"],
     permissions
   });
 }
 
 async function loginAdmin(baseUrl) {
-  const result = await requestJson(baseUrl, "/admin/auth/login", {
-    method: "POST",
-    body: { email: "warehouse@example.com", password: "AdminPass123" }
-  });
-  assert.equal(result.response.status, 200);
-  return result.body.session.access_token;
+  return (await loginAdminWithTotp(baseUrl, "warehouse@example.com")).session.access_token;
 }
 
 function photoBatch(count = 3, overrides = {}) {

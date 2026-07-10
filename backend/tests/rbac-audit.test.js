@@ -6,7 +6,7 @@ import { MemoryAuditRepository } from "./helpers/memory-auth-repository.js";
 
 test("RBAC definitions include required operational roles and permissions", () => {
   const roleCodes = ROLE_DEFINITIONS.map((role) => role.code);
-  for (const role of ["procurement", "warehouse", "support", "operations", "finance", "risk", "administrator"]) {
+  for (const role of ["super_admin", "procurement_agent", "procurement_lead", "support_agent", "warehouse_operator", "warehouse_lead", "finance_operator", "campaign_operator", "referral_operator"]) {
     assert.ok(roleCodes.includes(role));
   }
   assert.ok(PERMISSIONS.some(([code]) => code === "*"));

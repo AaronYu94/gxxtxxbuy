@@ -124,9 +124,9 @@ export class MemoryAdminRepository {
     };
   }
 
-  async listOrders({ status = "", limit = 25, offset = 0 } = {}) {
+  async listOrders({ status = "", limit = 25, offset = 0, id = "", userId = "", email = "", orderNo = "" } = {}) {
     return page(
-      Array.from(this.orders.values()).filter((order) => !status || order.status === status),
+      Array.from(this.orders.values()).filter((order) => matchesScope(order, { status, id, userId, email, reference: orderNo, referenceValue: order.externalOrderNo })),
       limit,
       offset
     );
@@ -174,17 +174,17 @@ export class MemoryAdminRepository {
     return clone(order);
   }
 
-  async listWarehouseItems({ status = "", limit = 25, offset = 0 } = {}) {
+  async listWarehouseItems({ status = "", limit = 25, offset = 0, id = "", userId = "", email = "" } = {}) {
     return page(
-      Array.from(this.warehouseItems.values()).filter((item) => !status || item.status === status),
+      Array.from(this.warehouseItems.values()).filter((item) => matchesScope(item, { status, id, userId, email })),
       limit,
       offset
     );
   }
 
-  async listParcels({ status = "", limit = 25, offset = 0 } = {}) {
+  async listParcels({ status = "", limit = 25, offset = 0, id = "", userId = "", email = "", parcelNo = "" } = {}) {
     return page(
-      Array.from(this.parcels.values()).filter((parcel) => !status || parcel.status === status),
+      Array.from(this.parcels.values()).filter((parcel) => matchesScope(parcel, { status, id, userId, email, reference: parcelNo, referenceValue: parcel.trackingNumber })),
       limit,
       offset
     );
@@ -210,6 +210,14 @@ export class MemoryAdminRepository {
     policy.updatedAt = new Date().toISOString();
     return clone(policy);
   }
+}
+
+function matchesScope(item, filters) {
+  return (!filters.status || item.status === filters.status)
+    && (!filters.id || item.id === filters.id)
+    && (!filters.userId || item.userId === filters.userId)
+    && (!filters.email || item.userEmail.toLowerCase() === filters.email.toLowerCase())
+    && (!filters.reference || filters.referenceValue === filters.reference);
 }
 
 function page(items, limit, offset, sorter = sortDesc) {

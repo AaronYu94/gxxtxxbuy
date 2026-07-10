@@ -8,7 +8,7 @@ import { DEFAULT_SHIPPING_LINES } from "../src/shipping/default-lines.js";
 import { importShippingLines } from "../src/shipping/shipping-line-import.js";
 import { signPaymentWebhook } from "../src/shipping/payment-webhook.js";
 import { quoteShippingLine } from "../src/shipping/quote-calculator.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { loginAdminWithTotp, MemoryAuditRepository, MemoryAuthRepository, registerVerifiedUser } from "./helpers/memory-auth-repository.js";
 import { MemoryCoreRepository } from "./helpers/memory-core-repository.js";
 import { MemoryShippingRepository } from "./helpers/memory-shipping-repository.js";
 import { MemoryWalletRepository } from "./helpers/memory-wallet-repository.js";
@@ -63,15 +63,7 @@ async function requestJson(baseUrl, path, { method = "GET", token = "", body = n
 }
 
 async function registerUser(baseUrl, email = "buyer@example.com") {
-  const result = await requestJson(baseUrl, "/auth/register", {
-    method: "POST",
-    body: { email, password: "CorrectHorse123" }
-  });
-  assert.equal(result.response.status, 201);
-  return {
-    token: result.body.session.access_token,
-    user: result.body.user
-  };
+  return registerVerifiedUser(baseUrl, email);
 }
 
 async function createAdmin(repository, permissions = ["shipping:write"]) {
@@ -79,18 +71,13 @@ async function createAdmin(repository, permissions = ["shipping:write"]) {
     email: "ops@example.com",
     emailNormalized: normalizeEmail("ops@example.com"),
     passwordHash: await hashPassword("AdminPass123"),
-    roles: ["operations"],
+    roles: ["warehouse_operator"],
     permissions
   });
 }
 
 async function loginAdmin(baseUrl) {
-  const result = await requestJson(baseUrl, "/admin/auth/login", {
-    method: "POST",
-    body: { email: "ops@example.com", password: "AdminPass123" }
-  });
-  assert.equal(result.response.status, 200);
-  return result.body.session.access_token;
+  return (await loginAdminWithTotp(baseUrl, "ops@example.com")).session.access_token;
 }
 
 function address(country = "United States") {

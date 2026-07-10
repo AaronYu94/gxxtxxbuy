@@ -1,4 +1,4 @@
-// B8-05: production/staging smoke test. Exercises the critical client and admin paths
+// Production/staging smoke test. Exercises the critical client and admin paths
 // against a running service and reports pass/fail per step. Read-mostly and safe to run
 // against staging; it creates a throwaway user via the public register endpoint.
 //

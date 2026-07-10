@@ -1,4 +1,6 @@
 import express from "express";
+import { createPgAccountRepository } from "./account/account-repository.js";
+import { createAccountService } from "./account/account-service.js";
 import { createAuditLogger } from "./audit/audit-log.js";
 import { createPgAdminRepository } from "./admin/admin-repository.js";
 import { createAdminService } from "./admin/admin-service.js";
@@ -25,6 +27,8 @@ import { createOpenApiDocument } from "./openapi/document.js";
 import { checkRedis } from "./queue/redis.js";
 import { createAdminAuthRouter } from "./routes/admin-auth.js";
 import { createAdminConsoleRouter } from "./routes/admin-console.js";
+import { createAdminSecurityRouter } from "./routes/admin-security.js";
+import { createAccountRouter } from "./routes/account.js";
 import { createAuthRouter } from "./routes/auth.js";
 import { createClientCoreRouter } from "./routes/client-core.js";
 import { createContentRouter } from "./routes/content.js";
@@ -54,6 +58,7 @@ export function createApp(options = {}) {
   };
   const repositories = {
     auth: options.repositories?.auth || createPgAuthRepository(env),
+    account: options.repositories?.account || createPgAccountRepository(env),
     audit: options.repositories?.audit || createPgAuditRepository(env),
     core: options.repositories?.core || createPgCoreRepository(env),
     warehouse: options.repositories?.warehouse || createPgWarehouseRepository(env),
@@ -70,9 +75,16 @@ export function createApp(options = {}) {
   const auditLogger = options.auditLogger || createAuditLogger({ repository: repositories.audit, logger });
   const authService = options.authService || createAuthService({
     repository: repositories.auth,
-    auditLogger
+    auditLogger,
+    env,
+    notifier: options.notifier
   });
   const productSource = options.productSource || createPlaceholderProductSource();
+  const accountService = options.accountService || createAccountService({
+    repository: repositories.account,
+    auditLogger,
+    env
+  });
   const coreService = options.coreService || createCoreService({
     repository: repositories.core,
     env,
@@ -144,7 +156,9 @@ export function createApp(options = {}) {
   });
 
   app.use(createAuthRouter({ authService }));
+  app.use(createAccountRouter({ authService, accountService }));
   app.use(createAdminAuthRouter({ authService }));
+  app.use(createAdminSecurityRouter({ authService }));
   app.use(createAdminConsoleRouter({ authService, adminService }));
   app.use(createClientCoreRouter({ authService, coreService }));
   app.use(createStorageRouter({ storage, signedUrlHelper }));

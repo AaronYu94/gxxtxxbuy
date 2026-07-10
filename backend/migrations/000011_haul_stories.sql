@@ -24,7 +24,7 @@ before update on haul_stories
 for each row
 execute function set_updated_at();
 
--- B7-08/B7-09: content moderation permission for the review queue and actions.
+-- Content moderation permission for the review queue and actions.
 insert into permissions (code, description)
 values ('content:review:write', 'Review and moderate user-generated content.')
 on conflict (code) do update set description = excluded.description;

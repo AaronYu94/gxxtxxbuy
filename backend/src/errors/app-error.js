@@ -30,6 +30,10 @@ export function conflict(message = "Resource conflict.", details) {
   return new AppError(409, "CONFLICT", message, { details });
 }
 
+export function tooManyRequests(message = "Too many requests.", details) {
+  return new AppError(429, "RATE_LIMITED", message, { details });
+}
+
 export function serviceUnavailable(message = "Service unavailable.", details) {
   return new AppError(503, "SERVICE_UNAVAILABLE", message, { details, expose: true });
 }

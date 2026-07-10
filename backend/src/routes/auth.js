@@ -21,6 +21,30 @@ export function createAuthRouter({ authService }) {
     }
   });
 
+  router.post("/auth/verify-email", async (req, res, next) => {
+    try {
+      res.json(await authService.verifyRegistrationEmail(req.body, requestMeta(req)));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/resend-verification", async (req, res, next) => {
+    try {
+      res.status(202).json(await authService.resendRegistrationVerification(req.body, requestMeta(req)));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/auth/verify-device", async (req, res, next) => {
+    try {
+      res.json(await authService.verifyLoginDevice(req.body, requestMeta(req)));
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post("/auth/refresh", async (req, res, next) => {
     try {
       res.json(await authService.refreshUserSession(req.body, requestMeta(req)));
@@ -49,6 +73,7 @@ export function requestMeta(req) {
   return {
     requestId: req.requestId,
     userAgent: req.get("user-agent") || "",
-    ip: req.ip || req.socket?.remoteAddress || ""
+    ip: req.ip || req.socket?.remoteAddress || "",
+    deviceId: req.get("x-device-id") || ""
   };
 }

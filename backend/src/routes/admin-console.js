@@ -1,5 +1,6 @@
 import express from "express";
 import { requireAdmin, requireAnyPermission, requirePermission } from "../middleware/auth.js";
+import { requireDataScope } from "../rbac/data-scope.js";
 import { requestMeta } from "./auth.js";
 
 export function createAdminConsoleRouter({ authService, adminService }) {
@@ -20,9 +21,9 @@ export function createAdminConsoleRouter({ authService, adminService }) {
     }
   });
 
-  router.get("/admin/orders", adminAuth, orderRead, async (req, res, next) => {
+  router.get("/admin/orders", adminAuth, orderRead, requireDataScope("orders"), async (req, res, next) => {
     try {
-      res.json(await adminService.listOrders(req.query));
+      res.json(await adminService.listOrders(req.query, req.adminDataScope, req.adminUser, requestMeta(req)));
     } catch (error) {
       next(error);
     }
@@ -44,17 +45,17 @@ export function createAdminConsoleRouter({ authService, adminService }) {
     }
   });
 
-  router.get("/admin/warehouse/items", adminAuth, warehouseRead, async (req, res, next) => {
+  router.get("/admin/warehouse/items", adminAuth, warehouseRead, requireDataScope("warehouse"), async (req, res, next) => {
     try {
-      res.json(await adminService.listWarehouseItems(req.query));
+      res.json(await adminService.listWarehouseItems(req.query, req.adminDataScope, req.adminUser, requestMeta(req)));
     } catch (error) {
       next(error);
     }
   });
 
-  router.get("/admin/parcels", adminAuth, parcelRead, async (req, res, next) => {
+  router.get("/admin/parcels", adminAuth, parcelRead, requireDataScope("shipping"), async (req, res, next) => {
     try {
-      res.json(await adminService.listParcels(req.adminPermissions, req.query));
+      res.json(await adminService.listParcels(req.adminPermissions, req.query, req.adminDataScope, req.adminUser, requestMeta(req)));
     } catch (error) {
       next(error);
     }

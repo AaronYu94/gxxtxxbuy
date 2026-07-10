@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
 
+# Local/generated project memory
+.nodi-wiki/
+**/.nodi-wiki/
+
 # Env / secrets (keep .env.example)
 .env
 .env.*

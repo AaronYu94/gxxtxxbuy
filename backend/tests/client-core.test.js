@@ -3,7 +3,7 @@ import test from "node:test";
 import { createApp } from "../src/app.js";
 import { parseEnv } from "../src/config/env.js";
 import { identifyPlatform, normalizeProductUrl } from "../src/core/link-platform.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { MemoryAuditRepository, MemoryAuthRepository, registerVerifiedUser } from "./helpers/memory-auth-repository.js";
 import { MemoryCoreRepository } from "./helpers/memory-core-repository.js";
 
 function createClientCoreTestApp(options = {}) {
@@ -50,15 +50,7 @@ async function requestJson(baseUrl, path, { method = "GET", token = "", body = n
 }
 
 async function register(baseUrl, email = "buyer@example.com") {
-  const result = await requestJson(baseUrl, "/auth/register", {
-    method: "POST",
-    body: {
-      email,
-      password: "CorrectHorse123"
-    }
-  });
-  assert.equal(result.response.status, 201);
-  return result.body.session.access_token;
+  return (await registerVerifiedUser(baseUrl, email)).token;
 }
 
 test("product URL platform recognition covers supported marketplaces", () => {

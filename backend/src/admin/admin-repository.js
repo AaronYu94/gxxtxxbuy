@@ -69,7 +69,7 @@ export function createPgAdminRepository(env) {
       };
     },
 
-    async listOrders({ status = "", limit = 25, offset = 0 } = {}) {
+    async listOrders({ status = "", limit = 25, offset = 0, id = "", userId = "", email = "", orderNo = "" } = {}) {
       const result = await getDbPool(env).query(
         `select
            purchase_orders.*,
@@ -87,9 +87,13 @@ export function createPgAdminRepository(env) {
          join users on users.id = purchase_orders.user_id
          join haul_items on haul_items.id = purchase_orders.haul_item_id
          where ($1 = '' or purchase_orders.status = $1)
+           and ($4 = '' or purchase_orders.id::text = $4)
+           and ($5 = '' or purchase_orders.user_id::text = $5)
+           and ($6 = '' or lower(users.email) = lower($6))
+           and ($7 = '' or purchase_orders.external_order_no = $7)
          order by purchase_orders.created_at desc
          limit $2 offset $3`,
-        [status, limit, offset]
+        [status, limit, offset, id, userId, email, orderNo]
       );
       return paged(result.rows, normalizeAdminOrder);
     },
@@ -228,7 +232,7 @@ export function createPgAdminRepository(env) {
       }
     },
 
-    async listWarehouseItems({ status = "", limit = 25, offset = 0 } = {}) {
+    async listWarehouseItems({ status = "", limit = 25, offset = 0, id = "", userId = "", email = "", orderNo = "" } = {}) {
       const result = await getDbPool(env).query(
         `select
            warehouse_items.*,
@@ -247,15 +251,19 @@ export function createPgAdminRepository(env) {
            on qc_photos.warehouse_item_id = warehouse_items.id
           and qc_photos.status = 'active'
          where ($1 = '' or warehouse_items.status = $1)
+           and ($4 = '' or warehouse_items.id::text = $4)
+           and ($5 = '' or warehouse_items.user_id::text = $5)
+           and ($6 = '' or lower(users.email) = lower($6))
+           and ($7 = '' or purchase_orders.external_order_no = $7)
          group by warehouse_items.id, users.email, haul_items.id, purchase_orders.id
          order by warehouse_items.received_at desc
          limit $2 offset $3`,
-        [status, limit, offset]
+        [status, limit, offset, id, userId, email, orderNo]
       );
       return paged(result.rows, normalizeAdminWarehouseItem);
     },
 
-    async listParcels({ status = "", limit = 25, offset = 0 } = {}) {
+    async listParcels({ status = "", limit = 25, offset = 0, id = "", userId = "", email = "", parcelNo = "" } = {}) {
       const result = await getDbPool(env).query(
         `select
            parcels.*,
@@ -281,10 +289,14 @@ export function createPgAdminRepository(env) {
            limit 1
          ) latest_payment on true
          where ($1 = '' or parcels.status = $1)
+           and ($4 = '' or parcels.id::text = $4)
+           and ($5 = '' or parcels.user_id::text = $5)
+           and ($6 = '' or lower(users.email) = lower($6))
+           and ($7 = '' or parcels.tracking_number = $7)
          group by parcels.id, users.email, shipping_lines.id, latest_payment.status, latest_payment.amount_cents, latest_payment.provider
          order by parcels.created_at desc
          limit $2 offset $3`,
-        [status, limit, offset]
+        [status, limit, offset, id, userId, email, parcelNo]
       );
       return paged(result.rows, normalizeAdminParcel);
     },

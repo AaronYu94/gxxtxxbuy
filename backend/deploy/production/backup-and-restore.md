@@ -1,4 +1,4 @@
-# B8-02 Database Backup & Restore
+# Database Backup & Restore
 
 ## Backup
 

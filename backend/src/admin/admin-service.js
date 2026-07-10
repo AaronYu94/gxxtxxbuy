@@ -57,10 +57,11 @@ export function createAdminService({ repository, auditLogger = null } = {}) {
       };
     },
 
-    async listOrders(query = {}) {
+    async listOrders(query = {}, dataScope = {}, adminUser = null, requestMeta = {}) {
       const page = parsePagination(query, { defaultLimit: 25, maxLimit: 100 });
       const status = validateStatus(query.status, ADMIN_ORDER_STATUSES);
-      const result = await repository.listOrders({ status, ...page });
+      await auditScopedQuery(auditLogger, adminUser, dataScope, "purchase_order", requestMeta);
+      const result = await repository.listOrders({ status, ...page, ...scopeFilters(dataScope) });
       return {
         orders: result.items.map(publicAdminOrder),
         pagination: pagination(result.total, page)
@@ -131,21 +132,23 @@ export function createAdminService({ repository, auditLogger = null } = {}) {
       return { order: publicAdminOrder(updated) };
     },
 
-    async listWarehouseItems(query = {}) {
+    async listWarehouseItems(query = {}, dataScope = {}, adminUser = null, requestMeta = {}) {
       const page = parsePagination(query, { defaultLimit: 25, maxLimit: 100 });
       const status = validateStatus(query.status, WAREHOUSE_STATUSES);
-      const result = await repository.listWarehouseItems({ status, ...page });
+      await auditScopedQuery(auditLogger, adminUser, dataScope, "warehouse_item", requestMeta);
+      const result = await repository.listWarehouseItems({ status, ...page, ...scopeFilters(dataScope) });
       return {
         items: result.items.map(publicAdminWarehouseItem),
         pagination: pagination(result.total, page)
       };
     },
 
-    async listParcels(permissions = [], query = {}) {
+    async listParcels(permissions = [], query = {}, dataScope = {}, adminUser = null, requestMeta = {}) {
       const page = parsePagination(query, { defaultLimit: 25, maxLimit: 100 });
       const status = validateStatus(query.status, PARCEL_STATUSES);
       const includeFinancials = hasAnyPermission(permissions, PARCEL_FINANCIAL_PERMISSIONS);
-      const result = await repository.listParcels({ status, ...page });
+      await auditScopedQuery(auditLogger, adminUser, dataScope, "parcel", requestMeta);
+      const result = await repository.listParcels({ status, ...page, ...scopeFilters(dataScope) });
       return {
         parcels: result.items.map((parcel) => publicAdminParcel(parcel, { includeFinancials })),
         pagination: pagination(result.total, page),
@@ -180,6 +183,30 @@ export function createAdminService({ repository, auditLogger = null } = {}) {
       return { policy: publicAdminPolicy(updated) };
     }
   };
+}
+
+function scopeFilters(dataScope = {}) {
+  const search = dataScope.exactSearch || {};
+  return {
+    id: search.id || "",
+    userId: search.user_id || "",
+    email: search.email || "",
+    orderNo: search.order_no || "",
+    parcelNo: search.parcel_no || ""
+  };
+}
+
+async function auditScopedQuery(auditLogger, adminUser, dataScope, resourceType, requestMeta) {
+  const filterKeys = Object.keys(dataScope?.exactSearch || {});
+  if (!adminUser || filterKeys.length === 0) return;
+  await auditLogger?.write({
+    actorType: "admin",
+    actorAdminUserId: adminUser.id,
+    action: "admin.sensitive_query",
+    resourceType,
+    metadata: { scope: dataScope.scope, filter_keys: filterKeys },
+    requestId: requestMeta.requestId
+  }, { critical: true });
 }
 
 export function publicAdminOrder(order) {

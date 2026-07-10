@@ -1,4 +1,4 @@
-// B8-02: database backup. Wraps pg_dump using DATABASE_URL and writes a compressed,
+// Database backup. Wraps pg_dump using DATABASE_URL and writes a compressed,
 // timestamped dump to the backup directory. Restore/verify steps are documented in
 // deploy/production/backup-and-restore.md.
 //

@@ -1,4 +1,4 @@
-# B8-04 Frontend API Base URL Switching
+# Frontend API Base URL Switching
 
 The client (`app/app.js`) and admin console (`app/admin.js`) default their API base URL
 to `window.GOATEDBUY_API_BASE_URL`, falling back to `http://127.0.0.1:3000`. Users can

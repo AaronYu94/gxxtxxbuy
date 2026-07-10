@@ -1,4 +1,4 @@
-# B8-10 Release Report — <version> (<date>)
+# Release Report — <version> (<date>)
 
 ## Summary
 

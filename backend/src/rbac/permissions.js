@@ -1,67 +1,60 @@
 export const PERMISSIONS = Object.freeze([
-  ["*", "Administrator wildcard permission."],
-  ["admin:read", "Read admin console metadata."],
-  ["admin:manage", "Manage admin users and roles."],
-  ["audit:read", "Read audit logs."],
+  ["*", "Full administrative access."],
+  ["admin:read", "Read admin account metadata."],
+  ["admin:manage", "Manage admin employees and roles."],
+  ["audit:read", "Read immutable audit logs."],
   ["orders:read", "Read purchase orders."],
   ["orders:write", "Update purchase orders."],
+  ["orders:controlled_transition", "Perform controlled order transitions."],
+  ["procurement:read", "Read procurement work."],
+  ["procurement:write", "Update assigned procurement work."],
+  ["procurement:reassign", "Reassign procurement work in the organization."],
   ["warehouse:read", "Read warehouse queues."],
   ["warehouse:write", "Update warehouse and QC records."],
+  ["warehouse:correct", "Perform controlled warehouse corrections."],
   ["support:read", "Read customer support context."],
-  ["support:write", "Update support cases and customer notes."],
+  ["support:write", "Update support cases and notes."],
+  ["users:search", "Search users by exact identifiers."],
+  ["finance:wallet:write", "Post approved wallet entries."],
+  ["finance:read", "Read finance records."],
+  ["finance:write", "Update finance workflows."],
+  ["finance:adjust", "Request or approve controlled adjustments."],
+  ["finance:lock", "Apply finance safety locks."],
+  ["campaign:read", "Read campaigns and operational content."],
+  ["campaign:write", "Manage campaigns and operational content."],
+  ["referral:read", "Read referral operations."],
+  ["referral:write", "Manage referral operations."],
   ["ops:policy:write", "Update policy CMS and operational content."],
-  ["content:review:write", "Review and moderate user-generated content."],
-  ["finance:wallet:write", "Adjust wallet credit and financial records."],
+  ["content:review:write", "Review user-generated content."],
   ["risk:case:write", "Create and update risk cases."],
   ["shipping:read", "Read parcel and shipping operations."],
-  ["shipping:write", "Update parcel and shipping operations."]
+  ["shipping:write", "Update parcel and shipping operations."],
+  ["config:read", "Read versioned configuration."],
+  ["config:write", "Manage versioned configuration."],
+  ["export:write", "Create sensitive exports."]
 ]);
 
 export const ROLE_DEFINITIONS = Object.freeze([
-  {
-    code: "procurement",
-    name: "Procurement",
-    description: "Can review and update purchase orders.",
-    permissions: ["orders:read", "orders:write"]
-  },
-  {
-    code: "warehouse",
-    name: "Warehouse",
-    description: "Can receive warehouse items and upload QC.",
-    permissions: ["warehouse:read", "warehouse:write"]
-  },
-  {
-    code: "support",
-    name: "Support",
-    description: "Can read customer context and handle support cases.",
-    permissions: ["orders:read", "support:read", "support:write", "content:review:write"]
-  },
-  {
-    code: "operations",
-    name: "Operations",
-    description: "Can manage policy CMS and shipping operations.",
-    permissions: ["ops:policy:write", "shipping:read", "shipping:write", "content:review:write"]
-  },
-  {
-    code: "finance",
-    name: "Finance",
-    description: "Can adjust wallet and financial records.",
-    permissions: ["finance:wallet:write", "audit:read"]
-  },
-  {
-    code: "risk",
-    name: "Risk",
-    description: "Can manage risk cases and review suspicious activity.",
-    permissions: ["risk:case:write", "content:review:write", "audit:read"]
-  },
-  {
-    code: "administrator",
-    name: "Administrator",
-    description: "Full administrative access.",
-    permissions: ["*"]
-  }
+  role("super_admin", "Super Admin", ["*"]),
+  role("procurement_agent", "Procurement Agent", ["orders:read", "orders:write", "procurement:read", "procurement:write"]),
+  role("procurement_lead", "Procurement Lead", ["orders:read", "orders:write", "orders:controlled_transition", "procurement:read", "procurement:write", "procurement:reassign"]),
+  role("support_agent", "Support Agent", ["orders:read", "support:read", "support:write", "users:search"]),
+  role("warehouse_operator", "Warehouse Operator", ["warehouse:read", "warehouse:write", "shipping:read", "shipping:write"]),
+  role("warehouse_lead", "Warehouse Lead", ["warehouse:read", "warehouse:write", "warehouse:correct", "shipping:read", "shipping:write"]),
+  role("finance_operator", "Finance Operator", ["finance:wallet:write", "finance:read", "finance:write", "finance:adjust", "finance:lock", "audit:read"]),
+  role("campaign_operator", "Campaign Operator", ["campaign:read", "campaign:write", "ops:policy:write", "users:search"]),
+  role("referral_operator", "Referral Operator", ["referral:read", "referral:write", "users:search"])
 ]);
 
 export function hasPermission(permissions = [], requiredPermission) {
   return permissions.includes("*") || permissions.includes(requiredPermission);
+}
+
+function role(code, name, permissions) {
+  return Object.freeze({
+    code,
+    name,
+    description: `${name} V2 system role.`,
+    permissions: Object.freeze(permissions)
+  });
 }

@@ -31,10 +31,16 @@
       </form>
 
       <div class="top-actions">
-        <button class="currency-button" type="button" title="Display currency">
+        <label class="header-select" title="Language">
+          <i data-lucide="languages" aria-hidden="true"></i>
+          <span class="sr-only">Language</span>
+          <select id="locale-select" aria-label="Language"></select>
+        </label>
+        <label class="header-select" title="Display currency">
           <i data-lucide="globe-2" aria-hidden="true"></i>
-          <span>USD</span>
-        </button>
+          <span class="sr-only">Display currency</span>
+          <select id="currency-select" aria-label="Display currency"></select>
+        </label>
         <button class="header-icon" type="button" data-route-button="wallet" title="Wallet" aria-label="Wallet">
           <i data-lucide="wallet-cards" aria-hidden="true"></i>
         </button>
@@ -139,7 +145,11 @@
     </div>
   </template>
 
+  <script src="./config.js"></script>
+  <script src="./runtime-config.js"></script>
+  <script src="./i18n.js"></script>
+  <script src="./currency.js"></script>
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-  <script src="./app.js?v=20260709-six-step-journey"></script>
+  <script src="./app.js?v=20260709-v2-account"></script>
 </body>
 </html>

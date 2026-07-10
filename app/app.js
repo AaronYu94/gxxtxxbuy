@@ -1,15 +1,31 @@
 const STORAGE_KEY = "goatedbuy-workspace-v1";
 const API_STORAGE_KEY = "goatedbuy-client-api-v1";
-// B8-04: staging/prod API base URL can be injected via window.GOATEDBUY_API_BASE_URL
-// (e.g. a small config.js loaded before this file) without editing the source.
-const DEFAULT_API_BASE_URL = (typeof window !== "undefined" && window.GOATEDBUY_API_BASE_URL) || "http://127.0.0.1:3000";
+const SESSION_STORAGE_KEY = "goatedbuy-client-session-v2";
+const PREFERENCES_STORAGE_KEY = "goatedbuy-client-preferences-v2";
+const DEVICE_STORAGE_KEY = "goatedbuy-client-device-v2";
+const runtime = window.GoatedBuyRuntime;
+const runtimeConfig = runtime?.config || {};
+const DEFAULT_API_BASE_URL = runtimeConfig.apiBaseUrl || "http://127.0.0.1:3000";
+const ROUTE_PATHS = Object.freeze({
+  dashboard: "/home", links: "/links", haul: "/forwarding", orders: "/orders",
+  qc: "/warehouse", shipping: "/parcels", wallet: "/wallet", creator: "/affiliate",
+  guide: "/help", community: "/community", trust: "/trust", login: "/account/login",
+  register: "/account/register", verifyEmail: "/account/verify-email",
+  verifyDevice: "/account/verify-device", account: "/account/settings", addresses: "/account/addresses"
+});
+const PATH_ROUTES = new Map(Object.entries(ROUTE_PATHS).map(([viewId, path]) => [path, viewId]));
+const PROTECTED_VIEWS = new Set(["links", "haul", "orders", "qc", "wallet", "account", "addresses"]);
+const AUTH_VIEWS = new Set(["login", "register", "verifyEmail", "verifyDevice"]);
+const deviceId = loadDeviceId();
+const preferences = loadPreferences();
+const i18n = window.GoatedBuyI18n.create(preferences.locale);
 
 const navItems = [
-  ["dashboard", "Home", "house"],
-  ["shipping", "Shipping Estimation", "calculator"],
-  ["haul", "Forwarding", "package-open"],
-  ["guide", "Help Center", "circle-help"],
-  ["creator", "Affiliate", "badge-percent"]
+  ["dashboard", "nav.home", "house"],
+  ["shipping", "nav.shipping", "calculator"],
+  ["haul", "nav.forwarding", "package-open"],
+  ["guide", "nav.help", "circle-help"],
+  ["creator", "nav.affiliate", "badge-percent"]
 ];
 
 const journey = [
@@ -37,7 +53,10 @@ const policyCards = [
 
 let state = loadState();
 let apiState = loadApiState();
-let currentView = "dashboard";
+let currentView = viewFromHash();
+let returnView = "dashboard";
+let authFlow = { email: "", password: "", verificationToken: "", resendAvailableAt: 0, loading: false, error: "" };
+let accountState = { account: null, addresses: [], loading: false, loaded: false, error: "", editingAddressId: "" };
 
 const view = document.querySelector("#view");
 const pageTitle = document.querySelector("#page-title");
@@ -85,7 +104,9 @@ function defaultApiState() {
 
 function loadApiState() {
   try {
-    return { ...defaultApiState(), ...JSON.parse(localStorage.getItem(API_STORAGE_KEY) || "{}") };
+    const safe = JSON.parse(localStorage.getItem(API_STORAGE_KEY) || "{}");
+    const session = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY) || "{}");
+    return { ...defaultApiState(), ...safe, accessToken: session.accessToken || "", refreshToken: session.refreshToken || "" };
   } catch {
     return defaultApiState();
   }
@@ -96,11 +117,43 @@ function saveState() {
 }
 
 function saveApiState() {
-  localStorage.setItem(API_STORAGE_KEY, JSON.stringify(apiState));
+  const { accessToken, refreshToken, ...safeState } = apiState;
+  localStorage.setItem(API_STORAGE_KEY, JSON.stringify(safeState));
+  if (accessToken || refreshToken) sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ accessToken, refreshToken }));
+  else sessionStorage.removeItem(SESSION_STORAGE_KEY);
 }
 
 function hasApiSession() {
   return Boolean(apiState.accessToken);
+}
+
+function loadDeviceId() {
+  const existing = localStorage.getItem(DEVICE_STORAGE_KEY);
+  if (existing) return existing;
+  const value = crypto.randomUUID();
+  localStorage.setItem(DEVICE_STORAGE_KEY, value);
+  return value;
+}
+
+function loadPreferences() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PREFERENCES_STORAGE_KEY) || "{}");
+    return {
+      locale: runtimeConfig.enabledLocales?.includes(saved.locale) ? saved.locale : runtimeConfig.defaultLocale || "en-US",
+      currency: runtimeConfig.displayCurrencies?.includes(saved.currency) ? saved.currency : runtimeConfig.defaultCurrency || "USD"
+    };
+  } catch {
+    return { locale: runtimeConfig.defaultLocale || "en-US", currency: runtimeConfig.defaultCurrency || "USD" };
+  }
+}
+
+function savePreferences() {
+  localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
+}
+
+function viewFromHash() {
+  const path = decodeURIComponent(location.hash.replace(/^#/, "") || "/home");
+  return PATH_ROUTES.get(path) || "dashboard";
 }
 
 function uid(prefix) {
@@ -200,7 +253,9 @@ async function apiRequest(path, options = {}) {
     method: options.method || "GET",
     headers: {
       ...(options.body ? { "content-type": "application/json" } : {}),
-      ...(apiState.accessToken ? { authorization: `Bearer ${apiState.accessToken}` } : {})
+      "x-device-id": deviceId,
+      ...(options.version ? { "if-match": `"${options.version}"` } : {}),
+      ...(apiState.accessToken && !options.anonymous ? { authorization: `Bearer ${apiState.accessToken}` } : {})
     },
     ...(options.body ? { body: JSON.stringify(options.body) } : {})
   });
@@ -208,52 +263,99 @@ async function apiRequest(path, options = {}) {
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) {
     const message = payload?.error?.message || `API request failed with ${response.status}`;
-    throw new Error(message);
+    if (response.status === 401 && !options.noRefresh && apiState.refreshToken && path !== "/auth/refresh") {
+      const refreshed = await refreshApiSession();
+      if (refreshed) return apiRequest(path, { ...options, noRefresh: true });
+    }
+    const error = new Error(message);
+    error.status = response.status;
+    error.code = payload?.error?.code || "REQUEST_FAILED";
+    error.details = payload?.error?.details;
+    throw error;
   }
   return payload;
 }
 
-async function connectApiAccount(mode, formData) {
-  const submittedBaseUrl = formData.get("baseUrl");
-  if (typeof submittedBaseUrl === "string" && submittedBaseUrl.trim()) {
-    apiState.baseUrl = submittedBaseUrl.trim().replace(/\/+$/, "");
+async function refreshApiSession() {
+  try {
+    const payload = await apiRequest("/auth/refresh", {
+      method: "POST", body: { refresh_token: apiState.refreshToken }, anonymous: true, noRefresh: true
+    });
+    applySession(payload);
+    return true;
+  } catch {
+    clearApiSession();
+    return false;
   }
+}
+
+function applySession(payload) {
+  apiState.accessToken = payload.session.access_token;
+  apiState.refreshToken = payload.session.refresh_token;
+  apiState.userEmail = payload.user.email;
+  apiState.connected = true;
+  apiState.error = "";
+  saveApiState();
+}
+
+function clearApiSession() {
+  apiState.accessToken = "";
+  apiState.refreshToken = "";
+  apiState.connected = false;
+  saveApiState();
+}
+
+async function connectApiAccount(mode, formData) {
   apiState.loading = true;
   apiState.error = "";
+  authFlow.loading = true;
+  authFlow.error = "";
   saveApiState();
   render();
 
   try {
     const payload = await apiRequest(mode === "register" ? "/auth/register" : "/auth/login", {
-      method: "POST",
+      method: "POST", anonymous: true, noRefresh: true,
       body: {
         email: formData.get("email"),
-        password: formData.get("password")
+        password: formData.get("password"),
+        display_name: formData.get("display_name") || undefined,
+        device_label: navigator.platform || "Browser"
       }
     });
-    apiState.accessToken = payload.session.access_token;
-    apiState.refreshToken = payload.session.refresh_token;
-    apiState.userEmail = payload.user.email;
-    apiState.connected = true;
-    apiState.error = "";
-    saveApiState();
-    await syncWorkspaceFromApi(false);
-    setToast(mode === "register" ? "API account registered." : "API account connected.");
+    authFlow.email = String(formData.get("email") || "");
+    authFlow.password = String(formData.get("password") || "");
+    authFlow.verificationToken = payload.verification_token || "";
+    authFlow.resendAvailableAt = Date.now() + 60000;
+    if (mode === "register") {
+      route("verifyEmail");
+    } else if (payload.device_verification_required) {
+      route("verifyDevice");
+    } else {
+      applySession(payload);
+      await finishAuthentication();
+    }
   } catch (error) {
     apiState.connected = false;
     apiState.error = error.message;
+    authFlow.error = error.message;
     saveApiState();
     render();
   } finally {
     apiState.loading = false;
+    authFlow.loading = false;
     saveApiState();
     render();
   }
 }
 
-function disconnectApiAccount() {
+async function disconnectApiAccount() {
+  if (hasApiSession()) {
+    try { await apiRequest("/auth/logout", { method: "POST", body: {}, noRefresh: true }); } catch { /* Local sign-out still succeeds. */ }
+  }
   apiState = defaultApiState();
   saveApiState();
+  accountState = { account: null, addresses: [], loading: false, loaded: false, error: "", editingAddressId: "" };
   state.links = [];
   state.items = [];
   state.qcItems = [];
@@ -264,7 +366,72 @@ function disconnectApiAccount() {
   state.coupons = [];
   state.policies = [];
   saveState();
+  route("login");
+}
+
+async function finishAuthentication() {
+  authFlow = { email: "", password: "", verificationToken: "", resendAvailableAt: 0, loading: false, error: "" };
+  accountState.loaded = false;
+  await syncWorkspaceFromApi(false);
+  const destination = PROTECTED_VIEWS.has(returnView) ? returnView : "account";
+  returnView = "dashboard";
+  route(destination);
+  setToast("Account connected securely.");
+}
+
+async function verifyAuthFlow(kind, formData) {
+  authFlow.loading = true;
+  authFlow.error = "";
   render();
+  try {
+    const payload = await apiRequest(kind === "email" ? "/auth/verify-email" : "/auth/verify-device", {
+      method: "POST", anonymous: true, noRefresh: true,
+      body: { token: formData.get("token"), device_label: navigator.platform || "Browser" }
+    });
+    if (kind === "email") {
+      setToast("Email verified. You can sign in now.");
+      authFlow.verificationToken = "";
+      route("login");
+    } else {
+      applySession(payload);
+      await finishAuthentication();
+    }
+  } catch (error) {
+    authFlow.error = error.message;
+    render();
+  } finally {
+    authFlow.loading = false;
+    render();
+  }
+}
+
+async function resendVerification(kind) {
+  if (Date.now() < authFlow.resendAvailableAt) return;
+  authFlow.loading = true;
+  authFlow.error = "";
+  render();
+  try {
+    if (kind === "email") {
+      const payload = await apiRequest("/auth/resend-verification", {
+        method: "POST", anonymous: true, noRefresh: true, body: { email: authFlow.email }
+      });
+      authFlow.verificationToken = payload.verification_token || "";
+    } else {
+      if (!authFlow.password) throw new Error("Return to sign in to send another device code.");
+      const payload = await apiRequest("/auth/login", {
+        method: "POST", anonymous: true, noRefresh: true,
+        body: { email: authFlow.email, password: authFlow.password, device_label: navigator.platform || "Browser" }
+      });
+      authFlow.verificationToken = payload.verification_token || "";
+    }
+    authFlow.resendAvailableAt = Date.now() + 60000;
+    setToast("Verification email sent.");
+  } catch (error) {
+    authFlow.error = error.message;
+  } finally {
+    authFlow.loading = false;
+    render();
+  }
 }
 
 async function syncWorkspaceFromApi(showToastOnSuccess = true) {
@@ -999,10 +1166,10 @@ function renderNav() {
     shipping: c.shipping,
     wallet: c.coupons
   };
-  nav.innerHTML = navItems.map(([id, label, icon]) => `
+  nav.innerHTML = navItems.map(([id, labelKey, icon]) => `
     <button class="${id === currentView ? "active" : ""}" data-route="${id}">
       <i data-lucide="${icon}" aria-hidden="true"></i>
-      <span class="nav-label">${label}</span>
+      <span class="nav-label">${i18n.t(labelKey)}</span>
       ${countMap[id] ? `<span class="count">${countMap[id]}</span>` : ""}
     </button>
   `).join("");
@@ -1011,10 +1178,20 @@ function renderNav() {
   });
 }
 
-function route(id) {
-  currentView = id;
+function route(id, options = {}) {
+  let destination = ROUTE_PATHS[id] ? id : "dashboard";
+  if (PROTECTED_VIEWS.has(destination) && !hasApiSession()) {
+    returnView = destination;
+    destination = "login";
+  }
+  currentView = destination;
+  const hash = `#${ROUTE_PATHS[destination]}`;
+  if (location.hash !== hash) {
+    if (options.replace) history.replaceState(null, "", hash);
+    else history.pushState(null, "", hash);
+  }
   render();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!options.noScroll) window.scrollTo({ top: 0, behavior: options.instant ? "auto" : "smooth" });
 }
 
 function empty(title, body) {
@@ -1840,6 +2017,246 @@ function renderTrust() {
   `;
 }
 
+function renderLogin() {
+  return renderAuthLayout({
+    eyebrow: "Secure account access",
+    title: "Welcome back",
+    body: "Sign in to manage orders, warehouse items, parcels, addresses, and account preferences.",
+    content: `
+      <form class="account-form" data-action="account-login">
+        ${authErrorMarkup()}
+        <label class="field"><span>${i18n.t("auth.email")}</span><input name="email" type="email" autocomplete="email" required value="${escapeHtml(authFlow.email)}"></label>
+        <label class="field"><span>${i18n.t("auth.password")}</span><input name="password" type="password" autocomplete="current-password" required minlength="10"></label>
+        <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.sign_in")}</button>
+      </form>
+      <p class="auth-switch">New to GOATEDBUY? <button type="button" data-route-button="register">${i18n.t("account.register")}</button></p>
+    `
+  });
+}
+
+function renderRegister() {
+  return renderAuthLayout({
+    eyebrow: "Buyer account",
+    title: "Create your account",
+    body: "Your email must be verified before any private workspace session is issued.",
+    content: `
+      <form class="account-form" data-action="account-register">
+        ${authErrorMarkup()}
+        <label class="field"><span>Display name</span><input name="display_name" autocomplete="name" maxlength="80"></label>
+        <label class="field"><span>${i18n.t("auth.email")}</span><input name="email" type="email" autocomplete="email" required value="${escapeHtml(authFlow.email)}"></label>
+        <label class="field"><span>${i18n.t("auth.password")}</span><input name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128"><small>10-128 characters</small></label>
+        <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.register")}</button>
+      </form>
+      <p class="auth-switch">Already registered? <button type="button" data-route-button="login">${i18n.t("account.sign_in")}</button></p>
+    `
+  });
+}
+
+function renderVerifyEmail() {
+  return renderVerification("email", "Check your email", "Enter the one-time registration token sent to your email. The token expires automatically and works once.");
+}
+
+function renderVerifyDevice() {
+  return renderVerification("device", "Verify this device", "This browser is new or its seven-day trust period expired. Complete the email check before a session is created.");
+}
+
+function renderVerification(kind, title, body) {
+  const seconds = Math.max(0, Math.ceil((authFlow.resendAvailableAt - Date.now()) / 1000));
+  const developmentToken = runtimeConfig.environment !== "production" && authFlow.verificationToken
+    ? `<p class="development-token"><strong>Local delivery token</strong><code>${escapeHtml(authFlow.verificationToken)}</code></p>` : "";
+  scheduleVerificationTick(seconds);
+  return renderAuthLayout({
+    eyebrow: kind === "email" ? "Email verification" : "Device security",
+    title,
+    body,
+    content: `
+      <form class="account-form" data-action="verify-${kind}">
+        ${authErrorMarkup()}
+        <label class="field"><span>Verification token</span><input name="token" autocomplete="one-time-code" required value="${escapeHtml(authFlow.verificationToken)}"></label>
+        ${developmentToken}
+        <div class="actions">
+          <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${kind === "email" ? i18n.t("auth.verify_email") : i18n.t("auth.verify_device")}</button>
+          <button class="secondary-button" type="button" data-resend-verification="${kind}" ${seconds || authFlow.loading ? "disabled" : ""}>${seconds ? `${i18n.t("auth.resend")} (${seconds}s)` : i18n.t("auth.resend")}</button>
+        </div>
+      </form>
+      <p class="auth-switch"><button type="button" data-route-button="login">Back to sign in</button></p>
+    `
+  });
+}
+
+function renderAuthLayout({ eyebrow, title, body, content }) {
+  return `
+    <section class="auth-layout">
+      <div class="auth-context">
+        <img src="./assets/goatedbuy-symbol.jpg" alt="" aria-hidden="true">
+        <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(body)}</p>
+        <ul><li>Private account data stays behind your session.</li><li>New devices require email confirmation.</li><li>GOATEDBUY support never asks for your password.</li></ul>
+      </div>
+      <div class="auth-form-panel">${content}</div>
+    </section>
+  `;
+}
+
+function authErrorMarkup() {
+  return authFlow.error ? `<div class="form-message error" role="alert"><i data-lucide="circle-alert"></i><span>${escapeHtml(authFlow.error)}</span></div>` : "";
+}
+
+function scheduleVerificationTick(seconds) {
+  clearTimeout(scheduleVerificationTick.timer);
+  if (seconds > 0) scheduleVerificationTick.timer = setTimeout(() => {
+    if (currentView === "verifyEmail" || currentView === "verifyDevice") render();
+  }, 1000);
+}
+
+function renderAccount() {
+  ensureAccountData();
+  if (accountState.loading && !accountState.account) return renderLoadingState("Loading account settings");
+  if (accountState.error && !accountState.account) return renderErrorState(accountState.error, "account");
+  const account = accountState.account;
+  if (!account) return renderLoadingState("Loading account settings");
+  return `
+    <section class="account-page">
+      <nav class="account-tabs" aria-label="Account sections">
+        <button class="active" type="button" data-route-button="account"><i data-lucide="user-round"></i>Settings</button>
+        <button type="button" data-route-button="addresses"><i data-lucide="map-pin"></i>${i18n.t("account.addresses")}</button>
+      </nav>
+      ${accountState.error ? `<div class="form-message error" role="alert">${escapeHtml(accountState.error)}</div>` : ""}
+      <div class="settings-grid">
+        <section class="settings-section">
+          <div class="section-heading-compact"><div><h2>${i18n.t("account.profile")}</h2><p>Email verified · Phone ${account.phone_verified ? "verified" : "not verified"}</p></div><span class="status good">v${account.version}</span></div>
+          <form class="account-form two-column" data-action="save-account">
+            <label class="field"><span>Email</span><input value="${escapeHtml(account.email)}" disabled></label>
+            <label class="field"><span>Display name</span><input name="display_name" maxlength="80" value="${escapeHtml(account.display_name)}"></label>
+            <label class="field"><span>Phone</span><input name="phone" autocomplete="tel" maxlength="32" value="${escapeHtml(account.phone || "")}"><small>New numbers remain unverified.</small></label>
+            <label class="field"><span>Country</span><input name="country_code" maxlength="2" value="${escapeHtml(account.country_code || "")}" placeholder="US"></label>
+            <label class="field"><span>Language</span><select name="default_locale">${localeOptions(account.default_locale)}</select><small>Only approved translations can be enabled.</small></label>
+            <label class="field"><span>Display currency</span><select name="default_currency">${currencyOptions(account.default_currency)}</select><small>Display only; the CNY ledger is unchanged.</small></label>
+            <input type="hidden" name="expected_version" value="${account.version}">
+            <div class="form-actions full"><button class="primary-button" type="submit">${i18n.t("common.save")}</button></div>
+          </form>
+        </section>
+        <section class="settings-section">
+          <div class="section-heading-compact"><div><h2>${i18n.t("account.security")}</h2><p>Changing your password signs out every device.</p></div><i data-lucide="shield-check"></i></div>
+          <form class="account-form" data-action="change-password">
+            <label class="field"><span>Current password</span><input name="current_password" type="password" autocomplete="current-password" required></label>
+            <label class="field"><span>New password</span><input name="new_password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+            <input type="hidden" name="expected_version" value="${account.version}">
+            <button class="secondary-button" type="submit">Update password</button>
+          </form>
+        </section>
+      </div>
+      <section class="danger-zone">
+        <div><h2>${i18n.t("account.delete")}</h2><p>Deletion is available only with zero balance and no warehouse item, active order, parcel, or after-sales case.</p></div>
+        <button class="danger-button" type="button" data-check-deletion>Check eligibility</button>
+      </section>
+    </section>
+  `;
+}
+
+function renderAddresses() {
+  ensureAccountData();
+  if (accountState.loading && !accountState.loaded) return renderLoadingState("Loading addresses");
+  if (accountState.error && !accountState.loaded) return renderErrorState(accountState.error, "addresses");
+  const editing = accountState.addresses.find((entry) => entry.id === accountState.editingAddressId);
+  return `
+    <section class="account-page">
+      <nav class="account-tabs" aria-label="Account sections">
+        <button type="button" data-route-button="account"><i data-lucide="user-round"></i>Settings</button>
+        <button class="active" type="button" data-route-button="addresses"><i data-lucide="map-pin"></i>${i18n.t("account.addresses")}</button>
+      </nav>
+      ${accountState.error ? `<div class="form-message error" role="alert">${escapeHtml(accountState.error)}</div>` : ""}
+      <div class="address-layout">
+        <section class="settings-section address-list-section">
+          <div class="section-heading-compact"><div><h2>Saved addresses</h2><p>${accountState.addresses.length} saved · one default maximum</p></div><button class="icon-button" type="button" data-new-address title="New address"><i data-lucide="plus"></i></button></div>
+          <div class="address-list">${accountState.addresses.length ? accountState.addresses.map(addressCard).join("") : renderEmptyState("No saved addresses", "Add an address before submitting an international parcel.")}</div>
+        </section>
+        <section class="settings-section address-editor">
+          <div class="section-heading-compact"><div><h2>${editing ? "Edit address" : "Add address"}</h2><p>Required fields are used for international delivery.</p></div></div>
+          ${addressForm(editing)}
+        </section>
+      </div>
+    </section>
+  `;
+}
+
+function addressCard(address) {
+  return `
+    <article class="address-item ${address.is_default ? "default" : ""}">
+      <div><div class="address-title"><strong>${escapeHtml(address.recipient_name)}</strong>${address.is_default ? `<span class="status good">Default</span>` : ""}</div>
+      <p>${escapeHtml(address.line1)}${address.line2 ? `, ${escapeHtml(address.line2)}` : ""}<br>${escapeHtml(address.city)}, ${escapeHtml(address.region)} ${escapeHtml(address.postal_code)} · ${escapeHtml(address.country_code)}</p><span>${escapeHtml(address.phone)}</span></div>
+      <div class="address-actions"><button class="icon-button" type="button" data-edit-address="${address.id}" title="Edit"><i data-lucide="pencil"></i></button><button class="icon-button" type="button" data-delete-address="${address.id}" data-version="${address.version}" title="Delete"><i data-lucide="trash-2"></i></button></div>
+    </article>
+  `;
+}
+
+function addressForm(address = null) {
+  const value = (key) => escapeHtml(address?.[key] || "");
+  return `
+    <form class="account-form two-column" data-action="save-address" data-address-id="${address?.id || ""}">
+      <label class="field full"><span>Recipient</span><input name="recipient_name" maxlength="120" required value="${value("recipient_name")}"></label>
+      <label class="field"><span>Phone</span><input name="phone" maxlength="32" required value="${value("phone")}"></label>
+      <label class="field"><span>Country code</span><input name="country_code" maxlength="2" required placeholder="US" value="${value("country_code")}"></label>
+      <label class="field"><span>Region / State</span><input name="region" maxlength="120" value="${value("region")}"></label>
+      <label class="field"><span>City</span><input name="city" maxlength="120" required value="${value("city")}"></label>
+      <label class="field"><span>Postal code</span><input name="postal_code" maxlength="32" required value="${value("postal_code")}"></label>
+      <label class="field full"><span>Address line 1</span><input name="line1" maxlength="240" required value="${value("line1")}"></label>
+      <label class="field full"><span>Address line 2</span><input name="line2" maxlength="240" value="${value("line2")}"></label>
+      <label class="check-field full"><input name="is_default" type="checkbox" ${address?.is_default ? "checked" : ""}><span>Use as default address</span></label>
+      <input type="hidden" name="expected_version" value="${address?.version || ""}">
+      <div class="form-actions full"><button class="primary-button" type="submit">${address ? "Save address" : "Add address"}</button>${address ? `<button class="secondary-button" type="button" data-new-address>${i18n.t("common.cancel")}</button>` : ""}</div>
+    </form>
+  `;
+}
+
+function renderLoadingState(label) {
+  return `<div class="ui-state loading" role="status"><span class="spinner"></span><h2>${escapeHtml(label)}</h2><p>Please wait.</p></div>`;
+}
+
+function renderErrorState(message, retryView) {
+  return `<div class="ui-state error"><i data-lucide="circle-alert"></i><h2>Unable to load</h2><p>${escapeHtml(message)}</p><button class="secondary-button" type="button" data-retry-account="${retryView}">${i18n.t("common.retry")}</button></div>`;
+}
+
+function renderEmptyState(title, body) {
+  return `<div class="ui-state empty"><i data-lucide="map-pin"></i><h3>${escapeHtml(title)}</h3><p>${escapeHtml(body)}</p></div>`;
+}
+
+function localeOptions(selected) {
+  return runtimeConfig.enabledLocales.map((locale) => `<option value="${locale}" ${locale === selected ? "selected" : ""}>${locale}</option>`).join("");
+}
+
+function currencyOptions(selected) {
+  return runtimeConfig.displayCurrencies.map((currency) => `<option value="${currency}" ${currency === selected ? "selected" : ""}>${currency}</option>`).join("");
+}
+
+async function loadAccountData() {
+  if (accountState.loading || !hasApiSession()) return;
+  accountState.loading = true;
+  accountState.error = "";
+  render();
+  try {
+    const [account, addresses] = await Promise.all([apiRequest("/api/v2/account"), apiRequest("/api/v2/addresses")]);
+    accountState.account = account.data;
+    accountState.addresses = addresses.data;
+    accountState.loaded = true;
+    preferences.locale = runtimeConfig.enabledLocales.includes(account.data.default_locale) ? account.data.default_locale : preferences.locale;
+    preferences.currency = runtimeConfig.displayCurrencies.includes(account.data.default_currency) ? account.data.default_currency : preferences.currency;
+    i18n.setLocale(preferences.locale);
+    savePreferences();
+  } catch (error) {
+    accountState.error = error.message;
+    if (error.status === 401) route("login", { replace: true });
+  } finally {
+    accountState.loading = false;
+    render();
+  }
+}
+
+function ensureAccountData() {
+  if (!accountState.loaded && !accountState.loading) setTimeout(loadAccountData, 0);
+}
+
 function renderApiBanner() {
   const status = apiState.loading
     ? "Syncing"
@@ -1860,15 +2277,14 @@ function renderApiBanner() {
       ${hasApiSession() ? `
         <div class="actions" style="margin:0">
           <button class="secondary-button" type="button" data-api-sync ${apiState.loading ? "disabled" : ""}>Retry sync</button>
+          <button class="secondary-button" type="button" data-route-button="account">Account</button>
           <button class="danger-button" type="button" data-api-disconnect>Disconnect</button>
         </div>
       ` : `
-        <form class="api-form" data-action="api-connect">
-          <input name="email" type="email" placeholder="buyer@example.com" aria-label="Email">
-          <input name="password" type="password" placeholder="Password" aria-label="Password">
-          <button class="primary-button" type="submit" name="mode" value="login" ${apiState.loading ? "disabled" : ""}>Sign in</button>
-          <button class="secondary-button" type="submit" name="mode" value="register" ${apiState.loading ? "disabled" : ""}>Register</button>
-        </form>
+        <div class="actions" style="margin:0">
+          <button class="primary-button" type="button" data-route-button="login">${i18n.t("account.sign_in")}</button>
+          <button class="secondary-button" type="button" data-route-button="register">${i18n.t("account.register")}</button>
+        </div>
       `}
     </section>
   `;
@@ -1900,6 +2316,120 @@ function attachHandlers() {
     button.addEventListener("click", () => route(button.dataset.routeButton));
   });
 
+  document.querySelector('form[data-action="account-login"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await connectApiAccount("login", new FormData(event.currentTarget));
+  });
+  document.querySelector('form[data-action="account-register"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await connectApiAccount("register", new FormData(event.currentTarget));
+  });
+  document.querySelector('form[data-action="verify-email"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await verifyAuthFlow("email", new FormData(event.currentTarget));
+  });
+  document.querySelector('form[data-action="verify-device"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await verifyAuthFlow("device", new FormData(event.currentTarget));
+  });
+  document.querySelectorAll("[data-resend-verification]").forEach((button) => {
+    button.addEventListener("click", () => resendVerification(button.dataset.resendVerification));
+  });
+  document.querySelector('form[data-action="save-account"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const body = formObject(new FormData(event.currentTarget));
+    try {
+      const payload = await apiRequest("/api/v2/account", { method: "PATCH", body });
+      accountState.account = payload.data;
+      accountState.error = "";
+      preferences.locale = payload.data.default_locale;
+      preferences.currency = payload.data.default_currency;
+      i18n.setLocale(preferences.locale);
+      savePreferences();
+      setToast("Account settings saved.");
+    } catch (error) {
+      accountState.error = error.code === "VERSION_CONFLICT" ? "Your account changed elsewhere. Reload before saving again." : error.message;
+      render();
+    }
+  });
+  document.querySelector('form[data-action="change-password"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      await apiRequest("/api/v2/account/password", { method: "POST", body: formObject(new FormData(event.currentTarget)) });
+      clearApiSession();
+      authFlow.error = "Password updated. Sign in again on this device.";
+      route("login");
+    } catch (error) {
+      accountState.error = error.message;
+      render();
+    }
+  });
+  document.querySelector('form[data-action="save-address"]')?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const body = formObject(new FormData(form));
+    body.is_default = form.elements.is_default.checked;
+    const addressId = form.dataset.addressId;
+    try {
+      await apiRequest(addressId ? `/api/v2/addresses/${addressId}` : "/api/v2/addresses", {
+        method: addressId ? "PATCH" : "POST", body
+      });
+      accountState.editingAddressId = "";
+      accountState.loaded = false;
+      accountState.error = "";
+      await loadAccountData();
+      setToast(addressId ? "Address updated." : "Address added.");
+    } catch (error) {
+      accountState.error = error.code === "VERSION_CONFLICT" ? "This address changed elsewhere. Reload and try again." : error.message;
+      render();
+    }
+  });
+  document.querySelectorAll("[data-edit-address]").forEach((button) => button.addEventListener("click", () => {
+    accountState.editingAddressId = button.dataset.editAddress;
+    render();
+    document.querySelector(".address-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+  document.querySelectorAll("[data-new-address]").forEach((button) => button.addEventListener("click", () => {
+    accountState.editingAddressId = "";
+    render();
+  }));
+  document.querySelectorAll("[data-delete-address]").forEach((button) => button.addEventListener("click", async () => {
+    if (!confirm("Delete this saved address? Existing parcel snapshots will not change.")) return;
+    try {
+      await apiRequest(`/api/v2/addresses/${button.dataset.deleteAddress}`, { method: "DELETE", version: button.dataset.version });
+      accountState.loaded = false;
+      await loadAccountData();
+      setToast("Address deleted.");
+    } catch (error) {
+      accountState.error = error.code === "VERSION_CONFLICT" ? "This address changed elsewhere. Reload and try again." : error.message;
+      render();
+    }
+  }));
+  document.querySelector("[data-check-deletion]")?.addEventListener("click", async () => {
+    try {
+      const eligibility = await apiRequest("/api/v2/account/deletion-eligibility");
+      if (!eligibility.data.eligible) {
+        const blockers = Object.entries(eligibility.data.blockers).filter(([, blocked]) => blocked).map(([name]) => name.replace(/_/g, " "));
+        accountState.error = `Deletion is blocked by: ${blockers.join(", ")}.`;
+        render();
+        return;
+      }
+      if (!confirm("Queue permanent account deletion? You will be signed out immediately.")) return;
+      await apiRequest("/api/v2/account/deletion-requests", { method: "POST", body: {} });
+      clearApiSession();
+      authFlow.error = "Account deletion was queued. Your private profile will be anonymized asynchronously.";
+      route("login");
+    } catch (error) {
+      accountState.error = error.details?.blockers ? `Deletion is blocked by active account obligations.` : error.message;
+      render();
+    }
+  });
+  document.querySelectorAll("[data-retry-account]").forEach((button) => button.addEventListener("click", () => {
+    accountState.loaded = false;
+    accountState.error = "";
+    loadAccountData();
+  }));
+
   document.querySelector("[data-focus-paste]")?.addEventListener("click", () => {
     route("dashboard");
     setTimeout(() => document.querySelector('input[name="url"]')?.focus(), 0);
@@ -1909,9 +2439,7 @@ function attachHandlers() {
     if (button.dataset.boundAccount) return;
     button.dataset.boundAccount = "true";
     button.addEventListener("click", () => {
-      if (currentView === "dashboard") route("wallet");
-      document.querySelector(".api-banner")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => document.querySelector('.api-form input[name="email"]')?.focus(), 350);
+      route(hasApiSession() ? "account" : "login");
     });
   });
 
@@ -2082,6 +2610,10 @@ function attachHandlers() {
   });
 }
 
+function formObject(formData) {
+  return Object.fromEntries([...formData.entries()].map(([key, value]) => [key, String(value)]));
+}
+
 function render() {
   const viewMap = {
     dashboard: ["Dashboard", renderDashboard],
@@ -2094,18 +2626,71 @@ function render() {
     creator: ["Creator", renderCreator],
     guide: ["New User Guide", renderGuide],
     community: ["Community", renderCommunity],
-    trust: ["Trust Center", renderTrust]
+    trust: ["Trust Center", renderTrust],
+    login: ["Sign in", renderLogin],
+    register: ["Create account", renderRegister],
+    verifyEmail: ["Verify email", renderVerifyEmail],
+    verifyDevice: ["Verify device", renderVerifyDevice],
+    account: ["Account settings", renderAccount],
+    addresses: ["Addresses", renderAddresses]
   };
   const [title, renderer] = viewMap[currentView] || viewMap.dashboard;
   document.body.dataset.view = currentView;
   pageTitle.textContent = title;
-  view.innerHTML = currentView === "dashboard" ? renderer() : `${renderApiBanner()}${renderer()}`;
+  document.title = `${title} | GOATEDBUY`;
+  if (!runtime?.valid) {
+    view.innerHTML = `<div class="ui-state error"><i data-lucide="settings"></i><h2>Frontend configuration error</h2><p>${escapeHtml(runtime?.diagnostics?.join(" ") || "Runtime configuration failed to load.")}</p><code>Check app/config.js</code></div>`;
+  } else {
+    const showBanner = currentView !== "dashboard" && !AUTH_VIEWS.has(currentView) && !["account", "addresses"].includes(currentView);
+    view.innerHTML = `${showBanner ? renderApiBanner() : ""}${renderer()}`;
+  }
   renderNav();
+  renderHeaderControls();
   renderQuickRail();
   attachHandlers();
   renderToast();
   window.lucide?.createIcons({ attrs: { "stroke-width": 1.8 } });
 }
 
+function renderHeaderControls() {
+  const localeSelect = document.querySelector("#locale-select");
+  const currencySelect = document.querySelector("#currency-select");
+  if (localeSelect) {
+    localeSelect.innerHTML = runtimeConfig.enabledLocales.map((locale) => `<option value="${locale}" ${locale === preferences.locale ? "selected" : ""}>${locale}</option>`).join("");
+    localeSelect.onchange = () => {
+      preferences.locale = localeSelect.value;
+      i18n.setLocale(preferences.locale);
+      savePreferences();
+      render();
+    };
+  }
+  if (currencySelect) {
+    currencySelect.innerHTML = runtimeConfig.displayCurrencies.map((currency) => `<option value="${currency}" ${currency === preferences.currency ? "selected" : ""}>${currency}</option>`).join("");
+    currencySelect.onchange = () => {
+      preferences.currency = currencySelect.value;
+      savePreferences();
+      if (hasApiSession()) route("account");
+    };
+  }
+}
+
+async function restoreSession() {
+  if (!hasApiSession()) return;
+  try {
+    const payload = await apiRequest("/me", { noRefresh: false });
+    apiState.userEmail = payload.user.email;
+    apiState.connected = true;
+    saveApiState();
+  } catch {
+    clearApiSession();
+    if (PROTECTED_VIEWS.has(currentView)) route("login", { replace: true });
+  }
+}
+
 document.querySelector("#reset-demo").addEventListener("click", resetWorkspace);
-render();
+window.addEventListener("hashchange", () => {
+  const next = viewFromHash();
+  if (next !== currentView) route(next, { replace: true, noScroll: true });
+});
+route(currentView, { replace: true, instant: true });
+restoreSession().then(() => render());

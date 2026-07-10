@@ -1,5 +1,5 @@
 const ADMIN_SESSION_KEY = "goatedbuy-admin-api-v1";
-// B8-04: staging/prod API base URL override, injectable via window.GOATEDBUY_API_BASE_URL.
+// Staging/prod API base URL override, injectable via window.GOATEDBUY_API_BASE_URL.
 const DEFAULT_API_BASE_URL = (typeof window !== "undefined" && window.GOATEDBUY_API_BASE_URL) || "http://127.0.0.1:3000";
 
 const navItems = [

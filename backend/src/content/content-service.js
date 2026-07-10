@@ -9,7 +9,7 @@ export function createContentService({ repository, auditLogger = null } = {}) {
   if (!repository) throw new Error("Content repository is required.");
 
   return {
-    // B7-07: create a story. Only a whitelist of fields is accepted from the user and
+    // Create a story. Only a whitelist of fields is accepted from the user and
     // the story always starts pending review. Public is not reachable without moderation.
     async createStory(user, input = {}, requestMeta = {}) {
       const title = requiredText(input.title, "title", 160);
@@ -39,7 +39,7 @@ export function createContentService({ repository, auditLogger = null } = {}) {
       return { stories: stories.map(publicStory) };
     },
 
-    // B7-09: a user can withdraw their own story at any time.
+    // A user can withdraw their own story at any time.
     async withdrawStory(user, storyId, requestMeta = {}) {
       const story = await repository.findStoryById(requiredText(storyId, "story_id", 80));
       if (!story || story.userId !== user.id) throw notFound("Story not found.");
@@ -58,7 +58,7 @@ export function createContentService({ repository, auditLogger = null } = {}) {
       return { story: publicStory(withdrawn), existing: false };
     },
 
-    // B7-08: moderation queue, paginated, review permission required at the route.
+    // Moderation queue, paginated, review permission required at the route.
     async listReviewQueue(query = {}) {
       const status = normalizeReviewStatus(query.status || "pending");
       const limit = clampLimit(query.limit);
@@ -70,7 +70,7 @@ export function createContentService({ repository, auditLogger = null } = {}) {
       };
     },
 
-    // B7-09: approve / reject / hide, always with an audit trail.
+    // Approve / reject / hide, always with an audit trail.
     async reviewStory(adminUser, storyId, input = {}, requestMeta = {}) {
       const action = String(input.action || "").trim().toLowerCase();
       if (!REVIEW_ACTIONS[action]) {

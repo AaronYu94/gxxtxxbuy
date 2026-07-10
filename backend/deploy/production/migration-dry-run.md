@@ -1,4 +1,4 @@
-# B8-03 Migration Dry Run
+# Migration Dry Run
 
 Destructive migrations must never go straight to production. The migration runner is
 already checksum-guarded (an applied migration whose file changes fails), and every

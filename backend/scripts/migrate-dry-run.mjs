@@ -1,4 +1,4 @@
-// B8-03: migration dry run. Lists migration files and scans for destructive DDL that
+// Migration dry run. Lists migration files and scans for destructive DDL that
 // must never be applied straight to production without a reviewed staging dry run.
 // Does NOT connect to or modify any database. Exits non-zero when destructive
 // statements are found so CI/CD can block the deploy.

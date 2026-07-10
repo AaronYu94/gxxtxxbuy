@@ -4,7 +4,7 @@ import { createApp } from "../src/app.js";
 import { normalizeEmail } from "../src/auth/input.js";
 import { parseEnv } from "../src/config/env.js";
 import { hashPassword } from "../src/security/password.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { loginAdminWithTotp, MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
 import { MemoryCountryRepository } from "./helpers/memory-country-repository.js";
 
 function createCountryTestApp() {
@@ -50,19 +50,14 @@ async function createAdmin(repository, { email, roles = [], permissions = [] }) 
 }
 
 async function loginAdmin(baseUrl, email) {
-  const result = await requestJson(baseUrl, "/admin/auth/login", {
-    method: "POST",
-    body: { email, password: "AdminPass123" }
-  });
-  assert.equal(result.response.status, 200);
-  return result.body.session.access_token;
+  return (await loginAdminWithTotp(baseUrl, email)).session.access_token;
 }
 
 test("country shipping hub returns only published content and marks expired versions", async () => {
   const { server, baseUrl, repositories } = createCountryTestApp();
   try {
-    await createAdmin(repositories.auth, { email: "ops@example.com", roles: ["operations"], permissions: ["ops:policy:write"] });
-    await createAdmin(repositories.auth, { email: "proc@example.com", roles: ["procurement"], permissions: ["orders:read"] });
+    await createAdmin(repositories.auth, { email: "ops@example.com", roles: ["campaign_operator"], permissions: ["ops:policy:write"] });
+    await createAdmin(repositories.auth, { email: "proc@example.com", roles: ["procurement_agent"], permissions: ["orders:read"] });
     const opsToken = await loginAdmin(baseUrl, "ops@example.com");
     const procToken = await loginAdmin(baseUrl, "proc@example.com");
 

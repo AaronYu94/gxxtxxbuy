@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createApp } from "../src/app.js";
 import { parseEnv } from "../src/config/env.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { MemoryAuditRepository, MemoryAuthRepository, registerVerifiedUser } from "./helpers/memory-auth-repository.js";
 import { MemoryCreatorRepository } from "./helpers/memory-creator-repository.js";
 import { MemoryShippingRepository } from "./helpers/memory-shipping-repository.js";
 import { MemoryWalletRepository } from "./helpers/memory-wallet-repository.js";
@@ -45,12 +45,7 @@ async function requestJson(baseUrl, path, { method = "GET", token = "", body = n
 }
 
 async function registerUser(baseUrl, email = "buyer@example.com") {
-  const result = await requestJson(baseUrl, "/auth/register", {
-    method: "POST",
-    body: { email, password: "CorrectHorse123" }
-  });
-  assert.equal(result.response.status, 201);
-  return result.body.session.access_token;
+  return (await registerVerifiedUser(baseUrl, email)).token;
 }
 
 test("feature flags default on and gate the guarded routes with 503 when disabled", async () => {

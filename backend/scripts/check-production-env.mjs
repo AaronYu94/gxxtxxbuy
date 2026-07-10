@@ -1,4 +1,4 @@
-// B8-01: production environment configuration checklist.
+// Production environment configuration checklist.
 // Validates that a production .env is complete and free of development placeholders
 // before a deploy. Exits non-zero on any blocking finding so CI/CD can gate on it.
 import { loadEnvFile, parseEnv } from "../src/config/env.js";
@@ -8,13 +8,19 @@ const REQUIRED = [
   "REDIS_URL",
   "CORS_ALLOWED_ORIGINS",
   "STORAGE_SIGNING_SECRET",
-  "SHIPPING_WEBHOOK_SECRET"
+  "SHIPPING_WEBHOOK_SECRET",
+  "AUTH_DEVICE_HMAC_SECRET",
+  "AUTH_TOTP_ENCRYPTION_SECRET",
+  "ACCOUNT_ADDRESS_HMAC_SECRET"
 ];
 
 // Secrets that must never keep their committed development defaults in production.
 const DEV_DEFAULTS = {
   STORAGE_SIGNING_SECRET: "local-dev-storage-signing-secret",
-  SHIPPING_WEBHOOK_SECRET: "local-dev-shipping-webhook-secret"
+  SHIPPING_WEBHOOK_SECRET: "local-dev-shipping-webhook-secret",
+  AUTH_DEVICE_HMAC_SECRET: "local-dev-device-hmac-secret",
+  AUTH_TOTP_ENCRYPTION_SECRET: "local-dev-totp-encryption-secret",
+  ACCOUNT_ADDRESS_HMAC_SECRET: "local-dev-address-hmac-secret"
 };
 
 export function checkProductionEnv(source = process.env) {

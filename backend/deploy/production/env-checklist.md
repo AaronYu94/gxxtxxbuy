@@ -1,4 +1,4 @@
-# B8-01 Production Environment Checklist
+# Production Environment Checklist
 
 Run `npm run env:check` against the production `.env` before every deploy. It fails the
 build when any blocking item below is unmet. Secrets are never committed; store them in

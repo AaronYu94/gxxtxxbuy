@@ -86,7 +86,19 @@ export function requireAnyPermission(requiredPermissions = []) {
   };
 }
 
-// B8-07: canary/kill switch. When a feature flag is off, the guarded route returns a
+export function requireHighRiskReauth(authService, action) {
+  return async (req, _res, next) => {
+    try {
+      if (!req.auth?.adminUser) throw unauthorized("Admin authentication required.");
+      req.reauth = await authService.consumeAdminReauth(req.get("x-reauth-token") || "", req.auth, action);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+// Canary/kill switch. When a feature flag is off, the guarded route returns a
 // clear 503 with FEATURE_DISABLED so operators can shut a surface (payments, shipping,
 // coupons, creators) without a deploy.
 export function requireFeature(env, featureName) {

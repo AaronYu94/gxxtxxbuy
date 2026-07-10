@@ -1,4 +1,4 @@
-# B8-08 Rollback Runbook
+# Rollback Runbook
 
 Roll back by layer. Prefer a feature-flag disable (seconds, no deploy) before a full
 rollback when the blast radius is a single surface.
@@ -45,4 +45,4 @@ rollback when the blast radius is a single surface.
 ## Post-rollback
 
 - Confirm `/ready` is green and error rate normalized.
-- Open a release report (B8-10) capturing cause, timeline, and follow-ups.
+- Open a release report capturing cause, timeline, and follow-ups.

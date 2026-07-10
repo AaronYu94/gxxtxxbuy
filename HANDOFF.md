@@ -1,282 +1,142 @@
-# GOATEDBUY Engineering Handoff
+# GOATEDBUY V2 Engineering Handoff
 
-Last updated: 2026-07-09  
-Repository: <https://github.com/AaronYu94/gxxtxxbuy>  
-Branch: `main`
+Generated: 2026-07-09 21:00 PDT
 
-## 1. Executive Summary
+## 1. Source Of Truth
 
-GOATEDBUY currently has:
+- Product baseline: `PRD/GoatedBuy_开发级详细PRD_V2.0.pdf`
+- Atomic roadmap: `PRD_V2_开发原子任务.md`
+- Official completion state: `prd-v2-task-status.json`
+- Interactive checklist: `prd-v2-checklist.html`
+- Frozen V2 baseline and decisions: `V2-00_需求冻结与现状基线/`
 
-- A responsive buyer-facing static frontend.
-- A separate internal admin console.
-- A Node.js/Express backend covering B0-B8 domain foundations.
-- PostgreSQL migrations, Redis queue integration, authentication, RBAC, audit logging, QC, shipping, wallet, creator/content/risk modules, and operational runbooks.
-- GitHub Actions for backend CI and GitHub Pages deployment.
-- A public frontend preview at <https://aaronyu94.github.io/gxxtxxbuy/>.
+Do not recreate or use removed V1/P0-P4 roadmaps. A task is complete only after implementation, verification, and an evidence note are added to `prd-v2-task-status.json`.
 
-The public site is a frontend preview, not a fully live production service. The production API and managed infrastructure have not been deployed. Marketplace parsing currently uses a deterministic placeholder source rather than real Taobao/1688/Weidian supplier data.
+## 2. Current State
 
-## 2. Current Release State
+- Branch: `main`
+- HEAD: `a9757fd` (`Add engineering handoff`)
+- Official V2 progress: **35/214**, blocked: **0**
+- Completed phases: **V2-00 (10/10), V2-01 (15/15), V2-02 (10/10)**
+- Next phase: **V2-03 - Link parsing and product snapshots**
+- Worktree: intentionally dirty with the current V2 implementation and deletion of the obsolete execution line. Do not reset, restore, or checkout deleted legacy files.
 
-| Area | State | Notes |
-| --- | --- | --- |
-| Buyer frontend | Deployed | GitHub Pages root URL |
-| Admin frontend | Deployed | `/admin.html`; requires a live API for real operations |
-| Backend source | Implemented and tested | Not deployed to a public production host |
-| PostgreSQL | Schema and migrations ready | Managed production instance not provisioned |
-| Redis | Queue adapter and worker ready | Managed production instance not provisioned |
-| QC media | Local private-storage adapter ready | Production object storage not connected |
-| Product parsing | Contract, worker, tests ready | Placeholder data source must be replaced |
-| Payments | Domain flow and signed webhook contract ready | External payment processor not connected |
-| Shipping/tracking | Quote, parcel, status, and tracking domain ready | Carrier/aggregator integration not connected |
-| Monitoring/backup | Runbooks and scripts ready | Production services and alert destinations not configured |
+The repository has not been committed after V2-00 through V2-02. Before any future commit, inspect `git status --short` and stage only the intended current-line files.
 
-### Public URLs
+## 3. V2-02 Delivered
 
-- Buyer client: <https://aaronyu94.github.io/gxxtxxbuy/>
-- Admin console: <https://aaronyu94.github.io/gxxtxxbuy/admin.html>
-- Surface switcher: <https://aaronyu94.github.io/gxxtxxbuy/portal.html>
-- Repository: <https://github.com/AaronYu94/gxxtxxbuy>
+### Frontend foundation
 
-### Last Published Commits
+- Validated public runtime configuration in `app/config.js` and `app/runtime-config.js`.
+- Restorable hash routes and guarded session shell in `app/app.js`.
+- Registration, email verification, login, device verification, account settings, password, address, and deletion flows.
+- Eight-locale framework with English fallback and missing-key diagnostics in `app/i18n.js`.
+- Exact integer-minor-unit display formatting in `app/currency.js`.
+- Responsive loading, empty, error, and conflict states in `app/styles.css`.
+- Tokens are kept in `sessionStorage`; profile and address PII is not persisted by the frontend.
 
-- `52920cc` - Update Pages actions runtime
-- `4821dd0` - Document architecture and deploy frontend to Pages
-- `6113470` - Complete GOATEDBUY client and parsing workflow
+Only `en-US` is enabled. The eight locale slots exist, but `GB-DEC-P1-001` is still pending and other languages must not be described as launched.
 
-The working tree was clean when this handoff was generated.
+### Backend account foundation
 
-## 3. System Architecture
+- Migration `000015_user_accounts_addresses.sql` adds versioned profiles, owner-scoped addresses, one-default uniqueness, parcel address references, and deletion requests.
+- `/api/v2/account` profile/preferences/password/deletion APIs.
+- `/api/v2/addresses` ownership-scoped CRUD with optimistic locking and soft deletion.
+- Address fingerprints are HMAC-derived and never returned to the client.
+- Parcel address JSON remains an immutable historical snapshot after a saved address changes or is deleted.
+- Deletion eligibility checks wallet, warehouse, active orders, parcels, and after-sales cases when that future table exists.
+- `npm run worker:account-deletion` asynchronously anonymizes PII while retaining business and immutable audit records.
+- Stale address writes return `409` without changing the existing default address.
 
-```mermaid
-flowchart LR
-    Buyer["Buyer"] --> Client["Static buyer client"]
-    Staff["Operations staff"] --> Admin["Static admin console"]
+Key implementation files:
 
-    Client --> API["Express API"]
-    Admin --> API
+- `backend/src/account/account-service.js`
+- `backend/src/account/account-repository.js`
+- `backend/src/routes/account.js`
+- `backend/scripts/account-deletion-worker.mjs`
+- `backend/migrations/000015_user_accounts_addresses.sql`
+- `backend/src/openapi/document.js`
 
-    API --> Auth["Auth + RBAC + audit"]
-    API --> Core["Links + haul + orders"]
-    API --> QC["Warehouse + QC"]
-    API --> Ship["Parcels + shipping"]
-    API --> Money["Wallet + coupons"]
-    API --> Platform["Creator + content + risk"]
+## 4. Verification Evidence
 
-    Core --> DB[("PostgreSQL")]
-    QC --> DB
-    Ship --> DB
-    Money --> DB
-    Platform --> DB
+Latest full verification:
 
-    Core --> Queue[("Redis")]
-    Queue --> Worker["Product parse worker"]
-    QC --> Media["Private object storage"]
-    Ship --> Providers["Payment + carrier providers"]
-```
+- Syntax lint: **121 files passed**
+- OpenAPI: **3.1.0, 79 paths passed**
+- Automated tests: **68/68 passed**
+- Build check: passed
+- PostgreSQL: migrations `000001` through `000015` applied to `goatedbuy_local_v2`
+- Real PostgreSQL regression: stale address update returned `409`; exactly one original default remained
+- Real PostgreSQL regression: parcel address snapshot survived saved-address soft deletion
+- Deletion worker regression: PII anonymized, request completed, sessions revoked, audit preserved
+- Browser regression: registration -> email verification -> login -> profile -> address -> reload passed
+- Responsive browser checks: `390x844`, `820x1024`, and `1440x900` had no horizontal overflow, overlap, clipped controls, or console errors
 
-### Architectural Boundaries
-
-- `app/` is a framework-free static frontend and can be deployed independently.
-- `backend/src/app.js` composes middleware, repositories, services, and HTTP routes.
-- Domain modules own business transitions; route handlers should remain thin.
-- PostgreSQL is the durable source of truth.
-- Redis handles asynchronous parsing work.
-- Private QC media must never be served as a public bucket; clients receive short-lived signed URLs.
-- Buyer ownership checks and admin RBAC are backend responsibilities, regardless of frontend visibility.
-
-## 4. Main Repository Map
-
-| Path | Purpose |
-| --- | --- |
-| `README.md` | Main architecture and local-development overview |
-| `app/client.html` | Buyer application shell |
-| `app/app.js` | Buyer views, state, API adapter, and interactions |
-| `app/admin.html` | Admin application shell |
-| `app/admin.js` | Admin API adapter and operations views |
-| `app/styles.css` | Shared responsive design system |
-| `app/assets/` | Brand, hero, mascot, and payment assets |
-| `backend/src/app.js` | Backend composition root |
-| `backend/src/core/` | Links, haul, orders, policies, and history |
-| `backend/src/auth/` | Authentication, sessions, RBAC, and audit |
-| `backend/src/warehouse/` | Receiving, weight, QC, and storage |
-| `backend/src/shipping/` | Quotes, parcels, payments, and tracking |
-| `backend/src/wallet/` | Wallet, coupons, locks, and adjustments |
-| `backend/src/parsing/` | URL recognition and product-source adapter |
-| `backend/migrations/` | PostgreSQL migration history |
-| `backend/tests/` | API and domain regression tests |
-| `backend/deploy/production/` | Production checks and runbooks |
-| `.github/workflows/backend-ci.yml` | Backend CI |
-| `.github/workflows/pages.yml` | GitHub Pages deployment |
-
-## 5. Implemented User Journey
-
-The homepage communicates six core stages:
-
-1. Search and Match.
-2. Pay for Goods.
-3. Order Reception and Transfer.
-4. Quality Check and Warehousing.
-5. Submit International Shipping.
-6. Efficient Management.
-
-Buyer functionality includes product-link intake, haul management, orders, QC review, forwarding, shipping quotes/parcels, wallet/coupons, affiliate views, and help content.
-
-Admin functionality includes permission-scoped queues for procurement, warehouse/QC, shipping, wallet operations, policy management, creator/content moderation, risk cases, and audit-aware state changes.
-
-## 6. Validation Baseline
-
-Run the complete backend gate:
+Run the full gate:
 
 ```bash
-cd backend
-npm run ci
+npm --prefix backend run ci
+DATABASE_URL=postgresql://127.0.0.1/goatedbuy_local_v2 npm --prefix backend run migrate:status
+git diff --check
 ```
 
-Last result:
-
-- Syntax check: 109 files passed.
-- OpenAPI: 3.1.0 document with 64 paths passed.
-- Tests: 53 passed, 0 failed.
-- Build check: passed.
-- Backend GitHub Action: passed.
-- Pages GitHub Action: passed.
-- Public buyer, admin, portal, CSS, JavaScript, and hero assets returned HTTP `200`.
-
-## 7. Local Startup
+## 5. Local Runtime
 
 Frontend:
 
-```bash
-cd /path/to/gxxtxxbuy
-python3 -m http.server 8080 --bind 127.0.0.1
-```
-
-Open:
-
-```text
-http://127.0.0.1:8080/app/
-http://127.0.0.1:8080/app/client.html
-http://127.0.0.1:8080/app/admin.html
-```
+- Client: <http://127.0.0.1:8080/app/client.html>
+- Account login: <http://127.0.0.1:8080/app/client.html#/account/login>
+- Checklist: <http://127.0.0.1:8080/prd-v2-checklist.html>
 
 Backend:
 
-```bash
-cd backend
-npm install
-cp .env.example .env
-npm run dev
-```
+- API: <http://127.0.0.1:3000>
+- Health: <http://127.0.0.1:3000/health>
+- Readiness: <http://127.0.0.1:3000/ready>
+- Database: `postgresql://127.0.0.1/goatedbuy_local_v2`
+- Redis is intentionally optional in the current local process.
 
-Full local dependencies:
-
-```bash
-cd backend
-docker compose up --build
-```
-
-Default local endpoints:
-
-- API: `http://127.0.0.1:3000`
-- PostgreSQL: `127.0.0.1:5433`
-- Redis: `127.0.0.1:6380`
-
-## 8. Production Configuration
-
-Do not commit production secrets.
-
-Required production categories include:
-
-- `DATABASE_URL`
-- `REDIS_URL`
-- storage driver, bucket, public API base, and signing secret
-- shipping webhook secret
-- CORS origins
-- database readiness flags and pool limits
-- feature flags for payments, shipping, coupons, and creators
-- welcome-gift and risk-automation configuration
-
-Use:
+Current backend launch command:
 
 ```bash
 cd backend
-npm run env:check
-npm run migrate:dry-run
-npm run db:backup
+DATABASE_URL=postgresql://127.0.0.1/goatedbuy_local_v2 \
+PORT=3000 NODE_ENV=development READY_REQUIRES_REDIS=false npm start
 ```
 
-The frontend reads `window.GOATEDBUY_API_BASE_URL` before falling back to `http://127.0.0.1:3000`. Production deployment must:
+Static frontend launch command if the existing server stops:
 
-1. Generate an untracked `config.js` containing the HTTPS API origin.
-2. Load `config.js` before `app.js` and `admin.js`.
-3. Add `https://aaronyu94.github.io` or the final custom domain to backend CORS.
-4. Never expose backend secrets in the static frontend.
+```bash
+python3 -m http.server 8080 --bind 127.0.0.1
+```
 
-See `backend/deploy/production/frontend-config.md`.
+The local database contains development/test users only. Do not treat it as production data.
 
-## 9. Known Gaps
+## 6. Pending Decisions
 
-### P0: Required Before Real Users
+All decision records remain in `V2-00_需求冻结与现状基线/`.
 
-- Deploy the backend API to a public HTTPS container host or VM.
-- Provision managed PostgreSQL and Redis.
-- Run and verify production migrations.
-- Connect private object storage for QC media.
-- Inject the production API URL into the Pages build.
-- Replace local-development secrets and pass `npm run env:check`.
-- Run production smoke tests and the P0 security regression checklist.
-- Configure logs, uptime checks, alerts, backups, and rollback ownership.
+Most urgent:
 
-### P1: Required Before Real Transactions
+- `GB-DEC-P0-004`: legal link-parsing source, supported Taobao/1688/Weidian fields, SLA, cost, rate limits, login/anti-bot risk, and manual fallback. Status: `pending_business_decision`.
+- `GB-DEC-P1-001`: final eight locale codes and translation delivery ownership. Status: `pending_business_decision`.
 
-- Replace `createPlaceholderProductSource()` with a legal, reliable marketplace data provider.
-- Integrate a real payment processor and map provider events to the existing signed webhook contract.
-- Integrate shipping quotes, labels, and tracking with a carrier aggregator.
-- Add real email/SMS/in-app notifications for order, QC, payment, and tracking events.
-- Complete finance reconciliation and refund operations.
+The V2-03 phase cannot claim production-ready marketplace parsing until `GB-DEC-P0-004` is approved. Existing placeholder parsing is development-only and must never be presented as supplier data.
 
-### P2: Product Hardening
+## 7. Recommended Next Actions
 
-- Add browser end-to-end tests for critical buyer and admin flows.
-- Add production analytics and conversion/error funnels.
-- Replace remaining placeholder support/community destinations with owned URLs.
-- Perform accessibility, localization, and content/legal review.
-- Add a custom domain and production privacy/terms pages.
+1. Complete `V2-03-01` by obtaining and recording the `GB-DEC-P0-004` decision and evidence.
+2. After approval, implement `V2-03-02` URL normalization/platform identification with short-link, tracking-parameter, protocol, length, and deduplication tests.
+3. Build Taobao, 1688, and Weidian adapters behind a shared contract; do not embed provider-specific behavior in routes.
+4. Add retry/dead-letter behavior before creating immutable catalog snapshots and APIs.
+5. Complete each atomic task independently, run its focused tests plus `npm run ci`, then add its ID and evidence to `prd-v2-task-status.json`.
 
-## 10. Recommended Next Execution Order
+If the P0 parsing decision is not available, implementation may only add contracts, test fixtures, explicit `not_configured` degradation, and decision documentation. It must not check off `V2-03-01` or simulate a real provider.
 
-1. Choose backend, database, Redis, and object-storage providers.
-2. Create staging infrastructure first.
-3. Configure staging secrets and run `env:check`.
-4. Run backup and migration dry-run.
-5. Deploy API and product-parse worker.
-6. Connect staging frontend via generated `config.js`.
-7. Run `npm run smoke` plus manual buyer/admin acceptance.
-8. Replace placeholder marketplace parsing.
-9. Integrate payment and carrier providers in sandbox mode.
-10. Promote the verified release to production using the rollback runbook.
+## 8. Safety Notes
 
-## 11. Operational Guardrails
-
-- Do not bypass ownership checks or RBAC for frontend convenience.
-- Do not make the QC object bucket public.
-- Do not run destructive migrations without a current restore-tested backup.
-- Do not enable risk automation until thresholds and review ownership are approved.
-- Keep payment, shipping, coupon, and creator kill switches independently operable.
-- Preserve idempotency for purchase, payment, webhook, coupon, and parcel transitions.
-- Treat the deployed admin HTML as public code; all authorization must remain server-side.
-
-## 12. Definition of the Next Milestone
-
-The next milestone is complete when:
-
-- Staging API `/health` and `/ready` are healthy.
-- PostgreSQL, Redis, storage, API, and worker are connected.
-- Pages uses the staging API without exposing secrets.
-- A buyer can register, submit a link, complete item details, create an order, review QC, create a parcel, and observe tracking.
-- An authorized operator can process the corresponding admin workflow.
-- Smoke, security, backup/restore, monitoring, and rollback checks all pass.
-
-At that point, the project moves from a deployed frontend preview plus tested backend codebase to an end-to-end staging system.
+- Preserve all user changes and intentional legacy-file deletions in the dirty worktree.
+- Never put API credentials, HMAC keys, encryption keys, verification tokens, or provider cookies in frontend/static files.
+- Keep buyer and employee identities and sessions separate.
+- Preserve integer-minor-unit money and immutable business snapshots.
+- Use ownership checks, optimistic versions, idempotency, and immutable audit records on every new V2 capability.

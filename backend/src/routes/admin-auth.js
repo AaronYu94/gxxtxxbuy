@@ -13,6 +13,30 @@ export function createAdminAuthRouter({ authService }) {
     }
   });
 
+  router.post("/admin/auth/totp/setup", async (req, res, next) => {
+    try {
+      res.json(await authService.beginAdminTotpSetup(req.body));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/admin/auth/totp/confirm", async (req, res, next) => {
+    try {
+      res.json(await authService.confirmAdminTotpSetup(req.body, requestMeta(req)));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/admin/auth/verify-totp", async (req, res, next) => {
+    try {
+      res.json(await authService.completeAdminLogin(req.body, requestMeta(req)));
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post("/admin/auth/refresh", async (req, res, next) => {
     try {
       res.json(await authService.refreshAdminSession(req.body, requestMeta(req)));
@@ -36,6 +60,14 @@ export function createAdminAuthRouter({ authService }) {
       roles: req.adminRoles,
       permissions: req.adminPermissions
     });
+  });
+
+  router.post("/admin/auth/reauth", requireAdmin(authService), async (req, res, next) => {
+    try {
+      res.json(await authService.createAdminReauth(req.auth, req.body, requestMeta(req)));
+    } catch (error) {
+      next(error);
+    }
   });
 
   return router;

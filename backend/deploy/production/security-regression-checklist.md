@@ -1,4 +1,4 @@
-# B8-09 P0 Security Regression Checklist
+# Security Regression Checklist
 
 Re-run before every production release. Backed by the automated regression suite
 (`npm test`) plus manual spot checks.

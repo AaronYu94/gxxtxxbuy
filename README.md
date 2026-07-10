@@ -48,16 +48,17 @@ The frontend is framework-free HTML, CSS, and JavaScript so it can be hosted on 
 - `app/admin.html` and `app/admin.js`: permission-scoped operations console for procurement, warehouse, shipping, policy, wallet, content, and risk work.
 - `app/styles.css`: shared responsive design system.
 - `app/assets/`: brand, hero, mascot, and payment assets.
-- `app/config.example.js`: runtime API endpoint configuration pattern for staging and production.
+- `app/config.js` and `app/config.example.js`: validated public runtime API, locale, and display-currency configuration for each environment.
 
-Local browser state keeps the static demonstration usable without a backend. Once authenticated, the API adapter replaces demo data with user-scoped live data.
+The buyer account routes use live, ownership-scoped API data. Session credentials are tab-scoped in `sessionStorage`; profile and address PII is not persisted by the frontend.
 
 ### Backend
 
 The backend is a Node.js 22 and Express 5 service organized by business capability:
 
 - `backend/src/app.js`: HTTP composition, middleware, routes, and dependency wiring.
-- `backend/src/auth/`: buyer/admin identity, sessions, password handling, and RBAC.
+- `backend/src/auth/`: buyer/admin identity, email and device verification, sessions, password handling, TOTP, and RBAC.
+- `backend/src/account/`: versioned profiles, multi-address ownership/default rules, deletion eligibility, and asynchronous anonymization.
 - `backend/src/core/`: links, haul items, purchase orders, policies, and order history.
 - `backend/src/warehouse/`: receiving, weight, QC photos, approval, and storage deadlines.
 - `backend/src/shipping/`: shipping lines, quotes, parcels, payments, webhooks, and tracking.
@@ -121,7 +122,7 @@ cd backend
 npm run ci
 ```
 
-The CI pipeline runs syntax linting, OpenAPI validation, 53 backend tests, and a build check. GitHub Actions runs the same backend checks and deploys `app/` to GitHub Pages after changes reach `main`.
+The CI pipeline runs syntax linting, OpenAPI validation, 68 backend/frontend-foundation tests, and a build check. GitHub Actions runs the same backend checks and deploys `app/` to GitHub Pages after changes reach `main`.
 
 ## Deployment Model
 
@@ -133,11 +134,13 @@ The CI pipeline runs syntax linting, OpenAPI validation, 53 backend tests, and a
 | Queue | Managed Redis | Worker connectivity |
 | QC media | Private object storage | Signed URL support |
 
-Production frontend configuration should set `window.GOATEDBUY_API_BASE_URL` to the HTTPS API origin and add the Pages/custom-domain origin to backend CORS.
+Production frontend configuration should provide a public `window.GOATEDBUY_CONFIG` object based on `app/config.example.js`, set `apiBaseUrl` to the HTTPS API origin, and add the Pages/custom-domain origin to backend CORS. Never put credentials or signing secrets in this static object.
 
 ## More Documentation
 
+- [PRD V2.0 atomic tasks](PRD_V2_开发原子任务.md)
+- [PRD V2.0 interactive checklist](prd-v2-checklist.html)
+- [V2-00 frozen baseline](V2-00_需求冻结与现状基线/README.md)
 - [Frontend notes](app/README.md)
 - [Backend API and operations](backend/README.md)
 - [Production deployment runbook](backend/deploy/production/README.md)
-- [Product requirements](GOATEDBUY_PRD修补计划_V1.0.md)

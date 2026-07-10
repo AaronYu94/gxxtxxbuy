@@ -77,7 +77,7 @@ export function createOpenApiDocument(env = {}) {
           operationId: "registerUser",
           requestBody: jsonRequest("RegisterRequest"),
           responses: {
-            201: jsonResponse("User registered.", "AuthResponse"),
+            201: jsonResponse("User registered; email verification required.", "RegistrationResponse"),
             400: errorResponse("Invalid registration input."),
             409: errorResponse("Email already registered.")
           }
@@ -93,6 +93,27 @@ export function createOpenApiDocument(env = {}) {
             200: jsonResponse("User logged in.", "AuthResponse"),
             401: errorResponse("Invalid credentials.")
           }
+        }
+      },
+      "/auth/verify-email": {
+        post: {
+          tags: ["Auth"], summary: "Verify a registration email", operationId: "verifyRegistrationEmail",
+          requestBody: jsonRequest("TokenRequest"),
+          responses: { 200: jsonResponse("Email verified.", "VerificationResponse"), 400: errorResponse("Token invalid or expired."), 409: errorResponse("Token already consumed.") }
+        }
+      },
+      "/auth/resend-verification": {
+        post: {
+          tags: ["Auth"], summary: "Resend registration verification", operationId: "resendRegistrationVerification",
+          requestBody: jsonRequest("EmailRequest"),
+          responses: { 202: jsonResponse("Request accepted.", "VerificationAcceptedResponse"), 429: errorResponse("Resend rate limited.") }
+        }
+      },
+      "/auth/verify-device": {
+        post: {
+          tags: ["Auth"], summary: "Verify a new or stale device", operationId: "verifyLoginDevice",
+          requestBody: jsonRequest("TokenRequest"),
+          responses: { 200: jsonResponse("Device trusted and session created.", "AuthResponse"), 400: errorResponse("Token invalid or expired."), 409: errorResponse("Token already consumed.") }
         }
       },
       "/auth/refresh": {
@@ -131,6 +152,61 @@ export function createOpenApiDocument(env = {}) {
           }
         }
       },
+      "/api/v2/account": {
+        get: {
+          tags: ["Auth"], summary: "Get versioned account settings", operationId: "getV2Account",
+          security: [{ bearerAuth: [] }],
+          responses: { 200: jsonResponse("Account settings.", "V2AccountEnvelope"), 401: errorResponse("Authentication required.") }
+        },
+        patch: {
+          tags: ["Auth"], summary: "Update account settings", operationId: "updateV2Account",
+          security: [{ bearerAuth: [] }], requestBody: jsonRequest("V2AccountUpdateRequest"),
+          responses: { 200: jsonResponse("Account updated.", "V2AccountEnvelope"), 409: errorResponse("Account version conflict.") }
+        }
+      },
+      "/api/v2/account/password": {
+        post: {
+          tags: ["Auth"], summary: "Change password and revoke all sessions", operationId: "changeV2AccountPassword",
+          security: [{ bearerAuth: [] }], requestBody: jsonRequest("V2PasswordChangeRequest"),
+          responses: { 200: jsonResponse("Password changed and sessions revoked.", "V2ActionEnvelope"), 401: errorResponse("Current password invalid."), 409: errorResponse("Account version conflict.") }
+        }
+      },
+      "/api/v2/addresses": {
+        get: {
+          tags: ["Auth"], summary: "List the current user's addresses", operationId: "listV2Addresses",
+          security: [{ bearerAuth: [] }], responses: { 200: jsonResponse("Address list.", "V2AddressListEnvelope") }
+        },
+        post: {
+          tags: ["Auth"], summary: "Create an address", operationId: "createV2Address",
+          security: [{ bearerAuth: [] }], requestBody: jsonRequest("V2AddressWriteRequest"),
+          responses: { 201: jsonResponse("Address created.", "V2AddressEnvelope"), 400: errorResponse("Invalid address.") }
+        }
+      },
+      "/api/v2/addresses/{addressId}": {
+        patch: {
+          tags: ["Auth"], summary: "Update an owned address", operationId: "updateV2Address",
+          security: [{ bearerAuth: [] }], parameters: [pathParameter("addressId")], requestBody: jsonRequest("V2AddressUpdateRequest"),
+          responses: { 200: jsonResponse("Address updated.", "V2AddressEnvelope"), 404: errorResponse("Address not found."), 409: errorResponse("Address version conflict.") }
+        },
+        delete: {
+          tags: ["Auth"], summary: "Soft-delete an owned address", operationId: "deleteV2Address",
+          security: [{ bearerAuth: [] }], parameters: [pathParameter("addressId"), headerParameter("If-Match")],
+          responses: { 200: jsonResponse("Address deleted.", "V2ActionEnvelope"), 404: errorResponse("Address not found."), 409: errorResponse("Address version conflict.") }
+        }
+      },
+      "/api/v2/account/deletion-eligibility": {
+        get: {
+          tags: ["Auth"], summary: "Check account deletion eligibility", operationId: "getV2DeletionEligibility",
+          security: [{ bearerAuth: [] }], responses: { 200: jsonResponse("Deletion eligibility.", "V2DeletionEligibilityEnvelope") }
+        }
+      },
+      "/api/v2/account/deletion-requests": {
+        post: {
+          tags: ["Auth"], summary: "Queue asynchronous account anonymization", operationId: "createV2DeletionRequest",
+          security: [{ bearerAuth: [] }],
+          responses: { 202: jsonResponse("Deletion queued and sessions revoked.", "V2DeletionRequestEnvelope"), 422: errorResponse("Account obligations block deletion.") }
+        }
+      },
       "/admin/auth/login": {
         post: {
           tags: ["Admin Auth"],
@@ -138,9 +214,51 @@ export function createOpenApiDocument(env = {}) {
           operationId: "loginAdmin",
           requestBody: jsonRequest("LoginRequest"),
           responses: {
-            200: jsonResponse("Admin logged in.", "AdminAuthResponse"),
+            200: jsonResponse("Password accepted; MFA challenge created.", "AdminChallengeResponse"),
             401: errorResponse("Invalid credentials.")
           }
+        }
+      },
+      "/admin/auth/totp/setup": {
+        post: {
+          tags: ["Admin Auth"], summary: "Begin mandatory TOTP setup", operationId: "beginAdminTotpSetup",
+          requestBody: jsonRequest("AdminChallengeRequest"),
+          responses: { 200: jsonResponse("TOTP secret created.", "TotpSetupResponse"), 401: errorResponse("Challenge invalid or expired.") }
+        }
+      },
+      "/admin/auth/totp/confirm": {
+        post: {
+          tags: ["Admin Auth"], summary: "Confirm TOTP setup and create session", operationId: "confirmAdminTotpSetup",
+          requestBody: jsonRequest("AdminTotpRequest"),
+          responses: { 200: jsonResponse("TOTP enabled and session created.", "AdminAuthResponse"), 401: errorResponse("Code invalid.") }
+        }
+      },
+      "/admin/auth/verify-totp": {
+        post: {
+          tags: ["Admin Auth"], summary: "Complete admin MFA login", operationId: "verifyAdminTotp",
+          requestBody: jsonRequest("AdminTotpRequest"),
+          responses: { 200: jsonResponse("Admin session created.", "AdminAuthResponse"), 401: errorResponse("Challenge or code invalid.") }
+        }
+      },
+      "/admin/auth/reauth": {
+        post: {
+          tags: ["Admin Auth"], summary: "Create a fresh high-risk re-authentication proof", operationId: "createAdminReauth",
+          security: [{ bearerAuth: [] }], requestBody: jsonRequest("AdminReauthRequest"),
+          responses: { 200: jsonResponse("One-time re-authentication proof created.", "AdminReauthResponse"), 401: errorResponse("Session or code invalid.") }
+        }
+      },
+      "/admin/security/users/{adminUserId}/disable": {
+        post: {
+          tags: ["Admin Auth"], summary: "Disable an employee and revoke sessions", operationId: "disableAdminUser",
+          security: [{ bearerAuth: [] }], parameters: [pathParameter("adminUserId")],
+          responses: { 200: jsonResponse("Employee disabled.", "AdminMeResponse"), 401: errorResponse("Authentication required."), 403: errorResponse("Permission or re-authentication missing.") }
+        }
+      },
+      "/admin/security/users/{adminUserId}/role": {
+        post: {
+          tags: ["Admin Auth"], summary: "Assign the employee's single role", operationId: "assignAdminRole",
+          security: [{ bearerAuth: [] }], parameters: [pathParameter("adminUserId")], requestBody: jsonRequest("AdminRoleRequest"),
+          responses: { 201: jsonResponse("Role assigned.", "AdminRoleResponse"), 409: errorResponse("Employee already has a role.") }
         }
       },
       "/admin/auth/refresh": {
@@ -1135,6 +1253,68 @@ export function createOpenApiDocument(env = {}) {
           email: { type: "string", format: "email" },
           password: { type: "string" }
         }, ["email", "password"]),
+        EmailRequest: objectSchema({ email: { type: "string", format: "email" } }, ["email"]),
+        TokenRequest: objectSchema({ token: { type: "string" }, device_label: { type: "string", maxLength: 80 } }, ["token"]),
+        RegistrationResponse: objectSchema({
+          user: { $ref: "#/components/schemas/User" },
+          verification_required: { const: true },
+          verification_token: { type: "string", description: "Only exposed outside production for test delivery." }
+        }, ["user", "verification_required"]),
+        VerificationResponse: objectSchema({
+          user: { $ref: "#/components/schemas/User" }, verified: { const: true }, idempotent: { type: "boolean" }
+        }, ["user", "verified", "idempotent"]),
+        VerificationAcceptedResponse: objectSchema({ accepted: { const: true }, verification_required: { type: "boolean" } }, ["accepted"]),
+        V2Meta: objectSchema({ request_id: { type: "string" } }, ["request_id"]),
+        V2Account: objectSchema({
+          email: { type: "string", format: "email" }, display_name: { type: "string" },
+          phone: { type: ["string", "null"] }, phone_verified: { type: "boolean" },
+          country_code: { type: ["string", "null"] }, default_locale: { type: "string" },
+          default_currency: { type: "string", pattern: "^[A-Z]{3}$" }, status: { type: "string" },
+          email_verified: { type: "boolean" }, version: { type: "integer", minimum: 1 },
+          deletion_requested_at: { type: ["string", "null"], format: "date-time" },
+          created_at: { type: ["string", "null"], format: "date-time" }
+        }, ["email", "display_name", "phone_verified", "default_locale", "default_currency", "status", "email_verified", "version"]),
+        V2AccountEnvelope: objectSchema({ data: { $ref: "#/components/schemas/V2Account" }, meta: { $ref: "#/components/schemas/V2Meta" } }, ["data", "meta"]),
+        V2AccountUpdateRequest: objectSchema({
+          display_name: { type: "string", maxLength: 80 }, phone: { type: ["string", "null"], maxLength: 32 },
+          country_code: { type: ["string", "null"], pattern: "^[A-Z]{2}$" }, default_locale: { type: "string" },
+          default_currency: { type: "string", pattern: "^[A-Z]{3}$" }, expected_version: { type: "integer", minimum: 1 }
+        }, ["expected_version"]),
+        V2PasswordChangeRequest: objectSchema({
+          current_password: { type: "string" }, new_password: { type: "string", minLength: 10, maxLength: 128 },
+          expected_version: { type: "integer", minimum: 1 }
+        }, ["current_password", "new_password", "expected_version"]),
+        V2Address: objectSchema({
+          id: { type: "string", format: "uuid" }, recipient_name: { type: "string" }, phone: { type: "string" },
+          country_code: { type: "string", pattern: "^[A-Z]{2}$" }, region: { type: "string" }, city: { type: "string" },
+          postal_code: { type: "string" }, line1: { type: "string" }, line2: { type: "string" },
+          is_default: { type: "boolean" }, version: { type: "integer", minimum: 1 },
+          created_at: { type: ["string", "null"], format: "date-time" }, updated_at: { type: ["string", "null"], format: "date-time" }
+        }, ["id", "recipient_name", "phone", "country_code", "city", "postal_code", "line1", "is_default", "version"]),
+        V2AddressWriteRequest: objectSchema({
+          recipient_name: { type: "string", maxLength: 120 }, phone: { type: "string", maxLength: 32 },
+          country_code: { type: "string", pattern: "^[A-Z]{2}$" }, region: { type: "string", maxLength: 120 },
+          city: { type: "string", maxLength: 120 }, postal_code: { type: "string", maxLength: 32 },
+          line1: { type: "string", maxLength: 240 }, line2: { type: "string", maxLength: 240 }, is_default: { type: "boolean" }
+        }, ["recipient_name", "phone", "country_code", "city", "postal_code", "line1"]),
+        V2AddressUpdateRequest: objectSchema({
+          recipient_name: { type: "string", maxLength: 120 }, phone: { type: "string", maxLength: 32 },
+          country_code: { type: "string", pattern: "^[A-Z]{2}$" }, region: { type: "string", maxLength: 120 },
+          city: { type: "string", maxLength: 120 }, postal_code: { type: "string", maxLength: 32 },
+          line1: { type: "string", maxLength: 240 }, line2: { type: "string", maxLength: 240 },
+          is_default: { type: "boolean" }, expected_version: { type: "integer", minimum: 1 }
+        }, ["recipient_name", "phone", "country_code", "city", "postal_code", "line1", "expected_version"]),
+        V2AddressEnvelope: objectSchema({ data: { $ref: "#/components/schemas/V2Address" }, meta: { $ref: "#/components/schemas/V2Meta" } }, ["data", "meta"]),
+        V2AddressListEnvelope: objectSchema({ data: { type: "array", items: { $ref: "#/components/schemas/V2Address" } }, meta: { $ref: "#/components/schemas/V2Meta" } }, ["data", "meta"]),
+        V2ActionEnvelope: objectSchema({ data: { type: "object", additionalProperties: true }, meta: { $ref: "#/components/schemas/V2Meta" } }, ["data", "meta"]),
+        V2DeletionEligibilityEnvelope: objectSchema({
+          data: objectSchema({ eligible: { type: "boolean" }, blockers: { type: "object", additionalProperties: true } }, ["eligible", "blockers"]),
+          meta: { $ref: "#/components/schemas/V2Meta" }
+        }, ["data", "meta"]),
+        V2DeletionRequestEnvelope: objectSchema({
+          data: objectSchema({ deletion_request: { type: "object", additionalProperties: true }, existing: { type: "boolean" } }, ["deletion_request", "existing"]),
+          meta: { $ref: "#/components/schemas/V2Meta" }
+        }, ["data", "meta"]),
         RefreshRequest: objectSchema({
           refresh_token: { type: "string" }
         }, ["refresh_token"]),
@@ -1148,6 +1328,23 @@ export function createOpenApiDocument(env = {}) {
           permissions: { type: "array", items: { type: "string" } },
           session: { $ref: "#/components/schemas/SessionTokens" }
         }, ["admin_user", "roles", "permissions", "session"]),
+        AdminChallengeRequest: objectSchema({ challenge_token: { type: "string" } }, ["challenge_token"]),
+        AdminChallengeResponse: objectSchema({
+          mfa_required: { const: true }, setup_required: { type: "boolean" }, challenge_token: { type: "string" }
+        }, ["mfa_required", "setup_required", "challenge_token"]),
+        AdminTotpRequest: objectSchema({
+          challenge_token: { type: "string" }, code: { type: "string", pattern: "^[0-9]{6}$" }, recovery_code: { type: "string" }
+        }, ["challenge_token"]),
+        TotpSetupResponse: objectSchema({ secret: { type: "string" }, otpauth_uri: { type: "string" } }, ["secret", "otpauth_uri"]),
+        AdminReauthRequest: objectSchema({
+          action: { type: "string" }, reason: { type: "string", maxLength: 500 }, code: { type: "string" }, recovery_code: { type: "string" },
+          resource_type: { type: "string" }, resource_id: { type: "string" }
+        }, ["action", "reason"]),
+        AdminReauthResponse: objectSchema({
+          reauth_token: { type: "string" }, expires_at: { type: "string", format: "date-time" }
+        }, ["reauth_token", "expires_at"]),
+        AdminRoleRequest: objectSchema({ role_code: { type: "string" } }, ["role_code"]),
+        AdminRoleResponse: objectSchema({ admin_user_id: { type: "string", format: "uuid" }, role_code: { type: "string" } }, ["admin_user_id", "role_code"]),
         MeResponse: objectSchema({
           user: { $ref: "#/components/schemas/User" }
         }, ["user"]),
@@ -1243,6 +1440,7 @@ export function createOpenApiDocument(env = {}) {
           source_platform: { type: "string" },
           source_domain: { type: "string" },
           status: { type: "string" },
+          email_verified: { type: "boolean" },
           haul_status: { type: "string" },
           exception: { type: "string" },
           external_order_no: { type: "string" },
@@ -1262,6 +1460,10 @@ export function createOpenApiDocument(env = {}) {
           title: { type: "string" },
           spec: { type: "string" },
           status: { type: "string" },
+          employee_no: { type: ["string", "null"] },
+          department_code: { type: ["string", "null"] },
+          organization_code: { type: ["string", "null"] },
+          totp_enabled: { type: "boolean" },
           haul_status: { type: "string" },
           order_status: { type: "string" },
           storage_location: { type: "string" },
@@ -1348,6 +1550,7 @@ export function createOpenApiDocument(env = {}) {
           refresh_token: { type: "string" },
           expires_at: { type: "string", format: "date-time" },
           refresh_expires_at: { type: "string", format: "date-time" },
+          absolute_expires_at: { type: "string", format: "date-time" },
           token_type: { const: "Bearer" }
         }, ["access_token", "refresh_token", "expires_at", "refresh_expires_at", "token_type"]),
         SaveLinkRequest: objectSchema({
@@ -1970,6 +2173,10 @@ function queryParameter(name, schema = { type: "string" }) {
     required: false,
     schema
   };
+}
+
+function headerParameter(name, schema = { type: "string" }) {
+  return { name, in: "header", required: true, schema };
 }
 
 function errorResponse(description) {

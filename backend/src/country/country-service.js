@@ -5,7 +5,7 @@ export function createCountryService({ repository, auditLogger = null, clock = (
   if (!repository) throw new Error("Country repository is required.");
 
   return {
-    // B7-14: public country shipping hub. Returns only published content and flags
+    // Public country shipping hub. Returns only published content and flags
     // when the published version has passed its expiry so stale rules are never
     // silently presented as current.
     async getPublishedCountry(countryParam) {

@@ -4,7 +4,7 @@ import { createApp } from "../src/app.js";
 import { normalizeEmail } from "../src/auth/input.js";
 import { parseEnv } from "../src/config/env.js";
 import { hashPassword } from "../src/security/password.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { loginAdminWithTotp, MemoryAuditRepository, MemoryAuthRepository, registerVerifiedUser } from "./helpers/memory-auth-repository.js";
 import { MemoryCreatorRepository } from "./helpers/memory-creator-repository.js";
 
 function createCreatorTestApp() {
@@ -40,12 +40,8 @@ async function requestJson(baseUrl, path, { method = "GET", token = "", body = n
 }
 
 async function registerUser(baseUrl, email) {
-  const result = await requestJson(baseUrl, "/auth/register", {
-    method: "POST",
-    body: { email, password: "CorrectHorse123" }
-  });
-  assert.equal(result.response.status, 201);
-  return { token: result.body.session.access_token, userId: result.body.user.id };
+  const result = await registerVerifiedUser(baseUrl, email);
+  return { token: result.token, userId: result.user.id };
 }
 
 async function createAdmin(repository, { email, roles = [], permissions = [] }) {
@@ -59,18 +55,13 @@ async function createAdmin(repository, { email, roles = [], permissions = [] }) 
 }
 
 async function loginAdmin(baseUrl, email) {
-  const result = await requestJson(baseUrl, "/admin/auth/login", {
-    method: "POST",
-    body: { email, password: "AdminPass123" }
-  });
-  assert.equal(result.response.status, 200);
-  return result.body.session.access_token;
+  return (await loginAdminWithTotp(baseUrl, email)).session.access_token;
 }
 
 test("creator touch attribution is public, validated, idempotent, and dashboard is aggregate-only", async () => {
   const { server, baseUrl, repositories } = createCreatorTestApp();
   try {
-    await createAdmin(repositories.auth, { email: "ops@example.com", roles: ["operations"], permissions: ["ops:policy:write"] });
+    await createAdmin(repositories.auth, { email: "ops@example.com", roles: ["campaign_operator"], permissions: ["ops:policy:write"] });
     const opsToken = await loginAdmin(baseUrl, "ops@example.com");
     const buyer = await registerUser(baseUrl, "buyer@example.com");
 

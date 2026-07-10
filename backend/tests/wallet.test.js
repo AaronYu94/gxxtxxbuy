@@ -7,7 +7,7 @@ import { hashPassword } from "../src/security/password.js";
 import { DEFAULT_SHIPPING_LINES } from "../src/shipping/default-lines.js";
 import { importShippingLines } from "../src/shipping/shipping-line-import.js";
 import { signPaymentWebhook } from "../src/shipping/payment-webhook.js";
-import { MemoryAuditRepository, MemoryAuthRepository } from "./helpers/memory-auth-repository.js";
+import { loginAdminWithTotp, MemoryAuditRepository, MemoryAuthRepository, registerVerifiedUser } from "./helpers/memory-auth-repository.js";
 import { MemoryCoreRepository } from "./helpers/memory-core-repository.js";
 import { MemoryShippingRepository } from "./helpers/memory-shipping-repository.js";
 import { MemoryWalletRepository } from "./helpers/memory-wallet-repository.js";
@@ -64,15 +64,7 @@ async function requestJson(baseUrl, path, { method = "GET", token = "", body = n
 }
 
 async function registerUser(baseUrl, email = "buyer@example.com") {
-  const result = await requestJson(baseUrl, "/auth/register", {
-    method: "POST",
-    body: { email, password: "CorrectHorse123" }
-  });
-  assert.equal(result.response.status, 201);
-  return {
-    token: result.body.session.access_token,
-    user: result.body.user
-  };
+  return registerVerifiedUser(baseUrl, email);
 }
 
 async function createAdmin(repository, permissions, email = "admin@example.com") {
@@ -80,18 +72,13 @@ async function createAdmin(repository, permissions, email = "admin@example.com")
     email,
     emailNormalized: normalizeEmail(email),
     passwordHash: await hashPassword("AdminPass123"),
-    roles: ["operations"],
+    roles: ["finance_operator"],
     permissions
   });
 }
 
 async function loginAdmin(baseUrl, email = "admin@example.com") {
-  const result = await requestJson(baseUrl, "/admin/auth/login", {
-    method: "POST",
-    body: { email, password: "AdminPass123" }
-  });
-  assert.equal(result.response.status, 200);
-  return result.body.session.access_token;
+  return (await loginAdminWithTotp(baseUrl, email)).session.access_token;
 }
 
 function address(country = "United States") {

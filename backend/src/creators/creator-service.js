@@ -5,7 +5,7 @@ export function createCreatorService({ repository, auditLogger = null } = {}) {
   if (!repository) throw new Error("Creator repository is required.");
 
   return {
-    // B7-03: record a creator/campaign touch. Public-safe: never stores addresses,
+    // Record a creator/campaign touch. Public-safe: never stores addresses,
     // payment, or contact info; only a session id and optional attributed user.
     async recordTouch(input = {}, context = {}, requestMeta = {}) {
       const campaignCode = normalizeCode(input.campaign_code ?? input.campaignCode, false);
@@ -46,7 +46,7 @@ export function createCreatorService({ repository, auditLogger = null } = {}) {
       return { attribution: publicAttribution(attribution) };
     },
 
-    // B7-04: creator dashboard. Returns aggregate/redacted data only. A creator can
+    // Creator dashboard. Returns aggregate/redacted data only. A creator can
     // never see buyer addresses, order line items, or QC through this surface.
     async getDashboard(user) {
       const creator = await repository.findCreatorByUserId(user.id);
