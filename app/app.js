@@ -1262,19 +1262,16 @@ function renderDashboard() {
             <button class="btn btn-ghost" type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Welcome gift</button>
           </div>
         </div>
-        <div class="card-floating vignette" data-reveal>
-          <div class="vh"><b>Parcel · GB-2481</b><span class="tag">AIR · ~4 days</span></div>
-          <div class="vstep done"><span class="bullet" style="background:var(--c-ink-3)">✓</span><span class="name">Sourced in China</span><span class="meta">3 links</span></div>
-          <div class="vstep done"><span class="bullet" style="background:var(--c-coral)">✓</span><span class="name">Purchased</span><span class="meta">12 items</span></div>
-          <div class="vstep done"><span class="bullet" style="background:var(--c-success)">✓</span><span class="name">Quality checked</span><span class="meta">36 photos</span></div>
-          <div class="vstep cur"><span class="bullet" style="background:var(--c-coral)"></span><span class="name">In warehouse</span><span class="meta">day 3 / 90</span></div>
-          <div class="vstep"><span class="bullet" style="background:var(--c-warehouse)"></span><span class="name">Bundled</span><span class="meta">—</span></div>
-          <div class="vstep"><span class="bullet" style="background:var(--c-warehouse)"></span><span class="name">Delivered</span><span class="meta">—</span></div>
-          <div class="vfoot">
-            <div class="st"><b>$0.00</b><span>Storage fee · 87 days left</span></div>
-            <div class="st"><b>2.4 kg</b><span>Est. combined weight</span></div>
-          </div>
+        <div class="hero-mascot" data-reveal>
+          <img src="./assets/gb-mascot.jpg" alt="GOATEDBUY mascot" loading="lazy">
         </div>
+      </div></section>
+
+      <!-- brand banner (elements) -->
+      <section class="section" style="padding-top:0"><div class="wrap">
+        <figure class="brand-banner" data-reveal>
+          <img src="./assets/gb-hero-warehouse.png" alt="From our China warehouse to your doorstep — air freight, consolidated." loading="lazy">
+        </figure>
       </div></section>
 
       <!-- 02 PROOF ribbon -->
@@ -1378,6 +1375,11 @@ function renderDashboard() {
           </div>
           <button class="btn btn-primary" type="button" data-route-button="community">Explore community <i data-lucide="arrow-right" aria-hidden="true"></i></button>
         </div>
+      </div></section>
+
+      <!-- brand lockup (full logo) -->
+      <section class="section" style="padding:var(--s-6) 0"><div class="wrap" style="text-align:center">
+        <img class="brand-full" src="./assets/gb-logo-full.jpg" alt="GOATEDBUY" loading="lazy" data-reveal>
       </div></section>
 
       <!-- 07 CTA -->

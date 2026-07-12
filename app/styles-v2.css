@@ -236,6 +236,14 @@
 /* hero collapses to a single column on narrow screens (copy first, then vignette) */
 @media(max-width:760px){.dl-v2 .hero{grid-template-columns:1fr;padding-top:var(--s-6)}}
 
+/* brand elements: mascot + warehouse banner. mix-blend-multiply drops the white
+   jpg background against the warm-white page so the mascot reads as cut-out. */
+.dl-v2 .hero-mascot{display:grid;place-items:center}
+.dl-v2 .hero-mascot img{max-width:100%;max-height:460px;mix-blend-mode:multiply}
+.dl-v2 .brand-banner{margin:0;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--e-2);line-height:0}
+.dl-v2 .brand-banner img{width:100%;height:auto;display:block}
+.dl-v2 .brand-full{width:220px;max-width:60%;height:auto;margin:0 auto;mix-blend-mode:multiply}
+
 /* Stage D · New User Guide (.guide-v2) — reuses the journey spine as the "how it works" */
 .dl-v2 .two-up{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--s-4);align-items:start}
 @media(max-width:760px){.dl-v2 .two-up{grid-template-columns:1fr}}
