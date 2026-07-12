@@ -1,0 +1,433 @@
+/* =============================================================================
+   GoatedBuy · Design Language V2 · Overlay layer  (Stage A / WP-6a)
+   -----------------------------------------------------------------------------
+   Loaded AFTER styles.css. Everything is scoped under `.dl-v2` so existing
+   pages (which have no .dl-v2 wrapper) are 100% unaffected. Tokens live on
+   `.dl-v2` — NOT :root — because styles.css already owns --bg / --muted / --amber
+   on :root and redefining those globally would break the legacy surfaces.
+   Extracted from app/home-v2.html <style> (WP-1 tokens · WP-3 cards · WP-4 motion
+   · the 9 film-rhythm sections). Keyframes renamed dlv2-* to avoid any collision.
+   ========================================================================== */
+
+/* ===================================================== WP-1 · TOKEN LAYER */
+.dl-v2{
+  --c-coral:#F0503D; --c-coral-deep:#C7361F; --c-coral-wash:#FFF1EE;
+  --c-warm-white:#FBFAF8; --c-paper:#FFFFFF; --c-graphite:#17191D; --c-graphite-2:#20242A;
+  --c-ink-2:#4A5158; --c-ink-3:#8A929B; --c-warehouse:#EEF0F2; --c-line:#E4E7EA;
+  --c-success:#16915B; --c-success-wash:#E7F4EC; --c-ship:#2F6BF0; --c-ship-wash:#E9F0FE;
+  --c-air:#6C4BD6; --c-air-wash:#EFEAFB; --c-danger:#C7361F; --c-amber:#B5741A;
+  --bg:var(--c-warm-white); --fg:var(--c-graphite); --muted:var(--c-ink-2); --faint:var(--c-ink-3);
+  --card:var(--c-paper); --hair:var(--c-line);
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--s-7:48px;--s-8:64px;--s-9:96px;--s-10:128px;--s-11:180px;
+  --r-xs:6px;--r-sm:10px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;
+  --t-display:clamp(48px,6vw,84px); --t-h1:clamp(38px,4.2vw,54px); --t-section:clamp(30px,3.2vw,46px);
+  --t-h3:22px; --t-subtitle:20px; --t-body-lg:18px; --t-body:16px; --t-caption:13px; --t-eyebrow:12px;
+  --lh-tight:1.03; --lh-snug:1.18; --lh-body:1.62;
+  --fw-reg:400;--fw-med:560;--fw-bold:720;--fw-black:820;
+  --e-0:none; --e-1:0 1px 2px rgba(23,25,29,.05); --e-2:0 8px 24px rgba(23,25,29,.08);
+  --e-3:0 24px 60px rgba(23,25,29,.12); --e-coral:0 12px 30px rgba(240,80,61,.28);
+  --dur-fast:140ms;--dur-base:260ms;--dur-slow:520ms;--dur-draw:1500ms;
+  --ease-out:cubic-bezier(.22,.61,.36,1); --ease-inout:cubic-bezier(.65,.05,.36,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  background:var(--bg); color:var(--fg);
+  font:var(--t-body)/var(--lh-body) Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.dl-v2 *{box-sizing:border-box}
+.dl-v2 .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.dl-v2 h1,.dl-v2 h2,.dl-v2 h3{margin:0;letter-spacing:-.02em;font-weight:var(--fw-black);line-height:var(--lh-snug)}
+.dl-v2 .eyebrow{font-size:var(--t-eyebrow);font-weight:var(--fw-bold);letter-spacing:.16em;text-transform:uppercase;color:var(--c-coral)}
+.dl-v2 .muted{color:var(--muted)} .dl-v2 .mono{font-family:ui-monospace,Menlo,monospace}
+.dl-v2 a{color:inherit}
+
+/* ===================================================== WP-3 · CARD TIERS + buttons */
+.dl-v2 .card-primary{background:var(--card);border-radius:var(--r-md);box-shadow:var(--e-2);border-top:3px solid var(--c-coral);padding:var(--s-6);transition:transform var(--dur-base) var(--ease-spring),box-shadow var(--dur-base) var(--ease-out)}
+.dl-v2 .card-primary:hover{transform:translateY(-4px);box-shadow:var(--e-3)}
+.dl-v2 .card-secondary{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-sm);box-shadow:var(--e-1);padding:var(--s-5);transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.dl-v2 .card-secondary:hover{transform:translateY(-2px);box-shadow:var(--e-2)}
+.dl-v2 .card-floating{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--e-3);padding:var(--s-6)}
+.dl-v2 .inline-chip{display:inline-flex;align-items:center;gap:6px;background:var(--c-coral-wash);color:var(--c-coral-deep);border-radius:var(--r-xs);padding:6px 12px;font-size:var(--t-caption);font-weight:var(--fw-bold)}
+.dl-v2 .inline-chip.plain{background:var(--c-warehouse);color:var(--muted)}
+.dl-v2 .btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:var(--fw-bold);cursor:pointer;border-radius:var(--r-xs);padding:13px 22px;border:1px solid transparent;text-decoration:none;transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur-base) var(--ease-out)}
+.dl-v2 .btn-primary{background:var(--c-coral);color:#fff}.dl-v2 .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--e-coral)}
+.dl-v2 .btn-ghost{background:var(--card);border-color:var(--hair);color:var(--fg)}.dl-v2 .btn-ghost:hover{border-color:var(--c-coral);color:var(--c-coral-deep)}
+.dl-v2 .btn-inverse{background:#fff;color:var(--c-coral-deep)}.dl-v2 .btn-inverse:hover{transform:translateY(-2px)}
+
+/* ===================================================== header */
+.dl-v2 .nav{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--hair)}
+.dl-v2 .nav .in{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:var(--s-4)}
+.dl-v2 .brand{display:flex;align-items:center;gap:10px;font-weight:var(--fw-black);letter-spacing:-.01em}
+.dl-v2 .brand .g{width:30px;height:30px;border-radius:9px;background:var(--c-coral);color:#fff;display:grid;place-items:center;font-size:17px;font-weight:900}
+.dl-v2 .nav .links{display:flex;gap:var(--s-4);margin-left:var(--s-5);font-size:14px;color:var(--muted)}
+.dl-v2 .nav .links a{text-decoration:none}.dl-v2 .nav .links a:hover{color:var(--fg)}
+.dl-v2 .nav .sp{margin-left:auto;display:flex;gap:10px;align-items:center}
+@media(max-width:820px){.dl-v2 .nav .links{display:none}}
+
+/* ===================================================== 01 HERO (split) */
+.dl-v2 .hero{display:grid;grid-template-columns:1.08fr .92fr;gap:var(--s-8);align-items:center;padding:var(--s-11) 0 var(--s-9)}
+.dl-v2 .hero h1{font-size:var(--t-display);line-height:var(--lh-tight)}
+.dl-v2 .hero h1 em{color:var(--c-coral);font-style:normal}
+.dl-v2 .hero .lede{font-size:var(--t-body-lg);color:var(--muted);max-width:520px;margin:var(--s-4) 0 var(--s-5)}
+.dl-v2 .paste{display:flex;gap:10px;background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:8px;box-shadow:var(--e-2);max-width:520px;margin-top:var(--s-4)}
+.dl-v2 .paste input{flex:1;border:none;background:transparent;font:inherit;font-size:15px;padding:10px 12px;color:var(--fg);outline:none}
+.dl-v2 .paste input::placeholder{color:var(--faint)}
+.dl-v2 .hero .sub-actions{display:flex;gap:12px;align-items:center;margin-top:var(--s-4);flex-wrap:wrap}
+.dl-v2 .platforms{display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--s-5)}
+.dl-v2 .platforms span{font-size:var(--t-caption);color:var(--faint);align-self:center;margin-right:2px}
+.dl-v2 .platforms b{font-size:var(--t-caption);font-weight:var(--fw-bold);border:1px solid var(--hair);border-radius:var(--r-pill);padding:5px 12px;color:var(--muted)}
+/* hero product vignette */
+.dl-v2 .vignette{padding:var(--s-6)}
+.dl-v2 .vignette .vh{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-4)}
+.dl-v2 .vignette .vh b{font-size:15px}.dl-v2 .vignette .vh .tag{font-size:11px;font-weight:800;color:var(--c-air);background:var(--c-air-wash);border-radius:var(--r-pill);padding:3px 10px}
+.dl-v2 .vstep{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:12px;padding:9px 0;position:relative}
+.dl-v2 .vstep .bullet{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;z-index:1}
+.dl-v2 .vstep:not(:last-child)::before{content:"";position:absolute;left:12.5px;top:26px;bottom:-9px;width:2px;background:var(--hair)}
+.dl-v2 .vstep.done:not(:last-child)::before{background:var(--c-success)}
+.dl-v2 .vstep .name{font-size:14px;font-weight:var(--fw-med)}
+.dl-v2 .vstep .meta{font-size:12px;color:var(--faint)}
+.dl-v2 .vstep.cur .bullet{box-shadow:0 0 0 0 rgba(240,80,61,.5);animation:dlv2-ring 1.8s var(--ease-out) infinite}
+.dl-v2 .vstep.cur .name{font-weight:var(--fw-bold)}
+@keyframes dlv2-ring{0%{box-shadow:0 0 0 0 rgba(240,80,61,.45)}70%,100%{box-shadow:0 0 0 12px rgba(240,80,61,0)}}
+.dl-v2 .vfoot{display:flex;gap:10px;margin-top:var(--s-4);padding-top:var(--s-4);border-top:1px solid var(--hair)}
+.dl-v2 .vfoot .st{flex:1}.dl-v2 .vfoot .st b{display:block;font-size:19px}.dl-v2 .vfoot .st span{font-size:11.5px;color:var(--faint)}
+
+/* ===================================================== 02 PROOF ribbon */
+.dl-v2 .proof{background:var(--c-graphite);color:#fff}
+.dl-v2 .proof .in{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-5);padding:var(--s-5) 0}
+.dl-v2 .proof .p{display:flex;flex-direction:column;gap:2px}
+.dl-v2 .proof .p b{font-size:20px}.dl-v2 .proof .p span{font-size:12px;color:#AEB6BF}
+@media(max-width:640px){.dl-v2 .proof .in{grid-template-columns:repeat(2,1fr)}}
+
+/* ===================================================== section frame */
+.dl-v2 .section{padding:var(--s-10) 0}
+.dl-v2 .section-head{max-width:680px;margin:0 auto var(--s-8);text-align:center}
+.dl-v2 .section-head.left{margin-left:0;text-align:left}
+.dl-v2 .section-head h2{font-size:var(--t-section);margin:var(--s-3) 0}
+.dl-v2 .section-head p{font-size:var(--t-body-lg);color:var(--muted);margin:0}
+
+/* ===================================================== 03 JOURNEY spine (climax) */
+.dl-v2 .spine-wrap{overflow-x:auto}
+.dl-v2 svg.spine{display:block;width:100%;min-width:900px;height:auto;overflow:visible}
+.dl-v2 #spineTrack{stroke:var(--c-warehouse);stroke-width:4;fill:none;stroke-linecap:round}
+.dl-v2 #spineProg{stroke:var(--c-coral);stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset var(--dur-draw) var(--ease-inout)}
+.dl-v2 .node-halo{transform-box:fill-box;transform-origin:center;animation:dlv2-halo 2.1s var(--ease-out) infinite}
+@keyframes dlv2-halo{0%{transform:scale(1);opacity:.42}70%,100%{transform:scale(2.6);opacity:0}}
+.dl-v2 .node-dot{transition:r var(--dur-base) var(--ease-spring)}
+.dl-v2 .node.active .node-dot{r:11}
+.dl-v2 .node-label{font:800 13px Inter,sans-serif;fill:var(--fg)}
+.dl-v2 .node-cn{font:500 11px Inter,sans-serif;fill:var(--faint)}
+.dl-v2 .node-glyph{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dl-v2 .spine-details{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s-4);min-width:900px;margin-top:var(--s-5)}
+.dl-v2 .spine-details .col{text-align:center;padding:0 4px}
+.dl-v2 .spine-details .col .k{font-size:12px;font-weight:800;letter-spacing:.02em}
+.dl-v2 .spine-details .col .d{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:6px}
+.dl-v2 .spine-scroll{overflow-x:auto}
+@media(max-width:940px){.dl-v2 .spine-details{grid-template-columns:repeat(7,minmax(120px,1fr))}}
+
+/* ===================================================== 04 BENTO */
+.dl-v2 .bento{display:grid;gap:var(--s-4);grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(158px,auto);
+  grid-template-areas:"buy buy stat" "qc ship stat"}
+.dl-v2 .b-buy{grid-area:buy}.dl-v2 .b-qc{grid-area:qc}.dl-v2 .b-ship{grid-area:ship}.dl-v2 .b-stat{grid-area:stat}
+.dl-v2 .bento .cell{display:flex;flex-direction:column;justify-content:space-between}
+.dl-v2 .bento h3{font-size:var(--t-h3)}
+.dl-v2 .bento .lead{font-size:15px;color:var(--muted);margin-top:6px}
+.dl-v2 .bento .tagi{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c-coral)}
+.dl-v2 .b-buy{background:var(--card)}
+.dl-v2 .qc-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.dl-v2 .qc-shot{position:relative;aspect-ratio:1;border-radius:8px;background:var(--c-warm-white);border:1px solid var(--hair);display:grid;place-items:center;overflow:hidden}
+.dl-v2 .qc-shot svg{width:56%;height:56%}
+.dl-v2 .qc-shot::before,.dl-v2 .qc-shot::after{content:"";position:absolute;width:7px;height:7px;border:1.5px solid var(--c-ink-3);opacity:.55}
+.dl-v2 .qc-shot::before{top:5px;left:5px;border-right:0;border-bottom:0}
+.dl-v2 .qc-shot::after{bottom:5px;right:5px;border-left:0;border-top:0}
+.dl-v2 .qc-shot.ok{border-color:var(--c-success);background:var(--c-success-wash)}
+.dl-v2 .qc-badge{position:absolute;top:4px;right:4px;width:15px;height:15px;border-radius:50%;background:var(--c-success);color:#fff;display:grid;place-items:center;font-size:9px;font-weight:800;line-height:1}
+.dl-v2 .b-stat{background:var(--c-graphite);color:#fff;align-items:flex-start;justify-content:center;gap:var(--s-6);padding:var(--s-6);position:relative;overflow:hidden}
+.dl-v2 .b-stat::after{content:"";position:absolute;right:-46px;bottom:-46px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(108,75,214,.30),transparent 70%);pointer-events:none}
+.dl-v2 .b-stat>div{position:relative;z-index:1}
+.dl-v2 .b-stat .big{font-size:44px;font-weight:820;line-height:1;color:#fff}
+.dl-v2 .b-stat .big.a{color:#B79BFF}
+.dl-v2 .b-stat span{font-size:13px;color:#AEB6BF}
+@media(max-width:760px){.dl-v2 .bento{grid-template-columns:1fr;grid-template-areas:"buy" "qc" "ship" "stat"}}
+
+/* ===================================================== 05 WORKSPACE dashboard (dark) */
+.dl-v2 .work{background:var(--c-graphite);color:#fff}
+.dl-v2 .dash{border-radius:var(--r-lg);background:var(--c-graphite-2);box-shadow:var(--e-3);padding:var(--s-6)}
+.dl-v2 .dash .dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-5);flex-wrap:wrap;gap:12px}
+.dl-v2 .dash .dh b{font-size:16px}
+.dl-v2 .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s-4)}
+.dl-v2 .tile{background:#181B20;border:1px solid #2A2F36;border-radius:var(--r-sm);padding:var(--s-4)}
+.dl-v2 .tile .t{font-size:12px;color:#8A929B}.dl-v2 .tile .v{font-size:30px;font-weight:820;margin-top:6px}
+.dl-v2 .tile .pill{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;border-radius:var(--r-pill);padding:3px 9px}
+.dl-v2 .pill.g{background:var(--c-success-wash);color:#5FD3A0}.dl-v2 .pill.b{background:#152138;color:#7FA9FF}.dl-v2 .pill.a{background:#241a3a;color:#C4B5FD}
+.dl-v2 .spark{display:flex;gap:3px;align-items:flex-end;height:22px;margin-top:8px}
+.dl-v2 .spark i{flex:1;background:var(--c-coral);border-radius:2px;opacity:.85}
+.dl-v2 .next-strip{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s-4);margin-top:var(--s-5);
+  background:#181B20;border:1px solid #2A2F36;border-left:3px solid var(--c-coral);border-radius:var(--r-sm);padding:var(--s-4) var(--s-5)}
+.dl-v2 .next-strip .ico{width:38px;height:38px;border-radius:10px;background:rgba(240,80,61,.16);color:#FF8A7A;display:grid;place-items:center}
+.dl-v2 .next-strip h4{margin:0;font-size:15px}.dl-v2 .next-strip p{margin:2px 0 0;font-size:13px;color:#8A929B}
+@media(max-width:820px){.dl-v2 .tiles{grid-template-columns:repeat(2,1fr)}}
+
+/* ===================================================== 06 TRUST */
+.dl-v2 .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4)}
+.dl-v2 .trust-grid .card-secondary h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.dl-v2 .trust-grid p{font-size:13.5px;color:var(--muted);margin:8px 0 0}
+@media(max-width:760px){.dl-v2 .trust-grid{grid-template-columns:1fr}}
+
+/* ===================================================== 07 PRICING */
+.dl-v2 .price-band{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-8);align-items:center}
+.dl-v2 .price-band h2{font-size:var(--t-section)}
+.dl-v2 .price-facts{display:flex;flex-direction:column;gap:var(--s-3)}
+.dl-v2 .pf{display:flex;align-items:center;gap:12px;font-size:15px}
+.dl-v2 .pf .n{width:30px;height:30px;border-radius:9px;background:var(--c-success-wash);color:var(--c-success);display:grid;place-items:center;font-weight:800;flex:none}
+.dl-v2 .quote .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--hair);font-size:14px}
+.dl-v2 .quote .row:last-child{border:none;font-weight:800;font-size:16px}
+.dl-v2 .quote .row .muted{color:var(--muted)}
+@media(max-width:760px){.dl-v2 .price-band{grid-template-columns:1fr}}
+
+/* ===================================================== 08 CTA */
+.dl-v2 .cta{background:linear-gradient(135deg,var(--c-coral),var(--c-coral-deep));color:#fff;text-align:center}
+.dl-v2 .cta .in{padding:var(--s-11) 24px}
+.dl-v2 .cta h2{font-size:var(--t-h1);color:#fff;max-width:640px;margin:0 auto var(--s-3)}
+.dl-v2 .cta p{color:rgba(255,255,255,.86);margin:0 auto var(--s-6);max-width:520px}
+.dl-v2 .cta .paste{margin:0 auto;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);box-shadow:none}
+.dl-v2 .cta .paste input{color:#fff}.dl-v2 .cta .paste input::placeholder{color:rgba(255,255,255,.7)}
+
+/* ===================================================== 09 FOOTER */
+.dl-v2 .foot{background:var(--c-graphite);color:#fff;padding:var(--s-9) 0 var(--s-7)}
+.dl-v2 .foot .top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:var(--s-6)}
+.dl-v2 .foot h4{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#8A929B;margin:0 0 12px;font-weight:700}
+.dl-v2 .foot a{display:block;color:#C7CDD4;text-decoration:none;font-size:14px;margin:7px 0}
+.dl-v2 .foot a:hover{color:#fff}
+.dl-v2 .foot .brand .g{background:var(--c-coral)}
+.dl-v2 .foot .lower{display:flex;justify-content:space-between;align-items:center;gap:var(--s-5);margin-top:var(--s-7);padding-top:var(--s-5);border-top:1px solid #2A2F36;flex-wrap:wrap}
+.dl-v2 .foot .lower small{color:#8A929B;font-size:12px}
+.dl-v2 .pay{display:flex;gap:8px;flex-wrap:wrap}
+.dl-v2 .pay img{height:30px;width:auto;background:#fff;border-radius:5px;padding:3px 5px}
+@media(max-width:760px){.dl-v2 .foot .top{grid-template-columns:1fr 1fr}}
+
+/* ===================================================== WP-4 · MOTION reveal */
+.dl-v2 [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+.dl-v2 [data-reveal].is-in{opacity:1;transform:none}
+.dl-v2 .spine-details .col[data-reveal]:nth-child(2){transition-delay:.06s}
+.dl-v2 .spine-details .col[data-reveal]:nth-child(3){transition-delay:.12s}
+.dl-v2 .spine-details .col[data-reveal]:nth-child(4){transition-delay:.18s}
+.dl-v2 .spine-details .col[data-reveal]:nth-child(5){transition-delay:.24s}
+.dl-v2 .spine-details .col[data-reveal]:nth-child(6){transition-delay:.30s}
+.dl-v2 .spine-details .col[data-reveal]:nth-child(7){transition-delay:.36s}
+.dl-v2.rm *,.dl-v2.rm *::before,.dl-v2.rm *::after{animation:none !important;transition:none !important}
+.dl-v2.rm [data-reveal]{opacity:1 !important;transform:none !important}
+@media(prefers-reduced-motion:reduce){
+  .dl-v2 [data-reveal]{opacity:1;transform:none}
+  .dl-v2 .node-halo,.dl-v2 .vstep.cur .bullet{animation:none}
+  .dl-v2 #spineProg{transition:none}
+}
+
+/* ===================================================== Stage C · in-app integration
+   The dashboard (.dash-v2) renders inside .view (max-width 1240, centered) — the
+   full-bleed bands become contained panels, so round them and trim the standalone
+   landing padding. Tiles map to the 4 real workspace metrics. */
+.dl-v2.dash-v2{background:transparent}
+.dl-v2.dash-v2 .hero{padding:var(--s-8) 0 var(--s-7)}
+.dl-v2.dash-v2 .section{padding:var(--s-9) 0}
+.dl-v2.dash-v2 .proof,.dl-v2.dash-v2 .work,.dl-v2.dash-v2 .cta{border-radius:var(--r-lg);overflow:hidden}
+.dl-v2.dash-v2 .cta .in{padding:var(--s-9) 24px}
+.dl-v2.dash-v2 .tiles{grid-template-columns:repeat(4,1fr)}
+@media(max-width:820px){.dl-v2.dash-v2 .tiles{grid-template-columns:repeat(2,1fr)}}
+/* hero collapses to a single column on narrow screens (copy first, then vignette) */
+@media(max-width:760px){.dl-v2 .hero{grid-template-columns:1fr;padding-top:var(--s-6)}}
+
+/* Stage D · New User Guide (.guide-v2) — reuses the journey spine as the "how it works" */
+.dl-v2 .two-up{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--s-4);align-items:start}
+@media(max-width:760px){.dl-v2 .two-up{grid-template-columns:1fr}}
+.dl-v2.guide-v2 .section{padding:var(--s-7) 0}
+.dl-v2.guide-v2 > section:first-child{padding-top:var(--s-6)}
+
+/* Stage D · content views (Trust Center, Community) */
+.dl-v2.content-v2 .section{padding:var(--s-6) 0}
+
+/* ===================================================== Stage D · transactional views reskin (.tx-v2)
+   Wraps legacy financial/logistics views in the V2 token system WITHOUT touching their
+   functional markup. Only appearance is remapped to dl-v2 tokens; every form, hook, and
+   status class keeps working. */
+.dl-v2.tx-v2{background:transparent;color:var(--fg)}
+.dl-v2.tx-v2.grid{display:grid;gap:var(--s-5)}
+.dl-v2.tx-v2.grid.two{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.dl-v2.tx-v2.grid.two{grid-template-columns:1fr}}
+
+/* panel -> floating surface */
+.dl-v2.tx-v2 .panel{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);box-shadow:var(--e-2);padding:var(--s-6)}
+.dl-v2.tx-v2 .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s-4);margin-bottom:var(--s-5)}
+.dl-v2.tx-v2 .panel-head h2{font-size:var(--t-h3);letter-spacing:-.02em}
+.dl-v2.tx-v2 .subtle{color:var(--muted);font-size:14px}
+
+/* card -> secondary card */
+.dl-v2.tx-v2 .card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);box-shadow:var(--e-1);padding:var(--s-5)}
+.dl-v2.tx-v2 .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s-3)}
+.dl-v2.tx-v2 .card h3{font-size:16px}
+.dl-v2.tx-v2 .list{display:flex;flex-direction:column;gap:var(--s-4)}
+
+/* item card (haul / qc) */
+.dl-v2.tx-v2 .item-card{display:flex;gap:14px;align-items:flex-start}
+.dl-v2.tx-v2 .item-visual{flex:none;width:64px;height:64px;border-radius:var(--r-sm);background:var(--c-warehouse);color:var(--faint);display:grid;place-items:center;text-align:center;font-size:9px;line-height:1.25}
+.dl-v2.tx-v2 .item-main{flex:1;min-width:0}
+.dl-v2.tx-v2 .item-title{font-weight:var(--fw-bold)}
+
+/* status badges */
+.dl-v2.tx-v2 .status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:var(--r-pill);padding:4px 10px;background:var(--c-warehouse);color:var(--muted);white-space:nowrap}
+.dl-v2.tx-v2 .status.good{background:var(--c-success-wash);color:var(--c-success)}
+.dl-v2.tx-v2 .status.warn{background:#FBF0DD;color:var(--c-amber)}
+.dl-v2.tx-v2 .status.bad{background:#FCE9E6;color:var(--c-danger)}
+
+/* chips + meta */
+.dl-v2.tx-v2 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--c-warehouse);color:var(--muted);border-radius:var(--r-xs);padding:5px 10px;font-size:12px;font-weight:600}
+.dl-v2.tx-v2 .item-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* metrics */
+.dl-v2.tx-v2 .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-3)}
+@media(max-width:640px){.dl-v2.tx-v2 .metric-row{grid-template-columns:repeat(2,1fr)}}
+.dl-v2.tx-v2 .metric{background:var(--c-warm-white);border:1px solid var(--hair);border-radius:var(--r-sm);padding:12px 14px}
+.dl-v2.tx-v2 .metric strong{display:block;font-size:18px;font-weight:820}
+.dl-v2.tx-v2 .metric span{font-size:11.5px;color:var(--faint)}
+
+/* forms */
+.dl-v2.tx-v2 .paste-row{display:flex;gap:10px}
+.dl-v2.tx-v2 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}
+.dl-v2.tx-v2 .form-grid .field.full{grid-column:1 / -1}
+@media(max-width:640px){.dl-v2.tx-v2 .form-grid{grid-template-columns:1fr}}
+.dl-v2.tx-v2 .field{display:flex;flex-direction:column;gap:6px}
+.dl-v2.tx-v2 .field label{font-size:12px;font-weight:600;color:var(--muted)}
+.dl-v2.tx-v2 .field input,.dl-v2.tx-v2 .field select,.dl-v2.tx-v2 .field textarea,.dl-v2.tx-v2 .paste-row input{
+  font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r-xs);background:var(--card);color:var(--fg);outline:none;width:100%}
+.dl-v2.tx-v2 .field input:focus,.dl-v2.tx-v2 .field select:focus,.dl-v2.tx-v2 .field textarea:focus,.dl-v2.tx-v2 .paste-row input:focus{border-color:var(--c-coral)}
+.dl-v2.tx-v2 .field textarea{min-height:76px;resize:vertical}
+.dl-v2.tx-v2 .inline-inputs{display:flex;gap:8px}
+
+/* buttons */
+.dl-v2.tx-v2 .primary-button,.dl-v2.tx-v2 .secondary-button,.dl-v2.tx-v2 .danger-button{
+  display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:var(--fw-bold);cursor:pointer;border-radius:var(--r-xs);padding:11px 18px;border:1px solid transparent;text-decoration:none;transition:transform var(--dur-fast) var(--ease-spring)}
+.dl-v2.tx-v2 .primary-button{background:var(--c-coral);color:#fff}
+.dl-v2.tx-v2 .primary-button:hover{transform:translateY(-2px);box-shadow:var(--e-coral)}
+.dl-v2.tx-v2 .secondary-button{background:var(--card);border-color:var(--hair);color:var(--fg)}
+.dl-v2.tx-v2 .secondary-button:hover{border-color:var(--c-coral);color:var(--c-coral-deep)}
+.dl-v2.tx-v2 .danger-button{background:#FCE9E6;color:var(--c-danger)}
+.dl-v2.tx-v2 .danger-button:hover{background:#F8DAD4}
+.dl-v2.tx-v2 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+
+/* table (orders) */
+.dl-v2.tx-v2 .table-wrap{overflow-x:auto;border:1px solid var(--hair);border-radius:var(--r-md)}
+.dl-v2.tx-v2 table{width:100%;border-collapse:collapse;font-size:14px}
+.dl-v2.tx-v2 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);padding:12px 14px;border-bottom:1px solid var(--hair);background:var(--c-warm-white)}
+.dl-v2.tx-v2 td{padding:12px 14px;border-bottom:1px solid var(--hair);vertical-align:top}
+.dl-v2.tx-v2 tr:last-child td{border-bottom:none}
+
+/* qc photo grid */
+.dl-v2.tx-v2 .qc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+@media(max-width:640px){.dl-v2.tx-v2 .qc-grid{grid-template-columns:repeat(3,1fr)}}
+.dl-v2.tx-v2 .qc-photo{aspect-ratio:1;border-radius:8px;border:1px solid var(--hair);background:var(--c-warm-white);display:grid;place-items:center;font-size:11px;color:var(--faint);overflow:hidden;text-decoration:none}
+.dl-v2.tx-v2 .qc-photo img{width:100%;height:100%;object-fit:cover}
+
+/* empty state */
+.dl-v2.tx-v2 .empty{text-align:center;padding:var(--s-7) var(--s-5);color:var(--muted);border:1px dashed var(--hair);border-radius:var(--r-md)}
+.dl-v2.tx-v2 .empty-visual{width:44px;height:44px;margin:0 auto 12px;border-radius:var(--r-sm);background:var(--c-warehouse)}
+.dl-v2.tx-v2 .empty h3{font-size:16px}
+.dl-v2.tx-v2 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4);margin-bottom:var(--s-4)}
+
+/* ===================================================== Stage D · shared form + buttons + status (auth / account / creator)
+   Applies to any dl-v2 view that reuses the legacy .account-form / .status / button classes. */
+.dl-v2 .status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:var(--r-pill);padding:4px 10px;background:var(--c-warehouse);color:var(--muted);white-space:nowrap}
+.dl-v2 .status.good{background:var(--c-success-wash);color:var(--c-success)}
+.dl-v2 .status.warn{background:#FBF0DD;color:var(--c-amber)}
+.dl-v2 .status.bad{background:#FCE9E6;color:var(--c-danger)}
+.dl-v2 .primary-button,.dl-v2 .secondary-button,.dl-v2 .danger-button,.dl-v2 .ghost{
+  display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:var(--fw-bold);cursor:pointer;border-radius:var(--r-xs);padding:11px 18px;border:1px solid transparent;text-decoration:none;transition:transform var(--dur-fast) var(--ease-spring)}
+.dl-v2 .primary-button{background:var(--c-coral);color:#fff}.dl-v2 .primary-button:hover{transform:translateY(-2px);box-shadow:var(--e-coral)}
+.dl-v2 .secondary-button,.dl-v2 .ghost{background:var(--card);border-color:var(--hair);color:var(--fg)}
+.dl-v2 .secondary-button:hover,.dl-v2 .ghost:hover{border-color:var(--c-coral);color:var(--c-coral-deep)}
+.dl-v2 .danger-button{background:#FCE9E6;color:var(--c-danger)}.dl-v2 .danger-button:hover{background:#F8DAD4}
+.dl-v2 .account-form{display:flex;flex-direction:column;gap:var(--s-4)}
+.dl-v2 .account-form.two-column{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}
+@media(max-width:640px){.dl-v2 .account-form.two-column{grid-template-columns:1fr}}
+.dl-v2 .account-form .field,.dl-v2 .account-form label.field{display:flex;flex-direction:column;gap:6px}
+.dl-v2 .account-form .field.full{grid-column:1 / -1}
+.dl-v2 .account-form .field span{font-size:12px;font-weight:600;color:var(--muted)}
+.dl-v2 .account-form .field input,.dl-v2 .account-form .field select{font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r-xs);background:var(--card);color:var(--fg);outline:none;width:100%}
+.dl-v2 .account-form .field input:focus,.dl-v2 .account-form .field select:focus{border-color:var(--c-coral)}
+.dl-v2 .account-form .field small{font-size:11px;color:var(--faint)}
+.dl-v2 .account-form .field input:disabled{background:var(--c-warehouse);color:var(--muted)}
+.dl-v2 .form-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.dl-v2 .form-actions.full{grid-column:1 / -1}
+.dl-v2 .check-field{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.dl-v2 .check-field.full{grid-column:1 / -1}
+.dl-v2 .form-message{display:flex;align-items:center;gap:8px;font-size:13px;border-radius:var(--r-xs);padding:10px 12px}
+.dl-v2 .form-message.error{background:#FCE9E6;color:var(--c-danger)}
+
+/* ===================================================== Stage D · auth screens (.auth-v2) */
+.dl-v2.auth-v2 .auth-layout{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-6);max-width:940px;margin:var(--s-7) auto;align-items:start}
+@media(max-width:800px){.dl-v2.auth-v2 .auth-layout{grid-template-columns:1fr;gap:var(--s-5)}}
+.dl-v2.auth-v2 .auth-context{padding:var(--s-5) var(--s-4)}
+.dl-v2.auth-v2 .auth-context img{width:44px;height:44px;border-radius:11px;object-fit:cover;margin-bottom:var(--s-4)}
+.dl-v2.auth-v2 .auth-context h2{font-size:var(--t-h1);margin:6px 0 10px;line-height:var(--lh-tight)}
+.dl-v2.auth-v2 .auth-context > p{color:var(--muted);font-size:var(--t-body-lg)}
+.dl-v2.auth-v2 .auth-context ul{margin:var(--s-4) 0 0;padding-left:18px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:6px}
+.dl-v2.auth-v2 .auth-form-panel{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);box-shadow:var(--e-2);padding:var(--s-6)}
+.dl-v2.auth-v2 .auth-form-panel .field{margin-bottom:0}
+.dl-v2.auth-v2 .auth-switch{margin-top:var(--s-4);font-size:14px;color:var(--muted);text-align:center}
+.dl-v2.auth-v2 .auth-switch button{background:none;border:none;color:var(--c-coral);font:inherit;font-weight:var(--fw-bold);cursor:pointer;padding:0}
+.dl-v2.auth-v2 .development-token{margin-top:12px;font-size:12px;background:var(--c-warm-white);border:1px dashed var(--hair);border-radius:var(--r-sm);padding:10px}
+.dl-v2.auth-v2 .development-token code{display:block;margin-top:4px;font-family:ui-monospace,Menlo,monospace;color:var(--fg)}
+
+/* ===================================================== Stage D · account + addresses (.account-v2) */
+.dl-v2.account-v2 .account-page{display:flex;flex-direction:column;gap:var(--s-5)}
+.dl-v2.account-v2 .account-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.dl-v2.account-v2 .account-tabs button{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--hair);border-radius:var(--r-pill);padding:9px 16px;font:inherit;font-weight:var(--fw-med);color:var(--muted);cursor:pointer}
+.dl-v2.account-v2 .account-tabs button.active{background:var(--c-coral);border-color:var(--c-coral);color:#fff}
+.dl-v2.account-v2 .settings-grid,.dl-v2.account-v2 .address-layout{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4);align-items:start}
+@media(max-width:800px){.dl-v2.account-v2 .settings-grid,.dl-v2.account-v2 .address-layout{grid-template-columns:1fr}}
+.dl-v2.account-v2 .settings-section{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-lg);box-shadow:var(--e-1);padding:var(--s-6)}
+.dl-v2.account-v2 .section-heading-compact{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s-4);margin-bottom:var(--s-5)}
+.dl-v2.account-v2 .section-heading-compact h2{font-size:var(--t-h3)}
+.dl-v2.account-v2 .section-heading-compact p{font-size:13px;color:var(--muted);margin-top:4px}
+.dl-v2.account-v2 .danger-zone{display:flex;justify-content:space-between;align-items:center;gap:var(--s-4);background:#FDF3F1;border:1px solid #F3C9C1;border-radius:var(--r-lg);padding:var(--s-6);flex-wrap:wrap}
+.dl-v2.account-v2 .danger-zone h2{font-size:var(--t-h3);color:var(--c-danger)}
+.dl-v2.account-v2 .danger-zone p{font-size:13px;color:var(--muted);margin-top:4px;max-width:520px}
+.dl-v2.account-v2 .address-list{display:flex;flex-direction:column;gap:var(--s-3);margin-top:var(--s-4)}
+.dl-v2.account-v2 .address-item{display:flex;justify-content:space-between;gap:var(--s-4);border:1px solid var(--hair);border-radius:var(--r-md);padding:var(--s-4)}
+.dl-v2.account-v2 .address-item.default{border-color:var(--c-coral)}
+.dl-v2.account-v2 .address-title{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.dl-v2.account-v2 .address-item p{font-size:13px;color:var(--muted);margin:4px 0}
+.dl-v2.account-v2 .address-item > div > span{font-size:12px;color:var(--faint)}
+.dl-v2.account-v2 .address-actions{display:flex;gap:6px;align-items:flex-start}
+.dl-v2.account-v2 .icon-button{width:34px;height:34px;border-radius:var(--r-xs);border:1px solid var(--hair);background:var(--card);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.dl-v2.account-v2 .icon-button:hover{border-color:var(--c-coral);color:var(--c-coral-deep)}
+.dl-v2 .ui-state{text-align:center;padding:var(--s-8) var(--s-5);color:var(--muted)}
+.dl-v2 .ui-state h2,.dl-v2 .ui-state h3{color:var(--fg);margin-bottom:6px}
+
+/* ===================================================== Stage D · admin / ops console (.admin-v2 shell + .tx-v2 content)
+   Ops console reuses the client's legacy classes, so .tx-v2 reskins its content for free.
+   The shell (sidebar/topbar/nav/notice) is reskinned here with the air-purple role to
+   signal "internal / ops" distinctly from the client's coral. */
+.dl-v2 .ghost-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:var(--fw-bold);cursor:pointer;border-radius:var(--r-xs);padding:9px 16px;border:1px solid var(--hair);background:var(--card);color:var(--fg);text-decoration:none;transition:transform var(--dur-fast) var(--ease-spring)}
+.dl-v2 .ghost-button:hover{border-color:var(--c-air);color:var(--c-air)}
+.dl-v2.admin-v2{background:var(--bg);color:var(--fg)}
+.dl-v2.admin-v2 .shell{background:var(--bg)}
+.dl-v2.admin-v2 .sidebar,.dl-v2.admin-v2 .admin-sidebar{background:var(--card);border-right:1px solid var(--hair)}
+.dl-v2.admin-v2 .brand strong{font-weight:var(--fw-black)}
+.dl-v2.admin-v2 .brand span{color:var(--faint);font-size:12px}
+.dl-v2.admin-v2 .brand-mark,.dl-v2.admin-v2 .admin-mark{background:var(--c-air);border-radius:9px;color:#fff}
+.dl-v2.admin-v2 .admin-nav{padding:12px}
+.dl-v2.admin-v2 .admin-nav button{display:flex;width:100%;align-items:center;gap:8px;text-align:left;background:none;border:none;border-radius:var(--r-sm);padding:10px 12px;font:inherit;font-size:14px;color:var(--muted);cursor:pointer;margin-bottom:2px}
+.dl-v2.admin-v2 .admin-nav button:hover{background:var(--c-air-wash);color:var(--c-air)}
+.dl-v2.admin-v2 .admin-nav button.active{background:var(--c-air-wash);color:var(--c-air);font-weight:var(--fw-bold)}
+.dl-v2.admin-v2 .side-note{margin:auto 14px 14px;border:1px solid var(--hair);border-radius:var(--r-md);padding:14px;background:var(--c-warm-white)}
+.dl-v2.admin-v2 .side-note strong{display:block;margin-bottom:4px}
+.dl-v2.admin-v2 .side-note span{color:var(--muted);font-size:12.5px}
+.dl-v2.admin-v2 .main{padding:22px}
+.dl-v2.admin-v2 .topbar{max-width:1240px;margin:0 auto 18px}
+.dl-v2.admin-v2 .topbar .eyebrow{color:var(--c-air)}
+.dl-v2.admin-v2 .topbar h1{font-size:var(--t-section)}
+.dl-v2.admin-v2 .notice.admin-notice{max-width:1240px;margin:0 auto 16px;display:flex;align-items:center;gap:12px;background:var(--c-air-wash);border:1px solid #D9CEF5;border-radius:var(--r-md);padding:12px 16px}
+.dl-v2.admin-v2 .notice.admin-notice span{font-size:11px;font-weight:800;color:var(--c-air);background:#fff;border-radius:var(--r-pill);padding:4px 10px}
+.dl-v2.admin-v2 .notice.admin-notice p{margin:0;font-size:14px;color:var(--muted)}
+/* admin content: give the primary action the ops air-purple instead of client coral */
+.dl-v2.admin-v2 .tx-v2 .primary-button{background:var(--c-air)}
+.dl-v2.admin-v2 .tx-v2 .primary-button:hover{box-shadow:0 12px 30px rgba(108,75,214,.28)}

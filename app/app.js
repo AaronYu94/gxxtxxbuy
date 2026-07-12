@@ -28,16 +28,20 @@ const navItems = [
   ["creator", "nav.affiliate", "badge-percent"]
 ];
 
-const journey = [
-  "Paste Link",
-  "We Buy",
-  "Warehouse Arrival",
-  "QC Photos",
-  "Build Haul",
-  "Choose Shipping",
-  "Track Parcel",
-  "Delivered"
+// Design Language V2 · single source of truth for the parcel journey (Stage B).
+// The 7 canonical stages drive: the home spine (motion-v2.js reads window.JOURNEY_STAGES),
+// and the New User Guide timeline. Colors follow the Journey palette roles
+// (ink=origin · coral=brand act · amber=inspection · ship-blue=domestic · air-purple=international · success=done).
+const JOURNEY_STAGES = [
+  { label: "China",     cn: "中国货源", color: "#8A929B", glyph: "M9 15l6-6M8.5 12l-2 2a2.8 2.8 0 004 4l2-2M15.5 12l2-2a2.8 2.8 0 00-4-4l-2 2", detail: "Search platforms and suppliers; paste Taobao, 1688 or Weidian links." },
+  { label: "Purchased", cn: "平台代采", color: "#F0503D", glyph: "M5 12.5l4.5 4.5L19 7", detail: "A dedicated agent buys it for you; the seller ships to our China warehouse." },
+  { label: "QC",        cn: "入仓质检", color: "#B5741A", glyph: "M11 4a7 7 0 105 12l4 4M11 8v6M8 11h6", detail: "Inspected and photographed on arrival; defects are flagged before shipping." },
+  { label: "Warehouse", cn: "仓储",     color: "#2F6BF0", glyph: "M4 20V9l8-4 8 4v11M9 20v-6h6v6", detail: "Approved goods enter 90 days of free storage until you're ready." },
+  { label: "Bundle",    cn: "合包",     color: "#2F6BF0", glyph: "M12 4l7 3-7 3-7-3 7-3zM5 11l7 3 7-3M5 15l7 3 7-3", detail: "Combine many separate orders into one smart, lighter parcel." },
+  { label: "Air",       cn: "国际空运", color: "#6C4BD6", glyph: "M20 5L5 11l5 2M20 5l-6 15-2-6M20 5l-8 8", detail: "Pick from 700+ routes to 220+ countries; follow live tracking." },
+  { label: "Delivered", cn: "送达",     color: "#16915B", glyph: "M4 11l8-7 8 7M6 10v9h12v-9M10 19v-5h4v5", detail: "One dashboard for every order, payment, parcel and message." }
 ];
+if (typeof window !== "undefined") window.JOURNEY_STAGES = JOURNEY_STAGES;
 
 const sourceLabels = ["TikTok", "Reddit", "Discord", "Creator spreadsheet", "Taobao", "1688", "Weidian / Micro", "Yupoo"];
 
@@ -1229,244 +1233,240 @@ function itemCard(item, extra = "") {
 
 function renderDashboard() {
   const c = counts();
-  const nextAction = nextActionMarkup();
+  // Real next-step, derived from the user's own data (no fabrication).
+  const next = c.parcels > 0
+    ? { copy: "Track your parcel across 700+ routes.", cta: "Open shipping", view: "shipping" }
+    : c.haul > 0
+      ? { copy: "Combine arrived items into one smart parcel.", cta: "Build parcel", view: "shipping" }
+      : c.orders > 0
+        ? { copy: "Review QC photos and approve your items.", cta: "Open QC", view: "qc" }
+        : c.links > 0
+          ? { copy: "Turn a saved link into an order.", cta: "Open links", view: "links" }
+          : { copy: "Paste your first product link to start a haul.", cta: "Start an order", view: "links" };
   return `
-    <div class="home-page">
-      <section class="home-hero">
-        <div class="hero-copy">
-          <span class="hero-kicker"><i data-lucide="package-open" aria-hidden="true"></i>One link. One warehouse. Your world.</span>
-          <div>
-            <h2>Shop China.<br><em>Ship your way.</em></h2>
-            <p>Paste any product link. We buy it, inspect it at our China warehouse, combine your haul, and send it worldwide.</p>
-          </div>
-          <form class="hero-search" data-action="paste">
-            <i data-lucide="link-2" aria-hidden="true"></i>
-            <input name="url" type="url" placeholder="Paste a Taobao, 1688, Weidian or Yupoo link" aria-label="Item link">
-            <button class="primary-button" type="submit"><i data-lucide="search" aria-hidden="true"></i>Start order</button>
-            <button class="save-link-button" type="button" data-save-link title="Save link" aria-label="Save link"><i data-lucide="bookmark" aria-hidden="true"></i></button>
-          </form>
-          <div class="platform-row">
-            <span>Works with</span>
-            ${["Taobao", "1688", "Weidian", "Yupoo"].map((label) => `<strong>${label}</strong>`).join("")}
-          </div>
-          <div class="hero-actions">
-            <button type="button" data-route-button="guide"><i data-lucide="play-circle" aria-hidden="true"></i>How it works</button>
-            <button type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Welcome gift</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="proof-strip" aria-label="Service highlights">
-        <div><i data-lucide="camera" aria-hidden="true"></i><span><strong>3-5 QC photos</strong> before you ship</span></div>
-        <div><i data-lucide="warehouse" aria-hidden="true"></i><span><strong>90 days</strong> free storage</span></div>
-        <div><i data-lucide="route" aria-hidden="true"></i><span><strong>700+ routes</strong> across the world</span></div>
-        <div><i data-lucide="layers-3" aria-hidden="true"></i><span><strong>One parcel</strong> from many orders</span></div>
-      </section>
-
-      <section class="home-section services-section">
-        <div class="section-heading">
-          <span class="section-index">01</span>
-          <div>
-            <p class="eyebrow">From checkout to doorstep</p>
-            <h2>Everything your haul needs</h2>
-          </div>
-          <p>Clear checkpoints, visible costs, and control at every stage.</p>
-        </div>
-        <div class="service-grid">
-          <article class="service-card service-buy">
-            <div class="service-icon"><i data-lucide="mouse-pointer-click" aria-hidden="true"></i></div>
-            <span>BUY</span>
-            <h3>Paste it. We purchase it.</h3>
-            <p>Submit links from leading Chinese marketplaces and track each order from one workspace.</p>
-            <button type="button" data-route-button="links">Submit a link <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-          </article>
-          <article class="service-card service-qc">
-            <div class="service-icon"><i data-lucide="scan-search" aria-hidden="true"></i></div>
-            <span>CHECK</span>
-            <h3>See it before it leaves.</h3>
-            <p>Review warehouse weight and detailed QC photos before approving an item for shipping.</p>
-            <button type="button" data-route-button="qc">Open QC Center <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-          </article>
-          <article class="service-card service-ship">
-            <div class="service-icon"><i data-lucide="package-check" aria-hidden="true"></i></div>
-            <span>SHIP</span>
-            <h3>Build one smarter parcel.</h3>
-            <p>Combine ready items, compare international routes, pay, and follow tracking updates.</p>
-            <button type="button" data-route-button="shipping">Plan shipping <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-          </article>
-        </div>
-      </section>
-
-      <section class="home-section process-section">
-        <div class="section-heading process-heading">
-          <span class="section-index">02</span>
-          <div>
-            <p class="eyebrow">China to your doorstep</p>
-            <h2>One journey. Six clear moves.</h2>
-          </div>
-          <p>Follow the parcel from the first product search to final delivery, with every payment, photo, and status in one place.</p>
-        </div>
-        <div class="journey-lane" aria-hidden="true">
-          <span><i data-lucide="search" aria-hidden="true"></i>China marketplaces</span>
-          <div><i data-lucide="chevrons-right" aria-hidden="true"></i></div>
-          <strong>GOATEDBUY ROUTE 01</strong>
-          <div><i data-lucide="chevrons-right" aria-hidden="true"></i></div>
-          <span><i data-lucide="map-pin" aria-hidden="true"></i>220+ countries</span>
-        </div>
-        <div class="process-track">
-          ${[
-            ["search", "Search and Match", "搜索商品", ["Search across platforms and suppliers", "Paste Taobao and other product links", "Match and import product details"]],
-            ["credit-card", "Pay for Goods", "支付商品", ["Choose the product specification", "Add to cart or buy directly", "Pay with multiple payment methods"]],
-            ["handshake", "Order Reception and Transfer", "采购与转运", ["One-to-one purchasing agent service", "We complete the purchase for you", "Seller ships to our China warehouse"]],
-            ["scan-search", "Quality Check and Warehousing", "质检与入库", ["Warehouse inspection after arrival", "Approved goods enter free storage", "Defects are reported with QC photos"]],
-            ["plane", "Submit International Shipping", "提交国际运输", ["Confirm and combine your parcel", "Pay the international shipping fee", "700+ routes to 220+ countries", "Follow real-time tracking updates"]],
-            ["layout-dashboard", "Efficient Management", "订单管理", ["View every order and payment status", "Track international logistics", "Monitor warehouse status", "Contact customer service in one place"]]
-          ].map(([icon, title, chineseTitle, details], index) => `
-            <article class="process-step process-step-${index + 1}">
-              <div class="process-step-head">
-                <span class="process-number">${String(index + 1).padStart(2, "0")}</span>
-                <span class="process-icon"><i data-lucide="${icon}" aria-hidden="true"></i></span>
-                <span class="process-status">${index < 4 ? "CHINA" : "GLOBAL"}</span>
-              </div>
-              <h3>${title}<small>${chineseTitle}</small></h3>
-              <ul>
-                ${details.map((detail) => `<li>${detail}</li>`).join("")}
-              </ul>
-              ${index < 5 ? `<span class="process-connector" aria-hidden="true"><i data-lucide="arrow-right"></i></span>` : ""}
-            </article>
-          `).join("")}
-        </div>
-      </section>
-
-      <section class="home-section action-section">
-        <div class="next-action-copy">
-          <span class="section-index">03</span>
-          <div>
-            <p class="eyebrow">Your workspace</p>
-            <h2>Keep the next move obvious.</h2>
-          </div>
-        </div>
-        <div class="next-action">${nextAction}</div>
-        <div class="workspace-metrics">
-          <div><strong>${c.links}</strong><span>Saved links</span></div>
-          <div><strong>${c.haul}</strong><span>Haul items</span></div>
-          <div><strong>${c.orders}</strong><span>Orders</span></div>
-          <div><strong>${c.parcels}</strong><span>Parcels</span></div>
-        </div>
-      </section>
-
-      <section class="community-banner">
+    <div class="dl-v2 dash-v2">
+      <!-- 01 HERO (split) -->
+      <section><div class="wrap hero">
         <div>
-          <i data-lucide="messages-square" aria-hidden="true"></i>
-          <div><span>GOATEDBUY COMMUNITY</span><h2>First haul questions are welcome.</h2><p>Talk through QC details, shipping routes, and parcel planning with other buyers.</p></div>
+          <span class="eyebrow" data-reveal>One link · one warehouse · your world</span>
+          <h1 data-reveal>Shop China.<br><em>Ship your way.</em></h1>
+          <p class="lede" data-reveal>Paste any Taobao, 1688 or Weidian link. We buy, inspect, store, and bundle it into one smart international parcel — tracked end to end.</p>
+          <form class="paste" data-action="paste" data-reveal>
+            <input name="url" type="url" placeholder="Paste a Taobao / 1688 / Weidian product link" aria-label="Item link">
+            <button class="btn btn-primary" type="submit"><i data-lucide="search" aria-hidden="true"></i>Start order</button>
+            <button class="btn btn-ghost" type="button" data-save-link title="Save link" aria-label="Save link"><i data-lucide="bookmark" aria-hidden="true"></i></button>
+          </form>
+          <div class="platforms" data-reveal><span>Works with</span><b>Taobao</b><b>1688</b><b>Weidian</b><b>Yupoo</b></div>
+          <div class="hero-actions" data-reveal style="display:flex;gap:10px;margin-top:var(--s-4);flex-wrap:wrap">
+            <button class="btn btn-ghost" type="button" data-route-button="guide"><i data-lucide="play-circle" aria-hidden="true"></i>How it works</button>
+            <button class="btn btn-ghost" type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Welcome gift</button>
+          </div>
         </div>
-        <button class="light-button" type="button" data-route-button="community">Explore community <i data-lucide="arrow-right" aria-hidden="true"></i></button>
-      </section>
+        <div class="card-floating vignette" data-reveal>
+          <div class="vh"><b>Parcel · GB-2481</b><span class="tag">AIR · ~4 days</span></div>
+          <div class="vstep done"><span class="bullet" style="background:var(--c-ink-3)">✓</span><span class="name">Sourced in China</span><span class="meta">3 links</span></div>
+          <div class="vstep done"><span class="bullet" style="background:var(--c-coral)">✓</span><span class="name">Purchased</span><span class="meta">12 items</span></div>
+          <div class="vstep done"><span class="bullet" style="background:var(--c-success)">✓</span><span class="name">Quality checked</span><span class="meta">36 photos</span></div>
+          <div class="vstep cur"><span class="bullet" style="background:var(--c-coral)"></span><span class="name">In warehouse</span><span class="meta">day 3 / 90</span></div>
+          <div class="vstep"><span class="bullet" style="background:var(--c-warehouse)"></span><span class="name">Bundled</span><span class="meta">—</span></div>
+          <div class="vstep"><span class="bullet" style="background:var(--c-warehouse)"></span><span class="name">Delivered</span><span class="meta">—</span></div>
+          <div class="vfoot">
+            <div class="st"><b>$0.00</b><span>Storage fee · 87 days left</span></div>
+            <div class="st"><b>2.4 kg</b><span>Est. combined weight</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- 02 PROOF ribbon -->
+      <section class="proof"><div class="wrap in">
+        <div class="p"><b>3–5</b><span>QC photos before you ship</span></div>
+        <div class="p"><b>90 days</b><span>free warehouse storage</span></div>
+        <div class="p"><b>700+</b><span>routes to 220+ countries</span></div>
+        <div class="p"><b>1 parcel</b><span>from many separate orders</span></div>
+      </div></section>
+
+      <!-- 03 JOURNEY spine (climax) -->
+      <section class="section"><div class="wrap">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">China to your doorstep</span>
+          <h2>One journey. Seven clear moves.</h2>
+          <p>Not a pile of steps — a single parcel moving through one system. Follow it from source to delivery.</p>
+        </div>
+        <div class="spine-scroll" data-reveal>
+          <svg class="spine" viewBox="0 0 960 180" aria-label="Journey route">
+            <path id="spineTrack" d=""></path><path id="spineProg" d=""></path>
+            <g id="spineNodes"></g>
+            <g id="spineParcel" opacity="0">
+              <ellipse cx="0" cy="22" rx="14" ry="4" fill="rgba(23,25,29,.14)"></ellipse>
+              <path d="M0,-11 L15,-4 L0,3 L-15,-4 Z" fill="#F7B0A6"></path>
+              <path d="M-15,-4 L0,3 L0,18 L-15,11 Z" fill="#F0503D"></path>
+              <path d="M15,-4 L0,3 L0,18 L15,11 Z" fill="#C7361F"></path>
+              <path d="M0,-11 L0,3 M0,3 L0,18" stroke="#FBFAF8" stroke-width="2" stroke-linecap="round"></path>
+            </g>
+          </svg>
+          <div class="spine-details" id="spineDetails"></div>
+        </div>
+      </div></section>
+
+      <!-- 04 FEATURES bento -->
+      <section class="section"><div class="wrap">
+        <div class="section-head" data-reveal><span class="eyebrow">From checkout to doorstep</span><h2>Everything your haul needs</h2><p>Clear checkpoints, visible costs, and control at every stage.</p></div>
+        <div class="bento" data-reveal>
+          <div class="cell card-primary b-buy">
+            <div><span class="tagi">Buy</span><h3 style="margin-top:8px">Paste it. We purchase it.</h3><p class="lead">Drop any China-marketplace link. A dedicated agent buys it for you and routes it to our warehouse — no China account needed.</p></div>
+            <button class="btn btn-ghost" type="button" data-route-button="links" style="align-self:flex-start">Submit a link <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+          </div>
+          <div class="cell card-secondary b-qc">
+            <div><span class="tagi">Check</span><h3 style="margin-top:8px">See it first.</h3><p class="lead">3–5 QC photos per item.</p>
+              <button class="btn btn-ghost" type="button" data-route-button="qc" style="margin-top:10px">Open QC Center <i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+            <div class="qc-mosaic">
+              <div class="qc-shot"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="var(--c-ship)" stroke-width="1.8"/></svg></div>
+              <div class="qc-shot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="none" stroke="var(--c-air)" stroke-width="1.8"/></svg></div>
+              <div class="qc-shot"><svg viewBox="0 0 24 24"><path d="M12 5l7 13H5z" fill="none" stroke="var(--c-amber)" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+              <div class="qc-shot ok"><span class="qc-badge">✓</span><svg viewBox="0 0 24 24"><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="var(--c-success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+          <div class="cell card-secondary b-ship">
+            <div><span class="tagi">Ship</span><h3 style="margin-top:8px">One smart parcel.</h3><p class="lead">Combine many orders; pick the best of 700+ routes.</p></div>
+            <button class="btn btn-ghost" type="button" data-route-button="shipping" style="align-self:flex-start">Plan shipping <i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+          </div>
+          <div class="cell b-stat">
+            <div><div class="big">700+</div><span>shipping routes</span></div>
+            <div><div class="big a">220+</div><span>countries &amp; regions</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- 05 WORKSPACE dashboard (dark, real data) -->
+      <section class="section work"><div class="wrap">
+        <div class="section-head" data-reveal><span class="eyebrow" style="color:#FF8A7A">Your workspace</span><h2 style="color:#fff">Every order, one clear board</h2><p style="color:#AEB6BF">Not a screenshot — a real control surface for your whole haul.</p></div>
+        <div class="dash" data-reveal>
+          <div class="dh"><b>Workspace overview</b><span class="inline-chip plain" style="background:#181B20;color:#8A929B">synced just now</span></div>
+          <div class="tiles">
+            <div class="tile"><div class="t">Saved links</div><div class="v">${c.links}</div><span class="pill b">ready to order</span></div>
+            <div class="tile"><div class="t">Haul items</div><div class="v">${c.haul}</div><span class="pill g">in warehouse</span></div>
+            <div class="tile"><div class="t">Orders</div><div class="v">${c.orders}</div><span class="pill a">tracked</span></div>
+            <div class="tile"><div class="t">Parcels</div><div class="v">${c.parcels}</div><span class="pill b">international</span></div>
+          </div>
+          <div class="next-strip">
+            <div class="ico"><i data-lucide="arrow-right" aria-hidden="true"></i></div>
+            <div><h4>Next step</h4><p>${next.copy}</p></div>
+            <button class="btn btn-primary" type="button" data-route-button="${next.view}">${next.cta}</button>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- 06 TRUST -->
+      <section class="section"><div class="wrap">
+        <div class="section-head" data-reveal><span class="eyebrow">Buyer protection</span><h2>What's protected, said plainly</h2></div>
+        <div class="trust-grid" data-reveal>
+          <div class="card-secondary"><h3>Transparent fees</h3><p>Service fee shown up front; international shipping billed at real cost. No hidden markup on goods.</p></div>
+          <div class="card-secondary"><h3>QC before shipping</h3><p>Every item is inspected and photographed on arrival. Defects are reported before you pay to ship.</p></div>
+          <div class="card-secondary"><h3>90 days free storage</h3><p>Consolidate at your pace. Storage is free for 90 days; nothing ships until you approve it.</p></div>
+          <div class="card-secondary"><h3>Refunds &amp; returns</h3><p>Out of stock or price changed? Cancel the affected sub-order; siblings keep moving. Refunds to wallet.</p></div>
+          <div class="card-secondary"><h3>Private by default</h3><p>Your account data stays behind your session. New devices require email confirmation.</p></div>
+          <div class="card-secondary"><h3>Real tracking</h3><p>Live logistics status from warehouse to doorstep across 700+ routes — one place to watch it all.</p></div>
+        </div>
+      </div></section>
+
+      <!-- 06b COMMUNITY (restored entry) -->
+      <section class="section" style="padding-top:0"><div class="wrap">
+        <div class="card-primary" data-reveal style="display:flex;align-items:center;justify-content:space-between;gap:var(--s-5);flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="width:46px;height:46px;border-radius:13px;background:var(--c-coral-wash);color:var(--c-coral-deep);display:grid;place-items:center;flex:none"><i data-lucide="messages-square" aria-hidden="true"></i></div>
+            <div><span class="eyebrow">GoatedBuy community</span><h3 style="margin:3px 0 0;font-size:var(--t-h3)">First haul questions are welcome</h3><p class="muted" style="margin:4px 0 0;font-size:14px">Talk through QC details, shipping routes, and parcel planning with other buyers.</p></div>
+          </div>
+          <button class="btn btn-primary" type="button" data-route-button="community">Explore community <i data-lucide="arrow-right" aria-hidden="true"></i></button>
+        </div>
+      </div></section>
+
+      <!-- 07 CTA -->
+      <section class="cta"><div class="in">
+        <h2 data-reveal>Keep the next move obvious.</h2>
+        <p data-reveal>New buyers get a welcome coupon and 90 days of free storage. Paste a link and we'll take it from there.</p>
+        <form class="paste" data-action="paste" data-reveal style="max-width:520px">
+          <input name="url" type="url" placeholder="Paste your product link" aria-label="Item link">
+          <button class="btn btn-inverse" type="submit">Start order</button>
+        </form>
+      </div></section>
     </div>
   `;
 }
 
 function renderGuide() {
   return `
-    <div class="grid two">
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>New User Guide</h2>
-            <p class="subtle">A simple flow for first-time China shopping agent users.</p>
-          </div>
+    <div class="dl-v2 guide-v2">
+      <!-- The journey spine IS the guide: how a parcel travels, source to doorstep -->
+      <section><div class="wrap">
+        <div class="section-head left" data-reveal>
+          <span class="eyebrow">New user guide</span>
+          <h2>How your parcel travels</h2>
+          <p>From a pasted link in China to your doorstep — one parcel, seven clear moves. Nothing ships until you approve it.</p>
         </div>
-        <div class="timeline">
-          ${[
-            "Paste a Taobao / 1688 / Weidian link",
-            "GOATEDBUY purchases the item",
-            "Seller ships to the China warehouse",
-            "Warehouse takes 3-5 QC photos and weighs it",
-            "You combine arrived items into one parcel",
-            "Choose from 700+ international shipping routes",
-            "Pay final international shipping",
-            "Track the parcel overseas"
-          ].map((step, index) => `<div class="step"><b>${index + 1}</b><span>${step}</span></div>`).join("")}
+        <div class="spine-scroll" data-reveal>
+          <svg class="spine" viewBox="0 0 960 180" aria-label="Journey route">
+            <path id="spineTrack" d=""></path><path id="spineProg" d=""></path>
+            <g id="spineNodes"></g>
+            <g id="spineParcel" opacity="0">
+              <ellipse cx="0" cy="22" rx="14" ry="4" fill="rgba(23,25,29,.14)"></ellipse>
+              <path d="M0,-11 L15,-4 L0,3 L-15,-4 Z" fill="#F7B0A6"></path>
+              <path d="M-15,-4 L0,3 L0,18 L-15,11 Z" fill="#F0503D"></path>
+              <path d="M15,-4 L0,3 L0,18 L15,11 Z" fill="#C7361F"></path>
+              <path d="M0,-11 L0,3 M0,3 L0,18" stroke="#FBFAF8" stroke-width="2" stroke-linecap="round"></path>
+            </g>
+          </svg>
+          <div class="spine-details" id="spineDetails"></div>
         </div>
-      </section>
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Welcome Gift</h2>
-            <p class="subtle">Claim a local demo shipping coupon. In production this connects to coupon APIs and eligibility rules.</p>
-          </div>
-        </div>
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <h3>WELCOME10</h3>
-              <p class="subtle">$8 demo shipping coupon for eligible lines.</p>
+      </div></section>
+
+      <section class="section"><div class="wrap">
+        <div class="two-up">
+          <div class="card-primary">
+            <span class="inline-chip">Welcome gift</span>
+            <h3 style="margin:12px 0 6px;font-size:var(--t-h3)">WELCOME10</h3>
+            <p class="muted" style="margin:0 0 18px">A $8 demo shipping coupon for eligible lines. In production this connects to coupon APIs and eligibility rules.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-primary" type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Claim welcome gift</button>
+              <button class="btn btn-ghost" type="button" data-route-button="wallet">Open wallet</button>
             </div>
-            <span class="status good">New user</span>
           </div>
-          <div class="actions">
-            <button class="primary-button" data-welcome-gift>Claim Welcome Gift</button>
-            <button class="secondary-button" data-route-button="wallet">Open Wallet</button>
+          <div class="card-secondary">
+            <h3 style="font-size:16px;display:flex;align-items:center;gap:8px"><i data-lucide="warehouse" aria-hidden="true"></i>90 days free storage</h3>
+            <p class="muted" style="font-size:14px;margin-top:10px">Items get 90 days of free warehouse storage after arrival, so you can wait for multiple items and submit one combined parcel. Ready when you are.</p>
           </div>
-        </article>
-        <article class="card" style="margin-top:12px">
-          <h3>Storage benefit</h3>
-          <p class="subtle">Items get 90 days of free warehouse storage after arrival, so users can wait for multiple items and submit one combined parcel.</p>
-        </article>
-      </section>
+        </div>
+      </div></section>
     </div>
   `;
 }
 
 function renderCommunity() {
   return `
-    <div class="grid two">
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Community</h2>
-            <p class="subtle">Get first-haul help, QC discussion, and shipping questions without turning GOATEDBUY into an official finds shelf.</p>
+    <div class="dl-v2 content-v2">
+      <section class="section"><div class="wrap">
+        <div class="section-head left" data-reveal>
+          <span class="eyebrow">Community</span>
+          <h2>Talk it through with other buyers</h2>
+          <p>Get first-haul help, QC discussion, and shipping questions — without turning GOATEDBUY into an official finds shelf.</p>
+        </div>
+        <div class="two-up" data-reveal>
+          <div class="card-primary">
+            <span class="inline-chip">Discord</span>
+            <h3 style="margin:12px 0 6px;font-size:var(--t-h3)">Join the community</h3>
+            <p class="muted" style="margin:0 0 18px">first-haul-help, qc-help, shipping-help, haul-reviews, and creator-codes channels.</p>
+            <a class="btn btn-primary" href="https://discord.com" target="_blank" rel="noreferrer"><i data-lucide="messages-square" aria-hidden="true"></i>Join Discord</a>
+          </div>
+          <div class="card-secondary">
+            <h3 style="font-size:16px;display:flex;align-items:center;gap:8px"><i data-lucide="send" aria-hidden="true"></i>Telegram<span class="inline-chip plain" style="margin-left:auto">Placeholder</span></h3>
+            <p class="muted" style="font-size:14px;margin:10px 0 16px">Quick updates and shipping notices. Production should use the official configured channel.</p>
+            <a class="btn btn-ghost" href="https://telegram.org" target="_blank" rel="noreferrer">Open Telegram</a>
           </div>
         </div>
-        <div class="list">
-          <article class="card">
-            <div class="card-head">
-              <div>
-                <h3>Discord</h3>
-                <p class="subtle">Join first-haul-help, qc-help, shipping-help, haul-reviews, and creator-codes channels.</p>
-              </div>
-              <span class="status good">Community</span>
-            </div>
-            <div class="actions">
-              <a class="primary-button" href="https://discord.com" target="_blank" rel="noreferrer">Join Discord</a>
-            </div>
-          </article>
-          <article class="card">
-            <div class="card-head">
-              <div>
-                <h3>Telegram</h3>
-                <p class="subtle">Quick updates and shipping notices. Production should use the official configured channel.</p>
-              </div>
-              <span class="status warn">Placeholder</span>
-            </div>
-            <div class="actions">
-              <a class="secondary-button" href="https://telegram.org" target="_blank" rel="noreferrer">Open Telegram</a>
-            </div>
-          </article>
+        <div class="trust-grid" data-reveal style="grid-template-columns:1fr 1fr;margin-top:var(--s-5)">
+          <div class="card-secondary"><h3>No official finds</h3><p>The client can discuss links, but GOATEDBUY does not officially recommend or endorse products.</p></div>
+          <div class="card-secondary"><h3>Workflow first</h3><p>GOATEDBUY focuses on purchasing, warehouse handling, QC photos, consolidation, shipping, and support.</p></div>
         </div>
-      </section>
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Boundary</h2>
-            <p class="subtle">Community links and creator shares are third-party content.</p>
-          </div>
-        </div>
-        <div class="policy-grid">
-          <article class="card"><h3>No official finds</h3><p class="subtle">The client can discuss links, but GOATEDBUY does not officially recommend or endorse products.</p></article>
-          <article class="card"><h3>Workflow first</h3><p class="subtle">GOATEDBUY focuses on purchasing, warehouse handling, QC photos, consolidation, shipping, and support.</p></article>
-        </div>
-      </section>
+      </div></section>
     </div>
   `;
 }
@@ -1484,7 +1484,7 @@ function nextActionMarkup() {
 function renderLinks() {
   const draft = state.links.find((link) => link.id === state.draftLinkId) || state.links.find((link) => link.status !== "added_to_haul");
   return `
-    <div class="grid two">
+    <div class="dl-v2 tx-v2 grid two">
       <section class="panel">
         <div class="panel-head">
           <div>
@@ -1586,7 +1586,7 @@ function renderHaul() {
   ];
 
   return `
-    <div class="grid">
+    <div class="dl-v2 tx-v2 grid">
       <section class="panel">
         <div class="panel-head">
           <div>
@@ -1615,7 +1615,7 @@ function renderHaul() {
 
 function renderOrders() {
   return `
-    <section class="panel">
+    <div class="dl-v2 tx-v2"><section class="panel">
       <div class="panel-head">
         <div>
           <h2>Orders</h2>
@@ -1653,7 +1653,7 @@ function renderOrders() {
           </table>
         </div>
       ` : empty("No orders yet", "Submit purchase from My Haul to create the first order.")}
-    </section>
+    </section></div>
   `;
 }
 
@@ -1688,7 +1688,7 @@ function renderStorageChips(item) {
 function renderQc() {
   const qcItems = state.items.filter((item) => item.status === "qc_ready" || item.qcStatus === "extra_photo_requested");
   return `
-    <section class="panel">
+    <div class="dl-v2 tx-v2"><section class="panel">
         <div class="panel-head">
           <div>
             <h2>QC Center</h2>
@@ -1711,7 +1711,7 @@ function renderQc() {
           `)}
         `).join("") : empty("No QC photos ready yet", "Items will appear here after warehouse arrival and QC upload.")}
       </div>
-    </section>
+    </section></div>
   `;
 }
 
@@ -1728,7 +1728,7 @@ function renderShipping() {
   ];
   const lines = lineOptions.length ? lineOptions : fallbackLines;
   return `
-    <div class="grid two">
+    <div class="dl-v2 tx-v2 grid two">
       <section class="panel">
         <div class="panel-head">
           <div>
@@ -1860,7 +1860,7 @@ function renderWallet() {
   const wallet = state.wallet || defaultState().wallet;
   const transactions = wallet.transactions || [];
   return `
-    <div class="grid two">
+    <div class="dl-v2 tx-v2 grid two">
       <section class="panel">
         <div class="panel-head">
           <div>
@@ -1930,10 +1930,10 @@ function renderWallet() {
 function renderCreator() {
   if (!apiState.connected) {
     return `
-      <section class="panel">
+      <div class="dl-v2 tx-v2"><section class="panel">
         <div class="panel-head"><div><h2>Creator</h2><p class="subtle">Creator dashboards load from the live backend. Connect an API account to view your attribution.</p></div></div>
         ${empty("Not connected", "Connect a backend API account above to load your creator dashboard.")}
-      </section>
+      </section></div>
     `;
   }
   const creator = state.creator || { loaded: false, error: "", data: null };
@@ -1943,7 +1943,7 @@ function renderCreator() {
       ? renderCreatorDashboard(creator.data)
       : empty("No data yet", creator.loaded ? "No creator dashboard is linked to this account." : "Load your dashboard to see aggregate attribution counts.");
   return `
-    <section class="panel">
+    <div class="dl-v2 tx-v2"><section class="panel">
       <div class="panel-head">
         <div>
           <h2>Creator Dashboard</h2>
@@ -1952,7 +1952,7 @@ function renderCreator() {
         <button class="ghost" data-creator-refresh>${creator.loaded ? "Refresh" : "Load dashboard"}</button>
       </div>
       ${body}
-    </section>
+    </section></div>
   `;
 }
 
@@ -1998,23 +1998,105 @@ function renderTrust() {
     ? state.policies.map((policy) => [policy.title, policy.body])
     : policyCards;
   return `
-    <section class="panel">
-      <div class="panel-head">
-        <div>
+    <div class="dl-v2 content-v2">
+      <section class="section"><div class="wrap">
+        <div class="section-head left" data-reveal>
+          <span class="eyebrow">Buyer protection</span>
           <h2>Trust Center</h2>
-          <p class="subtle">Rules stay accessible from key workflow pages and keep GOATEDBUY's neutral agent boundary clear.</p>
+          <p>Rules stay accessible from key workflow pages and keep GOATEDBUY's neutral agent boundary clear.</p>
         </div>
-      </div>
-      <div class="policy-grid">
-        ${cards.map(([title, body]) => `
-          <article class="card">
-            <h3>${escapeHtml(title)}</h3>
-            <p class="subtle" style="margin-top:8px">${escapeHtml(body)}</p>
-          </article>
-        `).join("")}
-      </div>
-    </section>
+        <div class="trust-grid" data-reveal>
+          ${cards.map(([title, body]) => `
+            <div class="card-secondary"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(body)}</p></div>
+          `).join("")}
+        </div>
+      </div></section>
+    </div>
   `;
+}
+
+// Social login providers shown on the sign-in / register screens, in display order.
+const OAUTH_DISPLAY = [
+  { id: "google", label: "Google" },
+  { id: "apple", label: "Apple" },
+  { id: "discord", label: "Discord" },
+  { id: "facebook", label: "Facebook" },
+  { id: "github", label: "GitHub" },
+  { id: "microsoft", label: "Microsoft" }
+];
+let oauthProviderState = { loaded: false, configured: new Set() };
+
+function oauthBrandMark(id) {
+  switch (id) {
+    case "google":
+      return `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.7 3.2-7.8Z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M6 14.4a6.6 6.6 0 0 1 0-4.2V7.4H2.3a11 11 0 0 0 0 9.8L6 14.4Z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.1 1.6l3.1-3.1A11 11 0 0 0 2.3 7.4L6 10.2c.9-2.6 3.2-4.8 6-4.8Z"/></svg>`;
+    case "apple":
+      return `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.9-1.4-.1-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2-.1 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.8 1.3 0 2.1-1.2 2.9-2.4.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.5-3.9ZM14.1 5.6c.7-.8 1.1-2 1-3.1-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.9-1 3 1.1.1 2.1-.6 2.8-1.4Z"/></svg>`;
+    case "discord":
+      return `<svg viewBox="0 0 24 24" width="18" height="18" fill="#5865F2" aria-hidden="true"><path d="M19.3 5.4A17 17 0 0 0 15.1 4l-.2.4a15.7 15.7 0 0 1 3.7 1.2 15.9 15.9 0 0 0-13.2 0A15.7 15.7 0 0 1 9.1 4.4L8.9 4a17 17 0 0 0-4.2 1.4C2 9.3 1.3 13.1 1.6 16.9a17 17 0 0 0 5.2 2.6l.4-.6a11 11 0 0 1-1.8-.9l.4-.3a12 12 0 0 0 10.3 0l.4.3c-.6.4-1.2.7-1.8.9l.4.6a17 17 0 0 0 5.2-2.6c.4-4.4-.7-8.2-3.4-11.5ZM8.5 14.7c-1 0-1.9-.9-1.9-2.1 0-1.1.8-2.1 1.9-2.1s1.9 1 1.9 2.1c0 1.2-.8 2.1-1.9 2.1Zm7 0c-1 0-1.9-.9-1.9-2.1 0-1.1.8-2.1 1.9-2.1s1.9 1 1.9 2.1c0 1.2-.8 2.1-1.9 2.1Z"/></svg>`;
+    case "facebook":
+      return `<svg viewBox="0 0 24 24" width="18" height="18" fill="#1877F2" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.5V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>`;
+    case "github":
+      return `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .3.3.7 1 .7 2v3c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>`;
+    case "microsoft":
+      return `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#F25022" d="M3 3h8.5v8.5H3z"/><path fill="#7FBA00" d="M12.5 3H21v8.5h-8.5z"/><path fill="#00A4EF" d="M3 12.5h8.5V21H3z"/><path fill="#FFB900" d="M12.5 12.5H21V21h-8.5z"/></svg>`;
+    default:
+      return "";
+  }
+}
+
+function renderOAuthButtons() {
+  const buttons = OAUTH_DISPLAY.map(({ id, label }) => {
+    const configured = oauthProviderState.configured.has(id);
+    const cls = `oauth-button${configured ? "" : " is-unconfigured"}`;
+    const hint = configured ? "" : ' <span class="oauth-setup">Setup needed</span>';
+    return `<button type="button" class="${cls}" data-oauth="${id}" ${authFlow.loading ? "disabled" : ""}>
+      <span class="oauth-mark">${oauthBrandMark(id)}</span><span>Continue with ${label}</span>${hint}
+    </button>`;
+  }).join("");
+  return `<div class="oauth-block"><div class="oauth-divider"><span>or continue with</span></div><div class="oauth-buttons">${buttons}</div></div>`;
+}
+
+// Called at boot: pull tokens the OAuth callback left in the URL fragment, adopt them
+// as the session, then strip them from the address bar so they never linger in history.
+function consumeOAuthRedirect() {
+  const hash = location.hash || "";
+  if (!hash.includes("access_token=")) return null;
+  const params = new URLSearchParams(hash.replace(/^#/, ""));
+  const access = params.get("access_token") || "";
+  if (!access) return null;
+  apiState.accessToken = access;
+  apiState.refreshToken = params.get("refresh_token") || "";
+  apiState.connected = true;
+  apiState.error = "";
+  saveApiState();
+  const provider = params.get("provider") || "";
+  history.replaceState(null, "", `${location.pathname}${location.search}`);
+  return { provider };
+}
+
+async function loadOAuthProviders() {
+  try {
+    const res = await apiRequest("/auth/oauth/providers", { anonymous: true, noRefresh: true });
+    oauthProviderState = {
+      loaded: true,
+      configured: new Set((res.providers || []).filter((p) => p.configured).map((p) => p.provider))
+    };
+  } catch {
+    oauthProviderState = { ...oauthProviderState, loaded: true };
+  }
+}
+
+function startOAuth(provider) {
+  const meta = OAUTH_DISPLAY.find((p) => p.id === provider);
+  const label = meta ? meta.label : provider;
+  if (!oauthProviderState.configured.has(provider)) {
+    setToast(`${label} sign-in isn't configured on this server yet — add its OAuth client credentials to the backend.`);
+    render();
+    return;
+  }
+  const base = apiState.baseUrl.replace(/\/+$/, "");
+  window.location.href = `${base}/auth/oauth/${provider}/start`;
 }
 
 function renderLogin() {
@@ -2029,6 +2111,7 @@ function renderLogin() {
         <label class="field"><span>${i18n.t("auth.password")}</span><input name="password" type="password" autocomplete="current-password" required minlength="10"></label>
         <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.sign_in")}</button>
       </form>
+      ${renderOAuthButtons()}
       <p class="auth-switch">New to GOATEDBUY? <button type="button" data-route-button="register">${i18n.t("account.register")}</button></p>
     `
   });
@@ -2047,6 +2130,7 @@ function renderRegister() {
         <label class="field"><span>${i18n.t("auth.password")}</span><input name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128"><small>10-128 characters</small></label>
         <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.register")}</button>
       </form>
+      ${renderOAuthButtons()}
       <p class="auth-switch">Already registered? <button type="button" data-route-button="login">${i18n.t("account.sign_in")}</button></p>
     `
   });
@@ -2086,7 +2170,7 @@ function renderVerification(kind, title, body) {
 
 function renderAuthLayout({ eyebrow, title, body, content }) {
   return `
-    <section class="auth-layout">
+    <div class="dl-v2 auth-v2"><section class="auth-layout">
       <div class="auth-context">
         <img src="./assets/goatedbuy-symbol.jpg" alt="" aria-hidden="true">
         <p class="eyebrow">${escapeHtml(eyebrow)}</p>
@@ -2095,7 +2179,7 @@ function renderAuthLayout({ eyebrow, title, body, content }) {
         <ul><li>Private account data stays behind your session.</li><li>New devices require email confirmation.</li><li>GOATEDBUY support never asks for your password.</li></ul>
       </div>
       <div class="auth-form-panel">${content}</div>
-    </section>
+    </section></div>
   `;
 }
 
@@ -2117,7 +2201,7 @@ function renderAccount() {
   const account = accountState.account;
   if (!account) return renderLoadingState("Loading account settings");
   return `
-    <section class="account-page">
+    <div class="dl-v2 account-v2"><section class="account-page">
       <nav class="account-tabs" aria-label="Account sections">
         <button class="active" type="button" data-route-button="account"><i data-lucide="user-round"></i>Settings</button>
         <button type="button" data-route-button="addresses"><i data-lucide="map-pin"></i>${i18n.t("account.addresses")}</button>
@@ -2151,7 +2235,7 @@ function renderAccount() {
         <div><h2>${i18n.t("account.delete")}</h2><p>Deletion is available only with zero balance and no warehouse item, active order, parcel, or after-sales case.</p></div>
         <button class="danger-button" type="button" data-check-deletion>Check eligibility</button>
       </section>
-    </section>
+    </section></div>
   `;
 }
 
@@ -2161,7 +2245,7 @@ function renderAddresses() {
   if (accountState.error && !accountState.loaded) return renderErrorState(accountState.error, "addresses");
   const editing = accountState.addresses.find((entry) => entry.id === accountState.editingAddressId);
   return `
-    <section class="account-page">
+    <div class="dl-v2 account-v2"><section class="account-page">
       <nav class="account-tabs" aria-label="Account sections">
         <button type="button" data-route-button="account"><i data-lucide="user-round"></i>Settings</button>
         <button class="active" type="button" data-route-button="addresses"><i data-lucide="map-pin"></i>${i18n.t("account.addresses")}</button>
@@ -2177,7 +2261,7 @@ function renderAddresses() {
           ${addressForm(editing)}
         </section>
       </div>
-    </section>
+    </section></div>
   `;
 }
 
@@ -2314,6 +2398,12 @@ function attachHandlers() {
     if (button.dataset.boundRoute) return;
     button.dataset.boundRoute = "true";
     button.addEventListener("click", () => route(button.dataset.routeButton));
+  });
+
+  document.querySelectorAll("[data-oauth]").forEach((button) => {
+    if (button.dataset.boundOauth) return;
+    button.dataset.boundOauth = "true";
+    button.addEventListener("click", () => startOAuth(button.dataset.oauth));
   });
 
   document.querySelector('form[data-action="account-login"]')?.addEventListener("submit", async (event) => {
@@ -2650,6 +2740,7 @@ function render() {
   attachHandlers();
   renderToast();
   window.lucide?.createIcons({ attrs: { "stroke-width": 1.8 } });
+  window.DLV2?.initJourneyMotion(); // Design Language V2 · builds/animates the journey spine when present
 }
 
 function renderHeaderControls() {
@@ -2692,5 +2783,15 @@ window.addEventListener("hashchange", () => {
   const next = viewFromHash();
   if (next !== currentView) route(next, { replace: true, noScroll: true });
 });
-route(currentView, { replace: true, instant: true });
-restoreSession().then(() => render());
+const oauthReturn = consumeOAuthRedirect();
+route(oauthReturn ? "account" : currentView, { replace: true, instant: true });
+loadOAuthProviders().then(() => render());
+restoreSession().then(async () => {
+  if (oauthReturn) {
+    try { await syncWorkspaceFromApi(false); } catch { /* best-effort workspace load */ }
+    const meta = OAUTH_DISPLAY.find((p) => p.id === oauthReturn.provider);
+    setToast(`Signed in with ${meta ? meta.label : "your account"}.`);
+    route("account", { replace: true });
+  }
+  render();
+});

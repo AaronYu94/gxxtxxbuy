@@ -41,6 +41,31 @@ export function createPgAuthRepository(env) {
       return normalizeUser(result.rows[0]);
     },
 
+    // ---- social login identities ----
+    async findOAuthIdentity(provider, providerUserId) {
+      const r = await getDbPool(env).query("select * from oauth_identities where provider = $1 and provider_user_id = $2", [provider, String(providerUserId)]);
+      return r.rows[0] ? { id: r.rows[0].id, userId: r.rows[0].user_id, provider: r.rows[0].provider, providerUserId: r.rows[0].provider_user_id, email: r.rows[0].email } : null;
+    },
+    async linkOAuthIdentity({ userId, provider, providerUserId, email, displayName }) {
+      try {
+        const r = await getDbPool(env).query(
+          `insert into oauth_identities (user_id, provider, provider_user_id, email, display_name)
+           values ($1, $2, $3, $4, $5)
+           on conflict (provider, provider_user_id) do update set email = excluded.email, display_name = excluded.display_name
+           returning *`,
+          [userId, provider, String(providerUserId), email || "", displayName || ""]
+        );
+        return { id: r.rows[0].id, userId: r.rows[0].user_id, created: true };
+      } catch (error) {
+        if (error.code === "23505") { const e = new Error("provider already linked to another user"); e.code = "OAUTH_PROVIDER_LINKED"; throw e; }
+        throw error;
+      }
+    },
+    async listOAuthIdentities(userId) {
+      const r = await getDbPool(env).query("select provider, email, created_at from oauth_identities where user_id = $1 order by provider", [userId]);
+      return r.rows.map((x) => ({ provider: x.provider, email: x.email, createdAt: x.created_at }));
+    },
+
     async setUserSecurityLock(userId, lockedUntil) {
       const result = await getDbPool(env).query(
         "update users set security_locked_until = $2 where id = $1 returning *",

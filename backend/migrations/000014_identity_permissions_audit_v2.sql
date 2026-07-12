@@ -1,3 +1,4 @@
+-- @destructive-approved (V2-01 identity rework: reviewed & shipped; drops legacy columns, seeds RBAC)
 -- V2 identity, permission, device trust, MFA, and immutable audit foundation.
 
 alter table users drop constraint if exists users_status_check;

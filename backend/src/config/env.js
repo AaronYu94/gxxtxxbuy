@@ -68,6 +68,23 @@ export function parseEnv(source = process.env, options = {}) {
     storageLocalDir: readString(source, "STORAGE_LOCAL_DIR", ".data/storage"),
     storagePublicBaseUrl: readString(source, "STORAGE_PUBLIC_BASE_URL", "http://127.0.0.1:3000"),
     storageSigningSecret: readString(source, "STORAGE_SIGNING_SECRET", "local-dev-storage-signing-secret"),
+    // Social login (OAuth). Per-provider client credentials + the redirect base are
+    // optional; a provider with no credentials degrades to "not configured".
+    oauthStateSecret: readString(source, "OAUTH_STATE_SECRET", "local-dev-oauth-state-secret"),
+    oauthRedirectBase: readOptionalString(source, "OAUTH_REDIRECT_BASE") || "",
+    oauthSuccessRedirect: readString(source, "OAUTH_SUCCESS_REDIRECT", "http://127.0.0.1:8080/client.html"),
+    oauthGoogleClientId: readOptionalString(source, "OAUTH_GOOGLE_CLIENT_ID") || "",
+    oauthGoogleClientSecret: readOptionalString(source, "OAUTH_GOOGLE_CLIENT_SECRET") || "",
+    oauthAppleClientId: readOptionalString(source, "OAUTH_APPLE_CLIENT_ID") || "",
+    oauthAppleClientSecret: readOptionalString(source, "OAUTH_APPLE_CLIENT_SECRET") || "",
+    oauthDiscordClientId: readOptionalString(source, "OAUTH_DISCORD_CLIENT_ID") || "",
+    oauthDiscordClientSecret: readOptionalString(source, "OAUTH_DISCORD_CLIENT_SECRET") || "",
+    oauthFacebookClientId: readOptionalString(source, "OAUTH_FACEBOOK_CLIENT_ID") || "",
+    oauthFacebookClientSecret: readOptionalString(source, "OAUTH_FACEBOOK_CLIENT_SECRET") || "",
+    oauthGithubClientId: readOptionalString(source, "OAUTH_GITHUB_CLIENT_ID") || "",
+    oauthGithubClientSecret: readOptionalString(source, "OAUTH_GITHUB_CLIENT_SECRET") || "",
+    oauthMicrosoftClientId: readOptionalString(source, "OAUTH_MICROSOFT_CLIENT_ID") || "",
+    oauthMicrosoftClientSecret: readOptionalString(source, "OAUTH_MICROSOFT_CLIENT_SECRET") || "",
     storageSignedUrlTtlSeconds: readInteger(source, "STORAGE_SIGNED_URL_TTL_SECONDS", 900, { min: 60, max: 86400 }),
     shippingQuoteTtlSeconds: readInteger(source, "SHIPPING_QUOTE_TTL_SECONDS", 900, { min: 60, max: 86400 }),
     shippingWebhookSecret: readString(source, "SHIPPING_WEBHOOK_SECRET", "local-dev-shipping-webhook-secret"),
@@ -75,6 +92,12 @@ export function parseEnv(source = process.env, options = {}) {
     welcomeGiftCode: readString(source, "WELCOME_GIFT_CODE", "WELCOME10"),
     welcomeGiftAmountCents: readInteger(source, "WELCOME_GIFT_AMOUNT_CENTS", 1000, { min: 0, max: 100000 }),
     linkParseInline: readBoolean(source, "LINK_PARSE_INLINE", false),
+    // Approved marketplace data source (GB-DEC-P0-004). Until a legal provider is
+    // approved this stays "not_configured" and every adapter degrades safely.
+    productSourceProvider: readString(source, "PRODUCT_SOURCE_PROVIDER", "not_configured"),
+    catalogParseMaxAttempts: readInteger(source, "CATALOG_PARSE_MAX_ATTEMPTS", 5, { min: 1, max: 20 }),
+    catalogParseBackoffBaseMs: readInteger(source, "CATALOG_PARSE_BACKOFF_BASE_MS", 2000, { min: 100, max: 60000 }),
+    catalogParseBackoffMaxMs: readInteger(source, "CATALOG_PARSE_BACKOFF_MAX_MS", 300000, { min: 1000, max: 3600000 }),
     riskCouponAbuseEnabled: readBoolean(source, "RISK_COUPON_ABUSE_ENABLED", false),
     riskCouponAbuseThreshold: readInteger(source, "RISK_COUPON_ABUSE_THRESHOLD", 5, { min: 1, max: 1000 }),
     authVerificationTtlSeconds: readInteger(source, "AUTH_VERIFICATION_TTL_SECONDS", 1800, { min: 60, max: 86400 }),
@@ -90,6 +113,9 @@ export function parseEnv(source = process.env, options = {}) {
     authReauthTtlSeconds: readInteger(source, "AUTH_REAUTH_TTL_SECONDS", 300, { min: 30, max: 1800 }),
     authAdminAbsoluteSessionHours: readInteger(source, "AUTH_ADMIN_ABSOLUTE_SESSION_HOURS", 24, { min: 1, max: 24 }),
     authExposeVerificationToken: readBoolean(source, "AUTH_EXPOSE_VERIFICATION_TOKEN", nodeEnv !== "production"),
+    // Dev-only: skip mandatory admin TOTP and issue a session straight from password login.
+    // Double-guarded — force-disabled in production regardless of the env var.
+    authAdminMfaBypass: nodeEnv !== "production" && readBoolean(source, "AUTH_ADMIN_MFA_BYPASS", false),
     accountAddressHmacSecret: readString(source, "ACCOUNT_ADDRESS_HMAC_SECRET", "local-dev-address-hmac-secret"),
     accountDeletionPollMs: readInteger(source, "ACCOUNT_DELETION_POLL_MS", 5000, { min: 250, max: 60000 }),
     features: Object.freeze({

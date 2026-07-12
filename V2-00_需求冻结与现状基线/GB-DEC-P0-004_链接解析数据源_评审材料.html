@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GB-DEC-P0-004 链接解析数据源三方会签评审材料">
+<title>GB-DEC-P0-004 · 链接解析数据源评审</title>
+
+<style>
+  :root {
+    --bg: #eaeef3;
+    --surface: #ffffff;
+    --surface-2: #f3f6f9;
+    --ink: #191e29;
+    --muted: #5b6472;
+    --faint: #868f9e;
+    --line: #d5dbe4;
+    --line-strong: #bcc5d1;
+    --seal: #414fb0;
+    --seal-ink: #414fb0;
+    --seal-wash: #eef0fb;
+    --pending: #8f6410;
+    --pending-bg: #f4ead3;
+    --pending-line: #e0cfa4;
+    --ready: #2f7048;
+    --ready-bg: #e1efe6;
+    --ready-line: #bcdcc6;
+    --risk: #a8433a;
+    --risk-bg: #f6e3e0;
+    --risk-line: #e8c6c1;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 8px 28px -18px rgba(20,28,44,.28);
+
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "PingFang SC", monospace;
+
+    --maxw: 68rem;
+    --pad: clamp(1.1rem, 4vw, 2.4rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f131a;
+      --surface: #171b24;
+      --surface-2: #1c212c;
+      --ink: #e6eaf1;
+      --muted: #99a2b2;
+      --faint: #6c7688;
+      --line: #272d3a;
+      --line-strong: #363f50;
+      --seal: #929deb;
+      --seal-ink: #a6b0f2;
+      --seal-wash: #1b2033;
+      --pending: #e0b257;
+      --pending-bg: #2b2415;
+      --pending-line: #4a3f21;
+      --ready: #6ec38b;
+      --ready-bg: #15251b;
+      --ready-line: #294a34;
+      --risk: #ec8d83;
+      --risk-bg: #2a1815;
+      --risk-line: #4c2d28;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.6);
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg: #eaeef3; --surface: #ffffff; --surface-2: #f3f6f9; --ink: #191e29;
+    --muted: #5b6472; --faint: #868f9e; --line: #d5dbe4; --line-strong: #bcc5d1;
+    --seal: #414fb0; --seal-ink: #414fb0; --seal-wash: #eef0fb;
+    --pending: #8f6410; --pending-bg: #f4ead3; --pending-line: #e0cfa4;
+    --ready: #2f7048; --ready-bg: #e1efe6; --ready-line: #bcdcc6;
+    --risk: #a8433a; --risk-bg: #f6e3e0; --risk-line: #e8c6c1;
+    --shadow: 0 1px 2px rgba(20,28,44,.05), 0 8px 28px -18px rgba(20,28,44,.28);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f131a; --surface: #171b24; --surface-2: #1c212c; --ink: #e6eaf1;
+    --muted: #99a2b2; --faint: #6c7688; --line: #272d3a; --line-strong: #363f50;
+    --seal: #929deb; --seal-ink: #a6b0f2; --seal-wash: #1b2033;
+    --pending: #e0b257; --pending-bg: #2b2415; --pending-line: #4a3f21;
+    --ready: #6ec38b; --ready-bg: #15251b; --ready-line: #294a34;
+    --risk: #ec8d83; --risk-bg: #2a1815; --risk-line: #4c2d28;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(1.5rem, 5vw, 3.5rem) var(--pad) 5rem;
+  }
+
+  /* ---------- cover / dossier header ---------- */
+  .cover {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--seal);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .cover__top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 .7rem;
+  }
+  .cover h1 {
+    font-size: clamp(1.5rem, 3.6vw, 2.15rem);
+    line-height: 1.18;
+    letter-spacing: -.015em;
+    margin: 0 0 .55rem;
+    text-wrap: balance;
+    max-width: 30ch;
+  }
+  .cover__id {
+    font-family: var(--font-mono);
+    font-size: .8rem;
+    color: var(--seal-ink);
+    background: var(--seal-wash);
+    border: 1px solid color-mix(in srgb, var(--seal) 28%, transparent);
+    padding: .2rem .55rem;
+    border-radius: 4px;
+    display: inline-block;
+    letter-spacing: .02em;
+  }
+
+  .stamp {
+    flex-shrink: 0;
+    text-align: center;
+    border: 2px solid var(--pending);
+    color: var(--pending);
+    border-radius: 6px;
+    padding: .5rem .85rem;
+    transform: rotate(-2.5deg);
+    background: var(--pending-bg);
+  }
+  .stamp b {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    letter-spacing: .12em;
+    line-height: 1;
+  }
+  .stamp span {
+    font-size: .68rem;
+    letter-spacing: .06em;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1px;
+    background: var(--line);
+  }
+  .meta > div {
+    background: var(--surface);
+    padding: .9rem clamp(1.25rem, 4vw, 2rem);
+  }
+  .meta dt {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: .28rem;
+  }
+  .meta dd { margin: 0; font-size: .95rem; font-weight: 550; }
+  .meta dd.mono { font-family: var(--font-mono); font-weight: 500; font-size: .88rem; }
+
+  .cover__note {
+    padding: .85rem clamp(1.25rem, 4vw, 2rem);
+    border-top: 1px solid var(--line);
+    font-size: .84rem;
+    color: var(--muted);
+    background: var(--surface-2);
+    display: flex;
+    gap: .6rem;
+  }
+  .cover__note::before { content: "⚠"; color: var(--pending); }
+
+  /* ---------- gate status band ---------- */
+  .gate {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .gate div { background: var(--surface); padding: 1rem 1.2rem; }
+  .gate .num {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: .3rem;
+    letter-spacing: -.01em;
+  }
+  .gate .num.ok { color: var(--ready); }
+  .gate .num.block { color: var(--pending); }
+  .gate .lbl { font-size: .8rem; color: var(--muted); }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 3.25rem; }
+  .sec-head { display: flex; align-items: baseline; gap: .8rem; margin-bottom: 1.1rem; }
+  .sec-num {
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    color: var(--seal-ink);
+    border: 1px solid color-mix(in srgb, var(--seal) 30%, transparent);
+    background: var(--seal-wash);
+    border-radius: 4px;
+    padding: .12rem .5rem;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  h2 {
+    font-size: clamp(1.15rem, 2.4vw, 1.42rem);
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h3 {
+    font-size: 1rem;
+    margin: 1.6rem 0 .6rem;
+    color: var(--ink);
+  }
+  p { margin: 0 0 1rem; max-width: 72ch; }
+  a { color: var(--seal-ink); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: clamp(1.1rem, 3vw, 1.6rem);
+    box-shadow: var(--shadow);
+  }
+
+  ul.clean { list-style: none; margin: 0; padding: 0; }
+  ul.clean li {
+    position: relative;
+    padding-left: 1.4rem;
+    margin-bottom: .55rem;
+    max-width: 74ch;
+  }
+  ul.clean li::before {
+    content: "";
+    position: absolute;
+    left: .1rem; top: .62rem;
+    width: .42rem; height: .42rem;
+    background: var(--seal);
+    border-radius: 1px;
+    transform: rotate(45deg);
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: .86em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    padding: .06em .38em;
+    border-radius: 4px;
+  }
+
+  blockquote {
+    margin: 1rem 0;
+    padding: .85rem 1.1rem;
+    border-left: 3px solid var(--seal);
+    background: var(--seal-wash);
+    border-radius: 0 5px 5px 0;
+    color: var(--ink);
+    font-size: .93rem;
+  }
+  blockquote cite {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .04em;
+    color: var(--faint);
+    font-style: normal;
+    margin-top: .5rem;
+  }
+
+  /* ---------- tables ---------- */
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; background: var(--surface); font-size: .875rem; }
+  .matrix { min-width: 52rem; }
+  th, td {
+    text-align: left;
+    padding: .68rem .85rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+    position: sticky;
+    top: 0;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody th[scope="row"] {
+    font-weight: 600;
+    font-size: .84rem;
+    background: var(--surface-2);
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .matrix td:first-child { color: var(--muted); font-weight: 550; white-space: nowrap; }
+  .num-cell { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+  .fill { color: var(--faint); font-family: var(--font-mono); font-size: .82rem; }
+
+  /* rating chips inside matrix */
+  .r { font-family: var(--font-mono); font-size: .78rem; font-weight: 600; }
+  .r-hi { color: var(--ready); }
+  .r-mid { color: var(--pending); }
+  .r-lo { color: var(--risk); }
+
+  /* ---------- pills ---------- */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    font-family: var(--font-mono);
+    font-size: .74rem;
+    letter-spacing: .02em;
+    padding: .12rem .5rem;
+    border-radius: 4px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .pill--pending { color: var(--pending); background: var(--pending-bg); border-color: var(--pending-line); }
+  .pill--ready { color: var(--ready); background: var(--ready-bg); border-color: var(--ready-line); }
+  .pill--risk { color: var(--risk); background: var(--risk-bg); border-color: var(--risk-line); }
+  .pill--seal { color: var(--seal-ink); background: var(--seal-wash); border-color: color-mix(in srgb, var(--seal) 28%, transparent); }
+
+  /* ---------- recommendation callout ---------- */
+  .rec {
+    background: var(--ready-bg);
+    border: 1px solid var(--ready-line);
+    border-left: 3px solid var(--ready);
+    border-radius: 0 6px 6px 0;
+    padding: clamp(1.1rem, 3vw, 1.5rem);
+  }
+  .rec h3 { margin-top: 0; color: var(--ready); }
+  .rec ol { margin: .5rem 0 0; padding-left: 1.3rem; }
+  .rec li { margin-bottom: .5rem; }
+  .rec .fallback {
+    margin-top: 1rem; padding-top: 1rem;
+    border-top: 1px dashed var(--ready-line);
+    font-size: .9rem; color: var(--muted);
+  }
+
+  /* ---------- signer columns ---------- */
+  .signers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+  .signer { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1.2rem; box-shadow: var(--shadow); }
+  .signer h3 { margin: 0 0 .9rem; display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
+  .signer h3 .dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--seal); flex-shrink: 0; }
+  .checks { list-style: none; margin: 0; padding: 0; }
+  .checks li { position: relative; padding-left: 1.75rem; margin-bottom: .7rem; font-size: .88rem; color: var(--muted); }
+  .checks li::before {
+    content: "";
+    position: absolute; left: 0; top: .15rem;
+    width: 1.05rem; height: 1.05rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 3px;
+  }
+
+  /* ---------- fill block ---------- */
+  pre {
+    font-family: var(--font-mono);
+    font-size: .84rem;
+    line-height: 1.85;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1.2rem 1.3rem;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+    color: var(--ink);
+  }
+  pre .k { color: var(--seal-ink); }
+  pre .blank { color: var(--faint); }
+
+  /* ---------- sign-off ---------- */
+  .signoff td { height: 2.6rem; }
+  .signoff .role { font-weight: 600; white-space: nowrap; }
+  .signoff .blank-cell { color: var(--faint); }
+
+  /* ---------- footer flow ---------- */
+  .flow {
+    margin-top: 3rem;
+    padding: 1.3rem clamp(1.1rem, 3vw, 1.6rem);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .55rem;
+    font-family: var(--font-mono);
+    font-size: .8rem;
+  }
+  .flow .step { padding: .2rem .55rem; border-radius: 4px; border: 1px solid var(--line-strong); color: var(--muted); background: var(--surface); }
+  .flow .step.done { color: var(--pending); border-color: var(--pending-line); background: var(--pending-bg); }
+  .flow .arw { color: var(--faint); }
+  .flow .foot-note { flex-basis: 100%; font-family: var(--font-sans); color: var(--muted); font-size: .82rem; margin-top: .5rem; }
+
+  .lede { font-size: 1.02rem; color: var(--muted); max-width: 70ch; }
+
+  @media (max-width: 34rem) {
+    .stamp { transform: none; }
+    .cover__top { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ COVER ============ -->
+  <header class="cover">
+    <div class="cover__top">
+      <div>
+        <p class="eyebrow">GOATEDBUY · V2 决策登记 · P0 参数</p>
+        <h1>链接解析服务实现方式与支持范围</h1>
+        <span class="cover__id">GB-DEC-P0-004</span>
+      </div>
+      <div class="stamp" role="img" aria-label="状态：待业务决策">
+        <b>PENDING</b>
+        <span>待业务决策</span>
+      </div>
+    </div>
+
+    <dl class="meta">
+      <div>
+        <dt>决策负责人</dt>
+        <dd>产品 + 技术 + 合规<br><span style="font-weight:400;color:var(--muted);font-size:.82rem">三方会签，缺一不可</span></dd>
+      </div>
+      <div>
+        <dt>最晚批准点</dt>
+        <dd class="mono">V2-03-01 开始前</dd>
+      </div>
+      <div>
+        <dt>当前状态</dt>
+        <dd class="mono" style="color:var(--pending)">pending_business_decision</dd>
+      </div>
+      <div>
+        <dt>目标状态</dt>
+        <dd class="mono">proposed → in_review → approved</dd>
+      </div>
+    </dl>
+
+    <p class="cover__note">本文是<strong>&nbsp;决策支持材料，非最终结论&nbsp;</strong>。标注「待尽调 / 待填」的字段须由对应负责人核实后填写；工程不得替产品/合规假设合法数据源、成本或使用条款（PRD 附录E 版本边界声明）。</p>
+  </header>
+
+  <!-- ============ GATE STATUS ============ -->
+  <div class="gate" aria-label="V2-03 阶段闸门状态">
+    <div><div class="num ok">11/12</div><div class="lbl">V2-03 原子任务已实现并验证</div></div>
+    <div><div class="num block">1</div><div class="lbl">阻塞项 · 仅 V2-03-01（本决策）</div></div>
+    <div><div class="num ok">94/94</div><div class="lbl">自动化测试通过（npm run ci）</div></div>
+    <div><div class="num ok">85</div><div class="lbl">OpenAPI 路径 · lint 141 文件 · build ✓</div></div>
+  </div>
+
+  <!-- ============ 1. 背景 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§1</span><h2>背景与依据：PRD 明确要求本项由业务拍板</h2></div>
+    <p class="lede">PRD 有意把「用哪个合法数据源、支持哪些平台与字段」留空，交由本决策解决。三处原文依据：</p>
+
+    <blockquote>
+      <strong>P0</strong>｜链接解析服务实现方式与支持范围｜建议决策时间：<strong>订单开发前</strong>
+      <cite>GoatedBuy 开发级详细 PRD V2.0 · 附录E「仍需在开发前冻结的参数」· 第 41 页</cite>
+    </blockquote>
+    <blockquote>
+      附录E 中未冻结的参数<strong>不得由研发自行假设为最终业务规则</strong>，应由产品负责人在对应 Epic 启动前确认。
+      <cite>同上 · 版本边界声明</cite>
+    </blockquote>
+    <blockquote>
+      淘宝 / 1688 / Weidian <strong>反爬、登录态和页面变化</strong>可能导致解析中断；建议<strong>先做技术验证；提供人工失败提示和监控</strong>。
+      <cite>同上 · §26 风险与待确认项 · 第 13 页（唯一实施指引）</cite>
+    </blockquote>
+  </section>
+
+  <!-- ============ 2. 工程现状 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§2</span><h2>工程侧现状：骨架已就绪，等待注入数据源</h2></div>
+    <p>V2-03 除本项外的 11 个原子任务已实现并验证。关键在于：<strong>决策批准后，接入任一数据源的工程改动量极小</strong> —— 本决策是合规 / 商业 / 法律问题，不是技术阻塞。</p>
+    <div class="card">
+      <ul class="clean">
+        <li><strong>适配器契约已固化</strong>：<code>fetchProduct(ref) → 统一快照 | 降级枚举</code>。任何数据源以 provider 形式注入 <code>createProductSourceRegistry({ providers })</code> 即生效，<strong>无需改动路由、队列、快照或 API</strong>。</li>
+        <li><strong>降级枚举已覆盖</strong>风险表列出的全部失败态：<span class="pill pill--pending">not_configured</span> <span class="pill pill--pending">login_wall</span> <span class="pill pill--pending">rate_limited</span> <span class="pill pill--pending">timeout</span> <span class="pill pill--pending">item_removed</span> <span class="pill pill--pending">missing_fields</span></li>
+        <li><strong>队列已实现</strong>幂等、指数退避、重试、死信队列 + 告警、超限转人工。</li>
+        <li><strong>人工补录已实现</strong>；<code>scraped</code> 与 <code>manual</code> 数据以 <code>snapshot.source</code> 严格区分，快照不可变（数据库触发器强制）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 3. 四类结论 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§3</span><h2>本决策必须产出的四类结论</h2></div>
+    <p>评审通过 = 以下四栏全部有明确结论并会签。<strong>空栏即视为未批准。</strong></p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th style="width:2.5rem">#</th><th>登记表要求</th><th>需产出的结论（待填）</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">A</th><td>淘宝、1688、Weidian 的<strong>合法数据来源和使用条款</strong></td><td class="fill">每平台选定来源类型 + 授权凭证；合规负责人签字确认不违反平台 ToS 与当地法规</td></tr>
+          <tr><th scope="row">B</th><td><strong>可获得字段、成功率、限流、登录态、反爬风险、SLA、成本</strong></td><td class="fill">每平台字段清单、目标成功率、QPS/日配额、是否需登录态、成本量级、SLA 承诺</td></tr>
+          <tr><th scope="row">C</th><td><strong>下架、短链、缺字段、规格异常、人工补录</strong>降级方案</td><td class="fill">每种降级态的用户文案与业务动作（工程枚举已就绪，待业务确认动作）</td></tr>
+          <tr><th scope="row">D</th><td>供应商故障<strong>监控、重试、死信、维护责任人</strong></td><td class="fill">告警阈值、重试上限、死信处理 SLA、指定 on-call 维护责任人</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 4. 候选方案矩阵 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§4</span><h2>候选方案对比</h2></div>
+    <p>具体服务商名称、真实价格与 SLA 数字<strong>必须由技术/合规负责人尽调后填入</strong>；本表仅给定性量级与结构，禁止把占位数字当事实。</p>
+    <div class="scroll">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>A · 官方/开放平台</th>
+            <th>B · 授权第三方 API</th>
+            <th>C · 自建解析/采集</th>
+            <th>D · 混合（推荐）</th>
+            <th>E · 纯人工补录</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>合规性</td><td><span class="r r-hi">最高</span> 平台授权</td><td><span class="r r-mid">取决于授权链</span></td><td><span class="r r-lo">高风险</span> 易触 ToS</td><td><span class="r r-mid">中</span> 合规源为主</td><td><span class="r r-hi">最高</span> 无抓取</td></tr>
+          <tr><td>覆盖平台</td><td>需分别申请，微店开放度低</td><td>通常三平台全覆盖</td><td>理论全覆盖，维护重</td><td>三平台 + 兜底</td><td>全平台（人工）</td></tr>
+          <tr><td>字段完整度</td><td>高，受开放范围限制</td><td>高（含 SKU/阶梯价/运费）</td><td>取决于自建投入</td><td>高</td><td>取决于用户录入</td></tr>
+          <tr><td>成功率/稳定性</td><td><span class="r r-hi">高</span></td><td><span class="r r-mid">中–高</span></td><td><span class="r r-lo">低–中</span></td><td><span class="r r-mid">中–高</span></td><td><span class="r r-hi">100%</span> 但慢</td></tr>
+          <tr><td>反爬/登录态风险</td><td><span class="r r-hi">无</span></td><td>由服务商承担</td><td><span class="r r-lo">高</span> 封禁/验证码</td><td><span class="r r-hi">低</span></td><td><span class="r r-hi">无</span></td></tr>
+          <tr><td>接入/上线速度</td><td><span class="r r-lo">慢</span> 申请周期</td><td><span class="r r-hi">快</span> 签约即用</td><td><span class="r r-lo">慢</span> 自研</td><td><span class="r r-mid">中</span></td><td><span class="r r-hi">最快</span></td></tr>
+          <tr><td>成本量级</td><td class="fill">平台费/分成 · 待填</td><td class="fill">按量/包月 · 待填</td><td class="fill">人力+代理IP+维护 · 待填</td><td class="fill">B + 少量自建 · 待填</td><td class="fill">人力（随单量线性）</td></tr>
+          <tr><td>维护负担</td><td>低–中</td><td><span class="r r-hi">低</span> 外包</td><td><span class="r r-lo">高</span> 对抗改版</td><td>中</td><td>低（不可规模化）</td></tr>
+          <tr><td>与现有架构契合</td><td>provider 注入</td><td>provider 注入</td><td>provider 注入</td><td>多 provider + 降级链</td><td><span class="r r-hi">已实现</span>（当前默认）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>方案要点</h3>
+    <ul class="clean">
+      <li><strong>A 官方/开放平台</strong> —— 合规最优。风险：微店开放接口能力有限、申请周期长，可能只覆盖淘宝/1688。</li>
+      <li><strong>B 授权第三方 API</strong> —— 上线最快、覆盖最全。合规关键在<strong>核验服务商数据授权链是否合法</strong>（合规负责人必须审）。</li>
+      <li><strong>C 自建</strong> —— 控制力最强但法律与反爬风险最高、长期维护重；PRD 警示「反爬可能增加 2–6 周并需持续维护」。</li>
+      <li><strong>D 混合</strong> —— 合规源为主、自建/人工兜底，成功率与合规兼顾，正好落在 PRD「技术验证 + 人工失败提示 + 监控」指引上。</li>
+      <li><strong>E 纯人工</strong> —— 零合规风险，可作<strong>任何方案的强制兜底</strong>；也是当前 <code>not_configured</code> 已实现状态。缺点：不可规模化。</li>
+    </ul>
+  </section>
+
+  <!-- ============ 5. 推荐 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§5</span><h2>工程推荐（供参考，最终由三方定）</h2></div>
+    <div class="rec">
+      <h3>推荐 D（混合）作为落地形态，分两步</h3>
+      <ol>
+        <li><strong>首发以合规源为主</strong>：淘宝/1688 优先接入方案 A，或经合规核验的方案 B；微店若无合规源，先走人工补录并明确标注。</li>
+        <li><strong>全平台强制保留人工兜底（E）+ 监控告警</strong>：任一平台解析降级时自动转人工补录，符合 PRD §26 指引。</li>
+      </ol>
+      <p style="margin:1rem 0 0;font-size:.92rem"><strong>理由：</strong>工程改动量最小（provider 注入即可）、合规风险可控（授权源为主）、失败态已被现有降级链与死信/告警完整接住。</p>
+      <div class="fallback">
+        <strong>最低可批准项：</strong>若三方无法在 <code>V2-03-01</code> 前对 A/B/C/D 达成一致，可仅批准 <span class="pill pill--ready">E 纯人工补录</span> + 支持平台范围，即可解除「无任何合规源」的阻塞并进入生产，后续再增补自动源作为新决策版本。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. 签署人问题 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§6</span><h2>各签署人待答问题</h2></div>
+    <div class="signers">
+      <div class="signer">
+        <h3><span class="dot"></span>产品负责人</h3>
+        <ul class="checks">
+          <li>首发支持哪些平台？各平台支持范围（仅链接 / +SKU / +阶梯价+国内运费）？</li>
+          <li>每种降级态（下架/短链/缺字段/规格异常/未知运费）的用户文案与是否允许下单？</li>
+          <li>人工补录的时效承诺与责任团队？</li>
+        </ul>
+      </div>
+      <div class="signer">
+        <h3><span class="dot"></span>技术负责人</h3>
+        <ul class="checks">
+          <li>选定的数据源类型与具体服务商/接口（尽调后填）？</li>
+          <li>目标成功率、QPS/日配额、是否需维护登录态、SLA、成本量级？</li>
+          <li>监控告警阈值、重试上限、死信处理 SLA？</li>
+        </ul>
+      </div>
+      <div class="signer">
+        <h3><span class="dot"></span>合规负责人</h3>
+        <ul class="checks">
+          <li>选定来源是否符合淘宝/1688/微店 ToS 与适用法律？是否有可留档的授权/合同凭证？</li>
+          <li>第三方服务商（若选 B）的数据授权链是否合法可追溯？</li>
+          <li>用户侧是否需展示数据来源声明 / 免责说明？</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. 降级预案 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§7</span><h2>降级与运营预案</h2></div>
+    <p>对齐要求 C、D。工程行为已实现，业务需确认对应动作。</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>降级态（已实现枚举）</th><th>触发</th><th>现有工程行为</th><th>业务需确认（待填）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="pill pill--pending">not_configured</span></td><td>无获批数据源</td><td>转人工补录</td><td class="fill">上线前应被具体源替换或明确接受</td></tr>
+          <tr><td><span class="pill pill--pending">item_removed</span></td><td>商品下架 / 404</td><td>转人工，标记状态</td><td class="fill">是否允许下单？文案？</td></tr>
+          <tr><td><span class="pill pill--pending">login_wall</span></td><td>需登录态</td><td>终态转人工</td><td class="fill">是否投入登录态维护？</td></tr>
+          <tr><td><span class="pill pill--risk">rate_limited</span> <span class="pill pill--risk">timeout</span></td><td>限流/超时/上游异常</td><td>退避重试 → 超限进死信 + 告警</td><td class="fill">重试上限、告警接收人</td></tr>
+          <tr><td><span class="pill pill--pending">missing_fields</span></td><td>缺价格/标题等</td><td>转人工补录</td><td class="fill">必填字段清单</td></tr>
+          <tr><td><span class="pill pill--seal">isShortLink</span></td><td>m.tb.cn / qr.1688 等短链</td><td>标记待展开</td><td class="fill">是否要求数据源支持短链展开</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1rem;font-size:.9rem;color:var(--muted)"><strong>维护责任人（要求 D）：</strong><span class="fill">______（待指定 on-call）</span> · 死信处理 SLA：<span class="fill">______</span> · 告警渠道：<span class="fill">______</span></p>
+  </section>
+
+  <!-- ============ 8. 回填字段 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§8</span><h2>批准时回填字段</h2></div>
+    <p>可直接同步回决策登记表与状态文件。</p>
+<pre><span class="k">决策版本:</span>        GB-DEC-P0-004 v1
+<span class="k">批准状态:</span>        approved / rejected
+<span class="k">首发支持平台:</span>    淘宝<span class="blank">[ ]</span>  1688<span class="blank">[ ]</span>  微店<span class="blank">[ ]</span>
+<span class="k">各平台数据源:</span>    淘宝=<span class="blank">___</span>  1688=<span class="blank">___</span>  微店=<span class="blank">___</span>
+<span class="k">支持字段范围:</span>    <span class="blank">___</span>
+<span class="k">成功率/SLA/成本:</span>  <span class="blank">___</span>
+<span class="k">登录态维护:</span>      是/否
+<span class="k">降级动作确认:</span>    <span class="blank">___</span>（见 §7）
+<span class="k">监控/重试/死信:</span>   <span class="blank">___</span>
+<span class="k">维护责任人:</span>      <span class="blank">___</span>
+<span class="k">生效日期:</span>        <span class="blank">___</span></pre>
+    <p style="margin-top:1.2rem">批准后需同步更新：</p>
+    <ul class="clean">
+      <li><code>02_P0参数决策登记.md</code> 中 <code>GB-DEC-P0-004</code> 状态。</li>
+      <li><code>prd-v2-task-status.json</code>：将 <code>V2-03-01</code> 从 <code>blocked</code> 移入 <code>completed</code> 并补证据。</li>
+      <li>工程侧：把获批数据源以 provider 形式注入 <code>createProductSourceRegistry({ providers })</code>。</li>
+    </ul>
+  </section>
+
+  <!-- ============ 9. 会签 ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">§9</span><h2>会签</h2></div>
+    <div class="scroll">
+      <table class="signoff">
+        <thead>
+          <tr><th>角色</th><th>姓名</th><th>结论（同意 / 驳回）</th><th>日期</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="role">产品负责人</td><td class="blank-cell">—</td><td class="blank-cell">—</td><td class="blank-cell">—</td><td class="blank-cell">—</td></tr>
+          <tr><td class="role">技术负责人</td><td class="blank-cell">—</td><td class="blank-cell">—</td><td class="blank-cell">—</td><td class="blank-cell">—</td></tr>
+          <tr><td class="role">合规负责人</td><td class="blank-cell">—</td><td class="blank-cell">—</td><td class="blank-cell">—</td><td class="blank-cell">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flow">
+      <span class="step done">pending_business_decision</span>
+      <span class="arw">→</span>
+      <span class="step">proposed</span>
+      <span class="arw">→</span>
+      <span class="step">in_review</span>
+      <span class="arw">→</span>
+      <span class="step">approved</span>
+      <span class="foot-note">rejected 后须提交新方案；任何修改已批准结论的动作都必须创建新的决策版本。</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

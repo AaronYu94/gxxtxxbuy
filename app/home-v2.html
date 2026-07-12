@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoatedBuy — Shop China. Ship your way.</title>
+<!--
+  Design Language V2 · Home V2 (WP-0..WP-5)
+  Self-contained landing prototype. Foundation = token layer (WP-1) + Journey SVG kit (WP-2)
+  + card tiers (WP-3) + motion system (WP-4). WP-5 = the 9 film-rhythm sections below.
+  Later (WP-6/7): STAGES -> JOURNEY_STAGES in app.js; <style> -> styles-v2.css; markup -> renderDashboard.
+-->
+<style>
+/* ===================================================== WP-1 · TOKEN LAYER */
+:root{
+  --c-coral:#F0503D; --c-coral-deep:#C7361F; --c-coral-wash:#FFF1EE;
+  --c-warm-white:#FBFAF8; --c-paper:#FFFFFF; --c-graphite:#17191D; --c-graphite-2:#20242A;
+  --c-ink-2:#4A5158; --c-ink-3:#8A929B; --c-warehouse:#EEF0F2; --c-line:#E4E7EA;
+  --c-success:#16915B; --c-success-wash:#E7F4EC; --c-ship:#2F6BF0; --c-ship-wash:#E9F0FE;
+  --c-air:#6C4BD6; --c-air-wash:#EFEAFB; --c-danger:#C7361F; --c-amber:#B5741A;
+  --bg:var(--c-warm-white); --fg:var(--c-graphite); --muted:var(--c-ink-2); --faint:var(--c-ink-3);
+  --card:var(--c-paper); --hair:var(--c-line);
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;--s-7:48px;--s-8:64px;--s-9:96px;--s-10:128px;--s-11:180px;
+  --r-xs:6px;--r-sm:10px;--r-md:16px;--r-lg:24px;--r-xl:32px;--r-pill:999px;
+  --t-display:clamp(48px,6vw,84px); --t-h1:clamp(38px,4.2vw,54px); --t-section:clamp(30px,3.2vw,46px);
+  --t-h3:22px; --t-subtitle:20px; --t-body-lg:18px; --t-body:16px; --t-caption:13px; --t-eyebrow:12px;
+  --lh-tight:1.03; --lh-snug:1.18; --lh-body:1.62;
+  --fw-reg:400;--fw-med:560;--fw-bold:720;--fw-black:820;
+  --e-0:none; --e-1:0 1px 2px rgba(23,25,29,.05); --e-2:0 8px 24px rgba(23,25,29,.08);
+  --e-3:0 24px 60px rgba(23,25,29,.12); --e-coral:0 12px 30px rgba(240,80,61,.28);
+  --dur-fast:140ms;--dur-base:260ms;--dur-slow:520ms;--dur-draw:1500ms;
+  --ease-out:cubic-bezier(.22,.61,.36,1); --ease-inout:cubic-bezier(.65,.05,.36,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:var(--t-body)/var(--lh-body) Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+h1,h2,h3{margin:0;letter-spacing:-.02em;font-weight:var(--fw-black);line-height:var(--lh-snug)}
+.eyebrow{font-size:var(--t-eyebrow);font-weight:var(--fw-bold);letter-spacing:.16em;text-transform:uppercase;color:var(--c-coral)}
+.muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,monospace}
+a{color:inherit}
+
+/* ===================================================== WP-3 · CARD TIERS + buttons */
+.card-primary{background:var(--card);border-radius:var(--r-md);box-shadow:var(--e-2);border-top:3px solid var(--c-coral);padding:var(--s-6);transition:transform var(--dur-base) var(--ease-spring),box-shadow var(--dur-base) var(--ease-out)}
+.card-primary:hover{transform:translateY(-4px);box-shadow:var(--e-3)}
+.card-secondary{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-sm);box-shadow:var(--e-1);padding:var(--s-5);transition:transform var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.card-secondary:hover{transform:translateY(-2px);box-shadow:var(--e-2)}
+.card-floating{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--e-3);padding:var(--s-6)}
+.inline-chip{display:inline-flex;align-items:center;gap:6px;background:var(--c-coral-wash);color:var(--c-coral-deep);border-radius:var(--r-xs);padding:6px 12px;font-size:var(--t-caption);font-weight:var(--fw-bold)}
+.inline-chip.plain{background:var(--c-warehouse);color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:var(--fw-bold);cursor:pointer;border-radius:var(--r-xs);padding:13px 22px;border:1px solid transparent;text-decoration:none;transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur-base) var(--ease-out)}
+.btn-primary{background:var(--c-coral);color:#fff}.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--e-coral)}
+.btn-ghost{background:var(--card);border-color:var(--hair);color:var(--fg)}.btn-ghost:hover{border-color:var(--c-coral);color:var(--c-coral-deep)}
+.btn-inverse{background:#fff;color:var(--c-coral-deep)}.btn-inverse:hover{transform:translateY(-2px)}
+
+/* ===================================================== header */
+.nav{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--hair)}
+.nav .in{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:var(--s-4)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:var(--fw-black);letter-spacing:-.01em}
+.brand .g{width:30px;height:30px;border-radius:9px;background:var(--c-coral);color:#fff;display:grid;place-items:center;font-size:17px;font-weight:900}
+.nav .links{display:flex;gap:var(--s-4);margin-left:var(--s-5);font-size:14px;color:var(--muted)}
+.nav .links a{text-decoration:none}.nav .links a:hover{color:var(--fg)}
+.nav .sp{margin-left:auto;display:flex;gap:10px;align-items:center}
+@media(max-width:820px){.nav .links{display:none}}
+
+/* ===================================================== 01 HERO (split) */
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:var(--s-8);align-items:center;padding:var(--s-11) 0 var(--s-9)}
+.hero h1{font-size:var(--t-display);line-height:var(--lh-tight)}
+.hero h1 em{color:var(--c-coral);font-style:normal}
+.hero .lede{font-size:var(--t-body-lg);color:var(--muted);max-width:520px;margin:var(--s-4) 0 var(--s-5)}
+.paste{display:flex;gap:10px;background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:8px;box-shadow:var(--e-2);max-width:520px;margin-top:var(--s-4)}
+.paste input{flex:1;border:none;background:transparent;font:inherit;font-size:15px;padding:10px 12px;color:var(--fg);outline:none}
+.paste input::placeholder{color:var(--faint)}
+.hero .sub-actions{display:flex;gap:12px;align-items:center;margin-top:var(--s-4);flex-wrap:wrap}
+.platforms{display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--s-5)}
+.platforms span{font-size:var(--t-caption);color:var(--faint);align-self:center;margin-right:2px}
+.platforms b{font-size:var(--t-caption);font-weight:var(--fw-bold);border:1px solid var(--hair);border-radius:var(--r-pill);padding:5px 12px;color:var(--muted)}
+/* hero product vignette */
+.vignette{padding:var(--s-6)}
+.vignette .vh{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-4)}
+.vignette .vh b{font-size:15px}.vignette .vh .tag{font-size:11px;font-weight:800;color:var(--c-air);background:var(--c-air-wash);border-radius:var(--r-pill);padding:3px 10px}
+.vstep{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:12px;padding:9px 0;position:relative}
+.vstep .bullet{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;z-index:1}
+.vstep:not(:last-child)::before{content:"";position:absolute;left:12.5px;top:26px;bottom:-9px;width:2px;background:var(--hair)}
+.vstep.done:not(:last-child)::before{background:var(--c-success)}
+.vstep .name{font-size:14px;font-weight:var(--fw-med)}
+.vstep .meta{font-size:12px;color:var(--faint)}
+.vstep.cur .bullet{box-shadow:0 0 0 0 rgba(240,80,61,.5);animation:ring 1.8s var(--ease-out) infinite}
+.vstep.cur .name{font-weight:var(--fw-bold)}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(240,80,61,.45)}70%,100%{box-shadow:0 0 0 12px rgba(240,80,61,0)}}
+.vfoot{display:flex;gap:10px;margin-top:var(--s-4);padding-top:var(--s-4);border-top:1px solid var(--hair)}
+.vfoot .st{flex:1}.vfoot .st b{display:block;font-size:19px}.vfoot .st span{font-size:11.5px;color:var(--faint)}
+
+/* ===================================================== 02 PROOF ribbon */
+.proof{background:var(--c-graphite);color:#fff}
+.proof .in{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-5);padding:var(--s-5) 0}
+.proof .p{display:flex;flex-direction:column;gap:2px}
+.proof .p b{font-size:20px}.proof .p span{font-size:12px;color:#AEB6BF}
+@media(max-width:640px){.proof .in{grid-template-columns:repeat(2,1fr)}}
+
+/* ===================================================== section frame */
+.section{padding:var(--s-10) 0}
+.section-head{max-width:680px;margin:0 auto var(--s-8);text-align:center}
+.section-head.left{margin-left:0;text-align:left}
+.section-head h2{font-size:var(--t-section);margin:var(--s-3) 0}
+.section-head p{font-size:var(--t-body-lg);color:var(--muted);margin:0}
+
+/* ===================================================== 03 JOURNEY spine (climax) */
+.spine-wrap{overflow-x:auto}
+svg.spine{display:block;width:100%;min-width:900px;height:auto;overflow:visible}
+#spineTrack{stroke:var(--c-warehouse);stroke-width:4;fill:none;stroke-linecap:round}
+#spineProg{stroke:var(--c-coral);stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset var(--dur-draw) var(--ease-inout)}
+.node-halo{transform-box:fill-box;transform-origin:center;animation:halo 2.1s var(--ease-out) infinite}
+@keyframes halo{0%{transform:scale(1);opacity:.42}70%,100%{transform:scale(2.6);opacity:0}}
+.node-dot{transition:r var(--dur-base) var(--ease-spring)}
+.node.active .node-dot{r:11}
+.node-label{font:800 13px Inter,sans-serif;fill:var(--fg)}
+.node-cn{font:500 11px Inter,sans-serif;fill:var(--faint)}
+.node-glyph{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.spine-details{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s-4);min-width:900px;margin-top:var(--s-5)}
+.spine-details .col{text-align:center;padding:0 4px}
+.spine-details .col .k{font-size:12px;font-weight:800;letter-spacing:.02em}
+.spine-details .col .d{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:6px}
+.spine-scroll{overflow-x:auto}
+@media(max-width:940px){.spine-details{grid-template-columns:repeat(7,minmax(120px,1fr))}}
+
+/* ===================================================== 04 BENTO */
+.bento{display:grid;gap:var(--s-4);grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(158px,auto);
+  grid-template-areas:"buy buy stat" "qc ship stat"}
+.b-buy{grid-area:buy}.b-qc{grid-area:qc}.b-ship{grid-area:ship}.b-stat{grid-area:stat}
+.bento .cell{display:flex;flex-direction:column;justify-content:space-between}
+.bento h3{font-size:var(--t-h3)}
+.bento .lead{font-size:15px;color:var(--muted);margin-top:6px}
+.bento .tagi{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c-coral)}
+.b-buy{background:var(--card)}
+.qc-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.qc-shot{position:relative;aspect-ratio:1;border-radius:8px;background:var(--c-warm-white);border:1px solid var(--hair);display:grid;place-items:center;overflow:hidden}
+.qc-shot svg{width:56%;height:56%}
+.qc-shot::before,.qc-shot::after{content:"";position:absolute;width:7px;height:7px;border:1.5px solid var(--c-ink-3);opacity:.55}
+.qc-shot::before{top:5px;left:5px;border-right:0;border-bottom:0}
+.qc-shot::after{bottom:5px;right:5px;border-left:0;border-top:0}
+.qc-shot.ok{border-color:var(--c-success);background:var(--c-success-wash)}
+.qc-badge{position:absolute;top:4px;right:4px;width:15px;height:15px;border-radius:50%;background:var(--c-success);color:#fff;display:grid;place-items:center;font-size:9px;font-weight:800;line-height:1}
+.b-stat{background:var(--c-graphite);color:#fff;align-items:flex-start;justify-content:center;gap:var(--s-6);padding:var(--s-6);position:relative;overflow:hidden}
+.b-stat::after{content:"";position:absolute;right:-46px;bottom:-46px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(108,75,214,.30),transparent 70%);pointer-events:none}
+.b-stat>div{position:relative;z-index:1}
+.b-stat .big{font-size:44px;font-weight:820;line-height:1;color:#fff}
+.b-stat .big.a{color:#B79BFF}
+.b-stat span{font-size:13px;color:#AEB6BF}
+@media(max-width:760px){.bento{grid-template-columns:1fr;grid-template-areas:"buy" "qc" "ship" "stat"}}
+
+/* ===================================================== 05 WORKSPACE dashboard (dark) */
+.work{background:var(--c-graphite);color:#fff}
+.dash{border-radius:var(--r-lg);background:var(--c-graphite-2);box-shadow:var(--e-3);padding:var(--s-6)}
+.dash .dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-5);flex-wrap:wrap;gap:12px}
+.dash .dh b{font-size:16px}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s-4)}
+.tile{background:#181B20;border:1px solid #2A2F36;border-radius:var(--r-sm);padding:var(--s-4)}
+.tile .t{font-size:12px;color:#8A929B}.tile .v{font-size:30px;font-weight:820;margin-top:6px}
+.tile .pill{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;border-radius:var(--r-pill);padding:3px 9px}
+.pill.g{background:var(--c-success-wash);color:#5FD3A0}.pill.b{background:#152138;color:#7FA9FF}.pill.a{background:#241a3a;color:#C4B5FD}
+.spark{display:flex;gap:3px;align-items:flex-end;height:22px;margin-top:8px}
+.spark i{flex:1;background:var(--c-coral);border-radius:2px;opacity:.85}
+.next-strip{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s-4);margin-top:var(--s-5);
+  background:#181B20;border:1px solid #2A2F36;border-left:3px solid var(--c-coral);border-radius:var(--r-sm);padding:var(--s-4) var(--s-5)}
+.next-strip .ico{width:38px;height:38px;border-radius:10px;background:rgba(240,80,61,.16);color:#FF8A7A;display:grid;place-items:center}
+.next-strip h4{margin:0;font-size:15px}.next-strip p{margin:2px 0 0;font-size:13px;color:#8A929B}
+@media(max-width:820px){.tiles{grid-template-columns:repeat(2,1fr)}}
+
+/* ===================================================== 06 TRUST */
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4)}
+.trust-grid .card-secondary h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.trust-grid p{font-size:13.5px;color:var(--muted);margin:8px 0 0}
+@media(max-width:760px){.trust-grid{grid-template-columns:1fr}}
+
+/* ===================================================== 07 PRICING */
+.price-band{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-8);align-items:center}
+.price-band h2{font-size:var(--t-section)}
+.price-facts{display:flex;flex-direction:column;gap:var(--s-3)}
+.pf{display:flex;align-items:center;gap:12px;font-size:15px}
+.pf .n{width:30px;height:30px;border-radius:9px;background:var(--c-success-wash);color:var(--c-success);display:grid;place-items:center;font-weight:800;flex:none}
+.quote .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--hair);font-size:14px}
+.quote .row:last-child{border:none;font-weight:800;font-size:16px}
+.quote .row .muted{color:var(--muted)}
+@media(max-width:760px){.price-band{grid-template-columns:1fr}}
+
+/* ===================================================== 08 CTA */
+.cta{background:linear-gradient(135deg,var(--c-coral),var(--c-coral-deep));color:#fff;text-align:center}
+.cta .in{padding:var(--s-11) 24px}
+.cta h2{font-size:var(--t-h1);color:#fff;max-width:640px;margin:0 auto var(--s-3)}
+.cta p{color:rgba(255,255,255,.86);margin:0 auto var(--s-6);max-width:520px}
+.cta .paste{margin:0 auto;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);box-shadow:none}
+.cta .paste input{color:#fff}.cta .paste input::placeholder{color:rgba(255,255,255,.7)}
+
+/* ===================================================== 09 FOOTER */
+.foot{background:var(--c-graphite);color:#fff;padding:var(--s-9) 0 var(--s-7)}
+.foot .top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:var(--s-6)}
+.foot h4{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#8A929B;margin:0 0 12px;font-weight:700}
+.foot a{display:block;color:#C7CDD4;text-decoration:none;font-size:14px;margin:7px 0}
+.foot a:hover{color:#fff}
+.foot .brand .g{background:var(--c-coral)}
+.foot .lower{display:flex;justify-content:space-between;align-items:center;gap:var(--s-5);margin-top:var(--s-7);padding-top:var(--s-5);border-top:1px solid #2A2F36;flex-wrap:wrap}
+.foot .lower small{color:#8A929B;font-size:12px}
+.pay{display:flex;gap:8px;flex-wrap:wrap}
+.pay img{height:30px;width:auto;background:#fff;border-radius:5px;padding:3px 5px}
+@media(max-width:760px){.foot .top{grid-template-columns:1fr 1fr}}
+
+/* ===================================================== WP-4 · MOTION reveal */
+[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+[data-reveal].is-in{opacity:1;transform:none}
+.spine-details .col[data-reveal]:nth-child(2){transition-delay:.06s}
+.spine-details .col[data-reveal]:nth-child(3){transition-delay:.12s}
+.spine-details .col[data-reveal]:nth-child(4){transition-delay:.18s}
+.spine-details .col[data-reveal]:nth-child(5){transition-delay:.24s}
+.spine-details .col[data-reveal]:nth-child(6){transition-delay:.30s}
+.spine-details .col[data-reveal]:nth-child(7){transition-delay:.36s}
+.rm *,.rm *::before,.rm *::after{animation:none !important;transition:none !important}
+.rm [data-reveal]{opacity:1 !important;transform:none !important}
+@media(prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none}.node-halo,.vstep.cur .bullet{animation:none}#spineProg{transition:none}}
+</style>
+</head>
+<body class="client-body dl-v2">
+
+<!-- ===== header ===== -->
+<header class="nav"><div class="in">
+  <div class="brand"><span class="g">G</span> GOATEDBUY</div>
+  <div class="links"><a href="#journey">How it works</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#trust">Trust</a></div>
+  <div class="sp"><a class="btn btn-ghost" href="#hero">Sign in</a><a class="btn btn-primary" href="#hero">Start order</a></div>
+</div></header>
+
+<!-- ===== 01 HERO ===== -->
+<section id="hero"><div class="wrap hero">
+  <div>
+    <span class="eyebrow" data-reveal>One link · one warehouse · your world</span>
+    <h1 data-reveal>Shop China.<br><em>Ship your way.</em></h1>
+    <p class="lede" data-reveal>Paste any Taobao, 1688 or Weidian link. We buy, inspect, store, and bundle it into one smart international parcel — tracked end to end.</p>
+    <div class="paste" data-reveal>
+      <input placeholder="Paste a Taobao / 1688 / Weidian product link">
+      <button class="btn btn-primary">Start order</button>
+    </div>
+    <div class="platforms" data-reveal>
+      <span>Works with</span><b>Taobao</b><b>1688</b><b>Weidian</b><b>Yupoo</b>
+    </div>
+  </div>
+  <div class="card-floating vignette" data-reveal>
+    <div class="vh"><b>Parcel · GB-2481</b><span class="tag">AIR · ~4 days</span></div>
+    <div class="vstep done"><span class="bullet" style="background:var(--c-ink-3)">✓</span><span class="name">Sourced in China</span><span class="meta">3 links</span></div>
+    <div class="vstep done"><span class="bullet" style="background:var(--c-coral)">✓</span><span class="name">Purchased</span><span class="meta">12 items</span></div>
+    <div class="vstep done"><span class="bullet" style="background:var(--c-success)">✓</span><span class="name">Quality checked</span><span class="meta">36 photos</span></div>
+    <div class="vstep cur"><span class="bullet" style="background:var(--c-coral)"></span><span class="name">In warehouse</span><span class="meta">day 3 / 90</span></div>
+    <div class="vstep"><span class="bullet" style="background:var(--c-warehouse)"></span><span class="name">Bundled</span><span class="meta">—</span></div>
+    <div class="vstep"><span class="bullet" style="background:var(--c-warehouse)"></span><span class="name">Delivered</span><span class="meta">—</span></div>
+    <div class="vfoot">
+      <div class="st"><b>$0.00</b><span>Storage fee · 87 days left</span></div>
+      <div class="st"><b>2.4 kg</b><span>Est. combined weight</span></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===== 02 PROOF ===== -->
+<section class="proof"><div class="wrap in">
+  <div class="p"><b>3–5</b><span>QC photos before you ship</span></div>
+  <div class="p"><b>90 days</b><span>free warehouse storage</span></div>
+  <div class="p"><b>700+</b><span>routes to 220+ countries</span></div>
+  <div class="p"><b>1 parcel</b><span>from many separate orders</span></div>
+</div></section>
+
+<!-- ===== 03 JOURNEY spine (climax) ===== -->
+<section class="section" id="journey"><div class="wrap">
+  <div class="section-head" data-reveal>
+    <span class="eyebrow">China to your doorstep</span>
+    <h2>One journey. Seven clear moves.</h2>
+    <p>Not a pile of steps — a single parcel moving through one system. Follow it from source to delivery.</p>
+  </div>
+  <div class="spine-scroll" data-reveal>
+    <svg class="spine" viewBox="0 0 960 180" aria-label="Journey route">
+      <path id="spineTrack" d=""/><path id="spineProg" d=""/>
+      <g id="spineNodes"></g>
+      <g id="spineParcel" opacity="0">
+        <ellipse cx="0" cy="22" rx="14" ry="4" fill="rgba(23,25,29,.14)"/>
+        <path d="M0,-11 L15,-4 L0,3 L-15,-4 Z" fill="#F7B0A6"/>
+        <path d="M-15,-4 L0,3 L0,18 L-15,11 Z" fill="#F0503D"/>
+        <path d="M15,-4 L0,3 L0,18 L15,11 Z" fill="#C7361F"/>
+        <path d="M0,-11 L0,3 M0,3 L0,18" stroke="#FBFAF8" stroke-width="2" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="spine-details" id="spineDetails"></div>
+  </div>
+</div></section>
+
+<!-- ===== 04 FEATURES bento ===== -->
+<section class="section" id="features" style="background:var(--card);border-block:1px solid var(--hair)"><div class="wrap">
+  <div class="section-head" data-reveal><span class="eyebrow">From checkout to doorstep</span><h2>Everything your haul needs</h2></div>
+  <div class="bento" data-reveal>
+    <div class="cell card-primary b-buy">
+      <div><span class="tagi">Buy</span><h3 style="margin-top:8px">Paste it. We purchase it.</h3><p class="lead">Drop any China-marketplace link. A dedicated agent buys it for you and routes it to our warehouse — no China account needed.</p></div>
+      <div class="platforms"><b>Taobao</b><b>1688</b><b>Weidian</b><b>Yupoo</b></div>
+    </div>
+    <div class="cell card-secondary b-qc">
+      <div><span class="tagi">Check</span><h3 style="margin-top:8px">See it first.</h3><p class="lead">3–5 QC photos per item.</p></div>
+      <div class="qc-mosaic">
+        <div class="qc-shot"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="var(--c-ship)" stroke-width="1.8"/></svg></div>
+        <div class="qc-shot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="none" stroke="var(--c-air)" stroke-width="1.8"/></svg></div>
+        <div class="qc-shot"><svg viewBox="0 0 24 24"><path d="M12 5l7 13H5z" fill="none" stroke="var(--c-amber)" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        <div class="qc-shot ok"><span class="qc-badge">✓</span><svg viewBox="0 0 24 24"><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="var(--c-success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+    <div class="cell card-secondary b-ship">
+      <div><span class="tagi">Ship</span><h3 style="margin-top:8px">One smart parcel.</h3><p class="lead">Combine many orders; pick the best of 700+ routes.</p></div>
+      <svg viewBox="0 0 120 40" style="margin-top:8px"><path d="M6 32 C 40 32 60 12 114 8" stroke="var(--c-warehouse)" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M6 32 C 40 32 60 12 114 8" stroke="var(--c-air)" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="4 6"/><path d="M110 3l6 5-6 5" stroke="var(--c-air)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="cell b-stat">
+      <div><div class="big">700+</div><span>shipping routes</span></div>
+      <div><div class="big a">220+</div><span>countries & regions</span></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===== 05 WORKSPACE dashboard (climax 2) ===== -->
+<section class="section work" id="workspace"><div class="wrap">
+  <div class="section-head" data-reveal><span class="eyebrow" style="color:#FF8A7A">Your workspace</span><h2 style="color:#fff">Every order, one clear board</h2><p style="color:#AEB6BF">Not a screenshot — a real control surface for your whole haul.</p></div>
+  <div class="dash" data-reveal>
+    <div class="dh"><b>Workspace overview</b><span class="inline-chip plain" style="background:#181B20;color:#8A929B">synced just now</span></div>
+    <div class="tiles">
+      <div class="tile"><div class="t">Today's orders</div><div class="v">3</div><span class="pill g">2 purchasing</span></div>
+      <div class="tile"><div class="t">Active parcels</div><div class="v">1</div><span class="pill b">in warehouse</span></div>
+      <div class="tile"><div class="t">Warehouse</div><div class="v">12</div><span class="pill b">items stored</span><div class="spark"><i style="height:40%"></i><i style="height:65%"></i><i style="height:50%"></i><i style="height:80%"></i><i style="height:100%"></i></div></div>
+      <div class="tile"><div class="t">Coupons</div><div class="v">1</div><span class="pill a">WELCOME10</span></div>
+      <div class="tile"><div class="t">Wallet</div><div class="v">$0</div><span class="pill g">0 locked</span></div>
+    </div>
+    <div class="next-strip">
+      <div class="ico">▶</div>
+      <div><h4>Next: review QC photos</h4><p>Enamel Pin Set is inspected and waiting for your approval.</p></div>
+      <a class="btn btn-primary">Open QC</a>
+    </div>
+  </div>
+</div></section>
+
+<!-- ===== 06 TRUST ===== -->
+<section class="section" id="trust" style="background:var(--c-warehouse)"><div class="wrap">
+  <div class="section-head" data-reveal><span class="eyebrow">Buyer protection</span><h2>What's protected, said plainly</h2></div>
+  <div class="trust-grid" data-reveal>
+    <div class="card-secondary"><h3>Transparent fees</h3><p>Service fee shown up front; international shipping billed at real cost. No hidden markup on goods.</p></div>
+    <div class="card-secondary"><h3>QC before shipping</h3><p>Every item is inspected and photographed on arrival. Defects are reported before you pay to ship.</p></div>
+    <div class="card-secondary"><h3>90 days free storage</h3><p>Consolidate at your pace. Storage is free for 90 days; nothing ships until you approve it.</p></div>
+    <div class="card-secondary"><h3>Refunds & returns</h3><p>Out of stock or price changed? Cancel the affected sub-order; siblings keep moving. Refunds to wallet.</p></div>
+    <div class="card-secondary"><h3>Private by default</h3><p>Your account data stays behind your session. New devices require email confirmation.</p></div>
+    <div class="card-secondary"><h3>Real tracking</h3><p>Live logistics status from warehouse to doorstep across 700+ routes — one place to watch it all.</p></div>
+  </div>
+</div></section>
+
+<!-- ===== 07 PRICING ===== -->
+<section class="section" id="pricing"><div class="wrap price-band">
+  <div data-reveal>
+    <span class="eyebrow">Pricing</span>
+    <h2 style="margin:12px 0 16px">Fees you can see.</h2>
+    <div class="price-facts">
+      <div class="pf"><span class="n">1</span> Goods at the real seller price — no markup.</div>
+      <div class="pf"><span class="n">2</span> A flat service fee, shown before you pay.</div>
+      <div class="pf"><span class="n">3</span> International shipping billed at carrier cost.</div>
+    </div>
+  </div>
+  <div class="card-primary quote" data-reveal>
+    <div class="row"><span class="muted">Goods (12 items)</span><span>at seller price</span></div>
+    <div class="row"><span class="muted">Service fee</span><span>5% · shown up front</span></div>
+    <div class="row"><span class="muted">Domestic storage</span><span>free · 90 days</span></div>
+    <div class="row"><span class="muted">International shipping</span><span>at cost · 700+ routes</span></div>
+    <div class="row"><span>You always see the total</span><span>before you pay</span></div>
+  </div>
+</div></section>
+
+<!-- ===== 08 CTA ===== -->
+<section class="cta"><div class="in">
+  <h2 data-reveal>Start your first haul today.</h2>
+  <p data-reveal>New buyers get a welcome coupon and 90 days of free storage. Questions? Our Discord community is one click away.</p>
+  <div class="paste" data-reveal style="max-width:520px">
+    <input placeholder="Paste your first product link">
+    <button class="btn btn-inverse">Start order</button>
+  </div>
+</div></section>
+
+<!-- ===== 09 FOOTER ===== -->
+<footer class="foot"><div class="wrap">
+  <div class="top">
+    <div class="brand-col">
+      <div class="brand" style="color:#fff"><span class="g">G</span> GOATEDBUY</div>
+      <p style="color:#8A929B;font-size:13px;max-width:260px;margin-top:12px">The cross-border shopping agent that turns one link into one delivered parcel.</p>
+    </div>
+    <div><h4>Buying</h4><a href="#journey">How it works</a><a href="#features">Features</a><a href="#pricing">Fees</a></div>
+    <div><h4>Warehouse</h4><a href="#trust">QC & storage</a><a href="#workspace">Workspace</a><a href="#journey">Tracking</a></div>
+    <div><h4>Support</h4><a href="#trust">Buyer protection</a><a href="#">Community</a><a href="#">Contact</a></div>
+  </div>
+  <div class="lower">
+    <small>© 2021–2026 GOATED BUY LIMITED · Hong Kong</small>
+    <div class="pay">
+      <img src="./assets/payment/visa.svg" alt="Visa"><img src="./assets/payment/mastercard.svg" alt="Mastercard">
+      <img src="./assets/payment/discover.svg" alt="Discover"><img src="./assets/payment/unionpay.svg" alt="UnionPay">
+      <img src="./assets/payment/jcb.svg" alt="JCB">
+    </div>
+  </div>
+</div></footer>
+
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script>
+/* ===================================================== WP-2 + WP-4 runtime */
+(function(){
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Single Journey source (WP-6 will lift this to JOURNEY_STAGES in app.js)
+  const STAGES = [
+    {label:"China",     cn:"中国货源", color:"#8A929B", glyph:"M9 15l6-6M8.5 12l-2 2a2.8 2.8 0 004 4l2-2M15.5 12l2-2a2.8 2.8 0 00-4-4l-2 2", detail:"Search platforms and suppliers; paste Taobao, 1688 or Weidian links."},
+    {label:"Purchased", cn:"平台代采", color:"#F0503D", glyph:"M5 12.5l4.5 4.5L19 7", detail:"A dedicated agent buys it for you; the seller ships to our China warehouse."},
+    {label:"QC",        cn:"入仓质检", color:"#B5741A", glyph:"M11 4a7 7 0 105 12l4 4M11 8v6M8 11h6", detail:"Inspected and photographed on arrival; defects are flagged before shipping."},
+    {label:"Warehouse", cn:"仓储",     color:"#2F6BF0", glyph:"M4 20V9l8-4 8 4v11M9 20v-6h6v6", detail:"Approved goods enter 90 days of free storage until you're ready."},
+    {label:"Bundle",    cn:"合包",     color:"#2F6BF0", glyph:"M12 4l7 3-7 3-7-3 7-3zM5 11l7 3 7-3M5 15l7 3 7-3", detail:"Combine many separate orders into one smart, lighter parcel."},
+    {label:"Air",       cn:"国际空运", color:"#6C4BD6", glyph:"M20 5L5 11l5 2M20 5l-6 15-2-6M20 5l-8 8", detail:"Pick from 700+ routes to 220+ countries; follow live tracking."},
+    {label:"Delivered", cn:"送达",     color:"#16915B", glyph:"M4 11l8-7 8 7M6 10v9h12v-9M10 19v-5h4v5", detail:"One dashboard for every order, payment, parcel and message."}
+  ];
+
+  const track = document.getElementById("spineTrack");
+  const prog  = document.getElementById("spineProg");
+  const parcel= document.getElementById("spineParcel");
+  const nodesG= document.getElementById("spineNodes");
+  const detailsEl = document.getElementById("spineDetails");
+  const NS = "http://www.w3.org/2000/svg";
+
+  // Build a smooth path through EVENLY-SPACED node x-positions so nodes align with the detail columns below.
+  const N = STAGES.length, X0=60, X1=900, midY=92, amp=26;
+  const nx = STAGES.map((_,i)=> X0 + (X1-X0)*i/(N-1));
+  const ny = STAGES.map((_,i)=> midY + (i%2?amp:-amp)*0.7*Math.sin(i*0.9));
+  let d = `M${nx[0]} ${ny[0]}`;
+  for(let i=1;i<N;i++){ const cx=(nx[i-1]+nx[i])/2; d += ` C ${cx} ${ny[i-1]} ${cx} ${ny[i]} ${nx[i]} ${ny[i]}`; }
+  track.setAttribute("d",d); prog.setAttribute("d",d);
+
+  const L = track.getTotalLength();
+  prog.style.strokeDasharray = L;
+  prog.style.strokeDashoffset = RM ? 0 : L;
+
+  // node fractions along the path (approx even) for the parcel to stop on
+  const frac = STAGES.map((_,i)=> i/(N-1));
+
+  STAGES.forEach((s,i)=>{
+    const x=nx[i], y=ny[i];
+    const g=document.createElementNS(NS,"g"); g.setAttribute("class","node"); g.setAttribute("data-i",i);
+    g.innerHTML =
+      `<circle class="node-halo" cx="${x}" cy="${y}" r="10" fill="${s.color}"></circle>`+
+      `<circle class="node-dot" cx="${x}" cy="${y}" r="9" fill="${s.color}"></circle>`+
+      `<g class="node-glyph" transform="translate(${x-8.4},${y-8.4}) scale(0.7)"><path d="${s.glyph}"/></g>`+
+      `<text class="node-label" x="${x}" y="${y-24}" text-anchor="middle">${s.label}</text>`+
+      `<text class="node-cn" x="${x}" y="${y+32}" text-anchor="middle">${s.cn}</text>`;
+    g.querySelector(".node-halo").style.animationDelay=(i*0.26)+"s";
+    nodesG.appendChild(g);
+  });
+
+  detailsEl.innerHTML = STAGES.map((s,i)=>
+    `<div class="col" data-reveal><div class="k" style="color:${s.color}">${String(i+1).padStart(2,"0")} ${s.label}</div><div class="d">${s.detail}</div></div>`
+  ).join("");
+
+  // reveal observer
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("is-in");io.unobserve(e.target);}}),{threshold:.16});
+  document.querySelectorAll("[data-reveal]").forEach(el=>io.observe(el));
+
+  if(RM){
+    document.documentElement.classList.add("rm");
+    const p=track.getPointAtLength(L); parcel.setAttribute("transform",`translate(${p.x},${p.y-15})`); parcel.setAttribute("opacity","1");
+  } else {
+    // draw-in + parcel travel when the spine scrolls into view
+    const sio=new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ prog.style.strokeDashoffset=0; sio.disconnect(); travel(); }}),{threshold:.25});
+    sio.observe(document.querySelector(".spine-scroll"));
+    function travel(){
+      parcel.setAttribute("opacity","1");
+      const seg=820, dwell=560, segs=N-1;
+      let start=null, leg=-1;
+      const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      function place(f){ const p=track.getPointAtLength(Math.max(0,Math.min(1,f))*L); parcel.setAttribute("transform",`translate(${p.x},${p.y-15})`); }
+      function setActive(i){ document.querySelectorAll(".node").forEach(n=>n.classList.toggle("active",+n.dataset.i===i)); }
+      function pulse(i){ const h=document.querySelector('.node[data-i="'+i+'"] .node-halo'); if(!h)return; h.style.animation="none"; void h.getBBox(); h.style.animation="halo 2.1s var(--ease-out) infinite"; }
+      setActive(0); pulse(0);
+      function frame(ts){ if(start===null)start=ts;
+        const el=ts-start, cyc=seg+dwell, idx=Math.floor(el/cyc);
+        if(idx>=segs){ start=ts; leg=-1; setActive(0); place(0); requestAnimationFrame(frame); return; }
+        const w=el%cyc; let f;
+        if(w<seg){ f=(frac[idx] + (frac[idx+1]-frac[idx])*ease(w/seg)); }
+        else { f=frac[idx+1]; if(leg!==idx+1){ leg=idx+1; setActive(idx+1); pulse(idx+1);} }
+        place(f); requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+  }
+  if(window.lucide) lucide.createIcons({attrs:{"stroke-width":1.8}});
+})();
+</script>
+</body>
+</html>

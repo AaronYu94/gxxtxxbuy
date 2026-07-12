@@ -1354,10 +1354,8 @@ tr:last-child td {
   margin: 0 auto;
   padding: 56px 64px;
   background-color: #f8f6f3;
-  background-image: url("./assets/goatedbuy-hero-background.jpg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  /* Design Language V2: legacy hero photo retired; .home-hero is no longer rendered
+     (renderDashboard is now the dl-v2 layout). Kept as dead style pending full Stage-E sweep. */
 }
 
 .home-hero::before {
@@ -3148,3 +3146,34 @@ tr:last-child td {
     padding: 6px;
   }
 }
+
+/* ---- Social sign-in (OAuth) ---- */
+.oauth-block { margin-top: 18px; }
+.oauth-divider {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--muted); font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.oauth-divider::before, .oauth-divider::after {
+  content: ""; flex: 1; height: 1px; background: var(--line);
+}
+.oauth-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.oauth-button {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel); color: var(--ink);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .05s ease;
+}
+.oauth-button:hover { border-color: var(--ink); }
+.oauth-button:active { transform: translateY(1px); }
+.oauth-button:disabled { opacity: .55; cursor: default; transform: none; }
+.oauth-button .oauth-mark { display: inline-flex; flex: 0 0 auto; }
+.oauth-button.is-unconfigured { color: var(--muted); }
+.oauth-button .oauth-setup {
+  margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: .03em;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 2px 7px;
+}
+@media (max-width: 520px) { .oauth-buttons { grid-template-columns: 1fr; } }

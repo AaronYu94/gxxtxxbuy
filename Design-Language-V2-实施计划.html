@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoatedBuy · Design Language V2 实施计划</title>
+<style>
+:root{
+  --coral:#F0503D; --coral-deep:#C7361F; --coral-wash:#FFF1EE;
+  --warm-white:#FBFAF8; --paper:#FFFFFF; --graphite:#17191D; --graphite-2:#23262B;
+  --ink-2:#4A5158; --ink-3:#8A929B; --warehouse:#EEF0F2; --line:#E4E7EA;
+  --success:#16915B; --success-wash:#E7F4EC; --ship:#2F6BF0; --ship-wash:#E9F0FE;
+  --air:#6C4BD6; --air-wash:#EFEAFB; --amber:#B5741A;
+  --bg:var(--warm-white); --fg:var(--graphite); --muted:var(--ink-2); --faint:var(--ink-3);
+  --card:var(--paper); --hair:var(--line);
+  --e1:0 1px 2px rgba(23,25,29,.05); --e2:0 8px 24px rgba(23,25,29,.08); --e3:0 24px 60px rgba(23,25,29,.12);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0f1114;--fg:#ECEDEF;--muted:#AEB6BF;--faint:#7E868F;--card:#181B20;--hair:#272B31;
+    --coral-wash:#2a1712;--warehouse:#20242a;--ship-wash:#152138;--air-wash:#1f1836;--success-wash:#122a20;
+    --e1:0 1px 2px rgba(0,0,0,.4);--e2:0 8px 24px rgba(0,0,0,.5);--e3:0 24px 60px rgba(0,0,0,.6);}
+}
+:root[data-theme="light"]{--bg:#FBFAF8;--fg:#17191D;--muted:#4A5158;--faint:#8A929B;--card:#fff;--hair:#E4E7EA;
+  --coral-wash:#FFF1EE;--warehouse:#EEF0F2;--ship-wash:#E9F0FE;--air-wash:#EFEAFB;--success-wash:#E7F4EC;}
+:root[data-theme="dark"]{--bg:#0f1114;--fg:#ECEDEF;--muted:#AEB6BF;--faint:#7E868F;--card:#181B20;--hair:#272B31;
+  --coral-wash:#2a1712;--warehouse:#20242a;--ship-wash:#152138;--air-wash:#1f1836;--success-wash:#122a20;
+  --e1:0 1px 2px rgba(0,0,0,.4);--e2:0 8px 24px rgba(0,0,0,.5);--e3:0 24px 60px rgba(0,0,0,.6);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px 120px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* header */
+header.hero{padding:64px 0 40px;border-bottom:1px solid var(--hair);margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:720;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--coral);background:var(--coral-wash);padding:5px 12px;border-radius:999px}
+h1{font-size:clamp(38px,5.5vw,64px);line-height:1.04;letter-spacing:-.02em;margin:18px 0 10px;font-weight:820}
+h1 em{color:var(--coral);font-style:normal}
+.lede{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:720px;margin:0}
+.route{margin:34px 0 6px;overflow-x:auto}
+.route svg{display:block;min-width:680px}
+
+/* toolbar */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--hair);padding:10px 0;margin-bottom:34px}
+.bar .in{max-width:1080px;margin:0 auto;padding:0 22px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar a{font-size:13px;text-decoration:none;color:var(--fg);border:1px solid var(--hair);border-radius:999px;
+  padding:5px 12px;background:var(--card);white-space:nowrap}
+.bar a:hover{border-color:var(--coral)}
+.bar .sp{margin-left:auto}
+button.tog{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--hair);background:var(--card);
+  color:var(--fg);padding:6px 13px;border-radius:8px}
+
+h2.sec{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  margin:52px 0 4px;font-weight:720}
+h3.big{font-size:clamp(24px,3vw,34px);letter-spacing:-.01em;margin:2px 0 18px;font-weight:780}
+p{margin:0 0 14px}
+.sub{color:var(--muted)}
+
+/* law cards */
+.laws{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:8px 0 4px}
+.law{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:18px 18px;box-shadow:var(--e1)}
+.law b{display:block;font-size:15px;margin-bottom:6px}
+.law span{font-size:14px;color:var(--muted)}
+.law .n{font-size:12px;font-weight:800;color:var(--coral)}
+
+/* spec blocks */
+.block{background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:22px;margin:14px 0;box-shadow:var(--e1)}
+.block h4{margin:0 0 4px;font-size:18px}
+.block .tag{font-size:12px;font-weight:800;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+
+/* palette */
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
+.sw{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--card)}
+.sw .chip{height:52px}
+.sw .meta{padding:8px 10px}
+.sw .meta code{font-size:12px;font-weight:700}
+.sw .meta small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.map{margin-top:16px;overflow-x:auto}
+.map table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px}
+.map th,.map td{border-bottom:1px solid var(--hair);padding:8px 10px;text-align:left}
+.map th{color:var(--faint);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:7px}
+
+/* scale strips */
+.scale{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.scale .s{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.scale .s i{display:block;background:var(--coral);border-radius:3px;opacity:.85}
+.radius-demo{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+.radius-demo div{width:74px;height:56px;background:var(--coral-wash);border:1.5px solid var(--coral);
+  display:flex;align-items:flex-end;justify-content:center;font-size:11px;color:var(--coral-deep);padding-bottom:5px;font-weight:700}
+.type-demo>*{margin:2px 0;letter-spacing:-.01em}
+.pre{background:var(--warehouse);border:1px solid var(--hair);border-radius:12px;padding:14px 16px;
+  overflow-x:auto;font-size:12.5px;line-height:1.7;color:var(--fg);margin-top:12px}
+.pre .c{color:var(--faint)}
+
+/* card tiers demo */
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:16px}
+.tier{padding:16px;min-height:118px;display:flex;flex-direction:column;justify-content:space-between}
+.tier b{font-size:14px}.tier small{font-size:11.5px;color:var(--muted)}
+.t-primary{background:var(--card);border-radius:16px;box-shadow:var(--e2);border-top:3px solid var(--coral)}
+.t-secondary{background:var(--card);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--e1)}
+.t-ghost{background:transparent;border:1.5px dashed var(--hair);border-radius:10px}
+.t-floating{background:var(--card);border-radius:24px;box-shadow:var(--e3)}
+.t-inline{background:var(--coral-wash);border-radius:6px}
+
+/* work packages */
+.wps{display:grid;gap:12px;margin-top:6px}
+.wp{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:18px 20px;box-shadow:var(--e1);
+  transition:transform var(--ease) .2s, box-shadow var(--ease) .2s;scroll-margin-top:72px}
+.wp:hover{transform:translateY(-2px);box-shadow:var(--e2)}
+.wp .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.wp .id{font-size:12px;font-weight:820;color:#fff;background:var(--graphite);border-radius:8px;padding:4px 9px;white-space:nowrap}
+.wp.flag .id{background:var(--coral)}
+.wp h4{margin:0;font-size:17px;flex:1;min-width:180px}
+.wp .phase{font-size:11px;font-weight:700;color:var(--faint);border:1px solid var(--hair);border-radius:999px;padding:3px 9px}
+.wp .body{margin-top:10px;font-size:14px;color:var(--muted)}
+.wp .kv{margin-top:8px;font-size:13px}
+.wp .kv b{color:var(--fg)}
+.wp ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--muted)}
+.wp li{margin:3px 0}
+.stage-legend{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 2px}
+.pill{font-size:12px;border-radius:999px;padding:4px 11px;border:1px solid var(--hair);color:var(--muted);white-space:nowrap}
+.files{overflow-x:auto}
+.files table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px;margin-top:10px}
+.files td{border-bottom:1px solid var(--hair);padding:8px 10px;vertical-align:top}
+.files td:first-child{white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--coral-deep)}
+.note{background:var(--warehouse);border-left:3px solid var(--coral);border-radius:0 12px 12px 0;padding:14px 16px;
+  font-size:13.5px;color:var(--muted);margin-top:14px}
+footer.end{margin-top:48px;padding-top:20px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="bar"><div class="in">
+  <a href="#context">背景</a><a href="#laws">设计法令</a><a href="#spec">设计规范</a>
+  <a href="#packages">工作包</a><a href="#verify">验证</a><a href="#files">关键文件</a>
+  <span class="sp"></span>
+  <button class="tog" id="theme">切换主题</button>
+</div></div>
+
+<div class="wrap">
+<header class="hero" id="top">
+  <span class="kicker">Design Language V2 · 完整实施计划</span>
+  <h1>把"堆卡片"重构为<br>一条 <em>物流 Journey</em>。</h1>
+  <p class="lede">买家端已具备工程完成度，但缺少统一的设计哲学。这份计划围绕一个核心概念重建整个视觉系统：一件商品从中国出发，经采购、质检、仓储、合包、空运，最终送达全球——整站都是这条路线上的一个位置。</p>
+
+  <div class="route" aria-label="Journey 阶段示意">
+    <svg width="900" height="120" viewBox="0 0 900 120" fill="none" stroke-linecap="round">
+      <path d="M40 70 C 200 70, 260 70, 430 70 S 700 70, 860 70" stroke="var(--warehouse)" stroke-width="4"/>
+      <path d="M40 70 C 200 70, 260 70, 430 70 S 700 70, 720 70" stroke="var(--coral)" stroke-width="4"/>
+      <g font-family="inherit" font-size="12" font-weight="700" text-anchor="middle">
+        <g><circle cx="40"  cy="70" r="8" fill="var(--ink-3)"/><text x="40"  y="40" fill="var(--faint)">China</text></g>
+        <g><circle cx="177" cy="70" r="8" fill="var(--coral)"/><text x="177" y="40" fill="var(--fg)">Purchased</text></g>
+        <g><circle cx="314" cy="70" r="8" fill="var(--amber)"/><text x="314" y="40" fill="var(--fg)">QC</text></g>
+        <g><circle cx="451" cy="70" r="8" fill="var(--ship)"/><text x="451" y="40" fill="var(--fg)">Warehouse</text></g>
+        <g><circle cx="588" cy="70" r="8" fill="var(--ship)"/><text x="588" y="40" fill="var(--fg)">Bundle</text></g>
+        <g><circle cx="725" cy="70" r="8" fill="var(--air)"/><text x="725" y="40" fill="var(--fg)">Air</text></g>
+        <g><circle cx="862" cy="70" r="8" fill="var(--success)"/><text x="862" y="40" fill="var(--fg)">Delivered</text></g>
+      </g>
+    </svg>
+  </div>
+</header>
+
+<h2 class="sec" id="context">§ 背景与现状</h2>
+<h3 class="big">为什么要做 V2，而不是打磨按钮</h3>
+<p class="sub">整站是"白底 + 一模一样的圆角卡片"堆叠：信息密度平均、没有视觉高潮、没有品牌记忆点、几乎没有 Motion，插画/照片/3D/UI 四种视觉语言混用。工程 ≈ 70–80%，但停留在模板阶段。技术底座已探明，决定了实施方式：</p>
+<div class="laws" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr))">
+  <div class="law"><b>纯静态 · 无构建</b><span>单个 <code>styles.css</code>(3181 行) + 经典 <code>&lt;script&gt;</code>；render 函数返回模板字符串。加 <code>&lt;link&gt;</code>/内联 <code>&lt;svg&gt;</code> 都 trivial（OAuth 品牌标已有先例）。</span></div>
+  <div class="law"><b>Token 极弱</b><span>仅 17 个颜色变量 + 1 个 shadow，约 <b>192 处硬编码 hex</b> 绕过；<b>完全没有</b>间距/圆角/字阶/Motion token。</span></div>
+  <div class="law"><b>组件同质</b><span>几乎所有面 = 白 + 1px line + radius 6–8 + shadow（border-radius 出现 61 次）——这就是"半成品感"的根源。</span></div>
+  <div class="law"><b>Motion ≈ 0</b><span>1 个 @keyframes、1 个 transition、1 个真实 hover-lift；无 IntersectionObserver/rAF；无 <code>prefers-reduced-motion</code>。</span></div>
+  <div class="law"><b>三份步骤清单并存</b><span><code>journey</code>(8 项)、内联 process(6 项)、guide 时间线(8 项)必须收敛为一份。</span></div>
+  <div class="law"><b>孤儿资产可退役</b><span>mascot.png / wordmark.jpg / logistics-hero.jpg 零引用；hero 背景照片将随"照片退役"移除。</span></div>
+</div>
+<div class="note"><b>交付形态</b>：先做自包含原型 <code>app/home-v2.html</code>（内联 tokens + SVG + 一段 IIFE motion），截图反复迭代定稿后，再抽成 <code>styles-v2.css</code> 叠加、把 markup 接进 <code>renderDashboard</code>。插画统一为<b>极简几何线+面 SVG</b>，彻底放弃照片+3D 混搭。</div>
+
+<h2 class="sec" id="laws">§ 四条不动摇的设计法令</h2>
+<h3 class="big">贯穿所有工作包</h3>
+<div class="laws">
+  <div class="law"><span class="n">01</span><b>Journey 就是设计系统</b><span>任何面都是路线上的一个位置/检查点，不是通用"卡片"。</span></div>
+  <div class="law"><span class="n">02</span><b>照片退役</b><span>唯一插画语言 = 几何 SVG 路线套件；无照片、无 3D 羊、营销区无 UI 截图。</span></div>
+  <div class="law"><span class="n">03</span><b>蓝/紫各有职责</b><span>蓝 = 境内/仓储/追踪，紫 = 国际空运，珊瑚 = 品牌 & "你在这里"。没有装饰性色彩。</span></div>
+  <div class="law"><span class="n">04</span><b>六卡 → 一条脊柱</b><span>把六张几乎相同的 process 卡换成一条连续 Journey 脊柱——最高杠杆的单点改动，也是页面视觉高潮。</span></div>
+  <div class="law"><span class="n">05</span><b>叠加覆盖，不重写</b><span>新增 <code>styles-v2.css</code> 挂在老文件之后覆盖 token，第一轮绝不改 3181 行 <code>styles.css</code>。</span></div>
+</div>
+
+<h2 class="sec" id="spec">§ 设计规范（所有工作包共享）</h2>
+
+<div class="block">
+  <span class="tag">§A · 颜色</span>
+  <h4>Journey 调色板 — 9 个具名角色，各绑定一个阶段</h4>
+  <div class="pal" id="palette"></div>
+  <div class="map">
+    <table><thead><tr><th>阶段</th><th>节点色</th><th>域</th></tr></thead><tbody>
+      <tr><td>China（源）</td><td><span class="dot" style="background:var(--ink-3)"></span>ink-3 灰</td><td>origin</td></tr>
+      <tr><td>Purchased</td><td><span class="dot" style="background:var(--coral)"></span>coral</td><td>GOATEDBUY acts</td></tr>
+      <tr><td>QC</td><td><span class="dot" style="background:var(--amber)"></span>amber → 通过转 success</td><td>inspection</td></tr>
+      <tr><td>Warehouse</td><td><span class="dot" style="background:var(--ship)"></span>ship-blue</td><td>境内持有</td></tr>
+      <tr><td>Bundle</td><td><span class="dot" style="background:var(--ship)"></span>ship-blue</td><td>合包</td></tr>
+      <tr><td>Air</td><td><span class="dot" style="background:var(--air)"></span>air-purple</td><td>国际</td></tr>
+      <tr><td>Delivered</td><td><span class="dot" style="background:var(--success)"></span>success</td><td>done</td></tr>
+    </tbody></table>
+  </div>
+  <p class="sub" style="margin-top:12px;font-size:13.5px">这条映射是系统铁律：给蓝一个"境内/追踪"的职责、给紫一个"空运"的职责，"游离的蓝色 banner"问题就此消失——没有一个颜色是装饰性的。</p>
+</div>
+
+<div class="block">
+  <span class="tag">§B · 缺失的标度 token（今天完全没有）</span>
+  <h4>间距 · 圆角 · 字阶 · 高度 · Motion</h4>
+  <p class="sub" style="font-size:13.5px;margin-top:8px">间距 4px 基（section 竖向节奏用 96–180px；卡片内边距 24px；Hero 总高 ≥220px）：</p>
+  <div class="scale">
+    <div class="s"><i style="width:4px;height:4px"></i>4</div><div class="s"><i style="width:8px;height:8px"></i>8</div>
+    <div class="s"><i style="width:12px;height:12px"></i>12</div><div class="s"><i style="width:16px;height:16px"></i>16</div>
+    <div class="s"><i style="width:24px;height:24px"></i>24</div><div class="s"><i style="width:32px;height:32px"></i>32</div>
+    <div class="s"><i style="width:48px;height:48px"></i>48</div><div class="s"><i style="width:64px;height:64px"></i>64</div>
+    <div class="s"><i style="width:96px;height:64px"></i>96</div><div class="s"><i style="width:128px;height:64px"></i>128</div>
+    <div class="s"><i style="width:180px;height:64px"></i>180</div>
+  </div>
+  <p class="sub" style="font-size:13.5px;margin:18px 0 0">圆角分级（6·10·16·24·32）——分级本身就是让卡片一眼分主次的手段：</p>
+  <div class="radius-demo">
+    <div style="border-radius:6px">6</div><div style="border-radius:10px">10</div><div style="border-radius:16px">16</div>
+    <div style="border-radius:24px">24</div><div style="border-radius:32px">32</div>
+  </div>
+  <p class="sub" style="font-size:13.5px;margin:18px 0 0">字阶（Inter，已加载）：</p>
+  <div class="type-demo">
+    <div style="font-size:44px;font-weight:820;line-height:1.04">Display 56–88</div>
+    <div style="font-size:30px;font-weight:780">H1 40–56</div>
+    <div style="font-size:24px;font-weight:720">Section 48 / H3 24</div>
+    <div style="font-size:18px;color:var(--muted)">body-lg 18 · body 16 · subtitle 20</div>
+  </div>
+  <div class="pre"><span class="c">/* 高度分级(对应卡片分级) */</span>
+--e-0:none  --e-1:0 1px 2px /.05  --e-2:0 8px 24px /.08  --e-3:0 24px 60px /.12  --e-coral:0 12px 30px rgba(240,80,61,.28)
+<span class="c">/* Motion */</span>
+--dur: fast140 base260 slow520 draw1400 (ms)
+--ease-out:cubic-bezier(.22,.61,.36,1)  --ease-spring:cubic-bezier(.34,1.56,.64,1)  --ease-travel:cubic-bezier(.45,.05,.55,.95)</div>
+</div>
+
+<div class="block">
+  <span class="tag">§C · Journey SVG 品牌套件</span>
+  <h4>内联 · 几何 · 可动（stroke-width 1.8 对齐 lucide）</h4>
+  <p class="sub" style="font-size:14px;margin-top:8px">统一坐标语言：基于 stroke、round cap、24×24 字形网格、纯几何，填色来自 token。<b>会动的一律手写内联 SVG；纯静态的可用 lucide。</b></p>
+  <ul style="margin:6px 0 0;padding-left:20px;font-size:14px;color:var(--muted)">
+    <li><b>Route Spine</b> — Hero 主角：缓 S 形路径 + 7 节点；底轨 warehouse + 上层 coral 用 <code>stroke-dashoffset</code> 画入；节点带 halo 脉冲。</li>
+    <li><b>Package</b> — 3 个平行四边形拼的准等距箱 + 珊瑚胶带；单 <code>&lt;g id="parcel"&gt;</code> 供 JS 沿路径 <code>getPointAtLength()</code> 平移。</li>
+    <li><b>Warehouse</b> — 梯形屋顶 + 卷帘线，ship-blue。<b>Plane</b> — 纸飞机三角 + 画入的虚线尾迹，air-purple。</li>
+    <li><b>7 个阶段节点字形</b>（link/cart-check/scan/warehouse/layers/plane/home-pin）：静态可用 lucide，Hero 关键三件手写。</li>
+  </ul>
+</div>
+
+<div class="block">
+  <span class="tag">§D · 卡片系统 5 级</span>
+  <h4>终结"20 张一样的卡"</h4>
+  <div class="tiers">
+    <div class="tier t-primary"><b>Primary</b><small>r16 · 无边 · e-2 · 珊瑚顶条 · lift 4px</small></div>
+    <div class="tier t-secondary"><b>Secondary</b><small>r10 · 1px line · e-1 · lift 2px</small></div>
+    <div class="tier t-ghost"><b>Ghost</b><small>r10 · 虚线 · 无阴影 · 空态/添加</small></div>
+    <div class="tier t-floating"><b>Floating</b><small>r24 · 无边 · e-3 · 滚动视差</small></div>
+    <div class="tier t-inline"><b>Inline</b><small>r6 · 无阴影 · tint · chip/tile</small></div>
+  </div>
+  <p class="sub" style="font-size:13.5px;margin:16px 0 0"><b>硬约束：每屏最多一个 Primary + 一个 Floating</b>，其余只能 Secondary/Ghost/Inline。这一条就足以打破同质。</p>
+</div>
+
+<div class="block">
+  <span class="tag">§E · Motion 系统</span>
+  <h4>无框架：CSS + IntersectionObserver + rAF；必须尊重 reduced-motion</h4>
+  <p class="sub" style="font-size:14px;margin-top:8px">Journey 载入画入 · package 沿路滑行 · 节点脉冲 · 滚动揭示(共享 IO 切 <code>.is-in</code>) · 时间线自动推进(setInterval，hover 暂停) · 按钮 lift · 卡片 hover 2–4px。<code>prefers-reduced-motion</code> 在脚本顶部短路：加 <code>.rm</code> 类 → 关所有动画并强制 <code>.is-in</code>，package 停在 Delivered。</p>
+</div>
+
+<h2 class="sec" id="packages">§ 工作包（可独立执行 · 按优先级）</h2>
+<h3 class="big">WP-1..4 是可复用地基，WP-5 是旗舰</h3>
+<p class="sub">建议先落 WP-0 骨架，再按 A→B→C→D 在原型内迭代（对应优先级：信息架构&节奏 &gt; 品牌语言 &gt; 卡片系统 &gt; 留白&排版 &gt; Motion &gt; 颜色/图标）。WP-6 起接入真实站点。</p>
+<div class="wps" id="wps"></div>
+
+<h2 class="sec" id="verify">§ 验证（贯穿所有工作包）</h2>
+<div class="block">
+  <ul style="margin:0;padding-left:20px;font-size:14px;color:var(--muted)">
+    <li>复用本会话已跑通的<b>无头 Chrome CDP 截图</b>（Node 内置 WebSocket 驱动系统 Chrome，零安装）：本地静态服务 <code>app/</code>，每个工作包后抓 <b>1440px 与 390px 全页图</b>。</li>
+    <li>WP-4/Motion 另抓：<code>Emulation.setEmulatedMedia prefers-reduced-motion=reduce</code> 版 + 动画中间帧。</li>
+    <li>每包对照其验收判据：Hero≥220px、各段背景各异、§03 是一条脊柱而非六卡、§05 像真仪表盘、五级卡片可辨、reduced-motion 正常。</li>
+    <li>WP-6/7 接入后跑一次现有前端相关测试（若有）确保不回归；人工点各路由确认无 JS 报错。</li>
+  </ul>
+</div>
+
+<h2 class="sec" id="files">§ 关键文件</h2>
+<div class="block files">
+  <table><tbody>
+    <tr><td>app/home-v2.html</td><td>新建，WP-0..5 原型：token + SVG 套件 + 9 段 + motion</td></tr>
+    <tr><td>app/styles-v2.css</td><td>新建，WP-7 叠加覆盖层</td></tr>
+    <tr><td>app/motion-v2.js</td><td>新建（可选），WP-7 motion 脚本</td></tr>
+    <tr><td>app/app.js</td><td>WP-6 收敛 <code>JOURNEY_STAGES</code>（31-40 / 1317-1323 / 1380-1389）；WP-7 重建 <code>renderDashboard</code>(1230-1367)</td></tr>
+    <tr><td>app/client.html</td><td>WP-7 挂 styles-v2.css；WP-8 外壳</td></tr>
+    <tr><td>app/styles.css</td><td>仅作被覆盖对象，第一轮不改；WP-8/9 起逐步清理硬编码 hex</td></tr>
+    <tr><td>app/assets/…</td><td>退役 hero-background / mascot / wordmark / logistics-hero</td></tr>
+  </tbody></table>
+</div>
+<div class="note">第一轮严格"叠加覆盖不重写"，把风险关在 <code>styles-v2.css</code> + 新 render 字符串里；老 <code>styles.css</code> 的 192 处硬编码 hex 留到 WP-8/9 逐步清理。本文件是计划，尚未写任何代码；用户将分包独立执行，每个 WP 自包含、可交给新会话/agent。</div>
+
+<footer class="end">GoatedBuy · Design Language V2 实施计划 · 围绕 Journey 的统一视觉系统 · <a href="#top" style="color:var(--coral)">回到顶部</a></footer>
+</div>
+
+<script>
+// palette
+const PAL=[
+ ["--coral","#F0503D","Primary Coral · 品牌/主CTA"],["--coral-deep","#C7361F","Deep Coral · 按压/渐变floor"],
+ ["--coral-wash","#FFF1EE","Coral wash · tint"],["--warm-white","#FBFAF8","Warm White · 页面底"],
+ ["--graphite","#17191D","Graphite · 墨/深色高潮"],["--ink-3","#8A929B","Muted · 说明/China节点"],
+ ["--warehouse","#EEF0F2","Warehouse Gray · 非活节点/分割"],["--success","#16915B","Success · Delivered/QC通过"],
+ ["--ship","#2F6BF0","Shipping Blue · 仓储/追踪"],["--air","#6C4BD6","Air Purple · 国际空运"],
+ ["--amber","#B5741A","Amber · QC待处理"],["--line","#E4E7EA","Line · 发丝线"]
+];
+document.getElementById("palette").innerHTML=PAL.map(([v,hex,label])=>
+ `<div class="sw"><div class="chip" style="background:${hex}"></div><div class="meta"><code>${hex}</code><small>${label}</small></div></div>`).join("");
+
+// work packages
+const WPS=[
+ ["WP-0","原型骨架","原型",false,"新建 app/home-v2.html：内联 &lt;style&gt;(先只放 §B token 的 :root) + 空的 9 段 &lt;section data-reveal&gt; 占位 + 底部空 IIFE + 复用 lucide CDN。",["产出：可本地打开的空壳","验收：结构在、token 生效(背景=warm-white)"]],
+ ["WP-1","Token 地基","原型",false,"把 §A 调色板 + §B 全部标度 token 写进 :root；删除对老 --blue 语义的依赖，改用具名色。",["产出：完整 token 层(颜色故事+间距/圆角/字阶/高度/Motion)","验收：改一个 token 全站联动"]],
+ ["WP-2","Journey SVG 套件","原型",false,"按 §C 手写 5 件内联 SVG(route/parcel/warehouse/plane + 节点字形)，静态先行；为每条 path 预置 --len。",["产出：风格统一的几何 SVG 资产","验收：五件同族；1440/390 不糊"]],
+ ["WP-3","卡片系统 5 级","原型",false,"按 §D 定义 .card-primary/.card-secondary/.card-ghost/.card-floating/.inline-chip 五套 class。",["产出：可复用卡片分级原语","验收：五级一眼可辨；执行「每屏一个 Primary」"]],
+ ["WP-4","Motion 系统","原型",false,"按 §E 实现共享 IO 揭示、路径画入、package rAF 滑行、节点脉冲、时间线自动推进、按钮/卡片 hover；顶部 reduced-motion 短路。",["产出：无依赖 motion 脚本(IIFE)，SPA 重渲染后可重init","验收：正常态 + reduced-motion 两版都对"]],
+ ["WP-5","首页 Landing 重建","旗舰 · 最高优先级",true,"把 9 段按「电影节奏」重排，每段视觉完全不同，内容映射自现有数组：01 Hero 分栏(右侧活 Route Spine，无照片,≥220px) · 02 Proof 细带 · 03 Journey 脊柱(取代六卡) · 04 Features Bento(大小不一) · 05 Workspace 真·迷你仪表盘(深色) · 06 Trust · 07 Pricing · 08 CTA 全幅珊瑚 · 09 Footer。",["03=一条连续路线+7 节点，滚动错峰展开为细标签而非卡片，package 自动推进","04=grid-template-areas 做 Bento(BUY=2×1 Primary,QC/SHIP=Secondary,700+routes=Floating 紫)","05=Floating 仪表盘壳 + 5 个 Inline tile 取 counts() 真值","验收：Hero≥220px、各段背景各异、03 是脊柱、05 像仪表盘"]],
+ ["WP-6","收敛步骤清单 → JOURNEY_STAGES","接入",false,"在 app.js 建规范常量 JOURNEY_STAGES(7 阶段)；renderDashboard/renderGuide/未来 tracking 全部 map 这一份；删除 journey(31-40) 与内联 6 项(1317-1323)。",["产出：单一事实源","验收：首页 03 与 Guide 时间线同源、无重复清单"]],
+ ["WP-7","接入真实站点(叠加覆盖)","接入",false,"原型 &lt;style&gt; 抽成 styles-v2.css，在 client.html styles.css 之后挂 &lt;link&gt;；用 V2 markup 重建 renderDashboard；motion IIFE 移入 app.js 并在每次 #view 重渲染后重init；退役照片资产、更新 ?v=。",["产出：真实 client 首页即 V2","验收：#/home 与原型一致；其它路由不回归"]],
+ ["WP-8","全站共享外壳换新语言","铺开",false,"用 V2 token + 卡片分级重做：公告条、sticky header(search/lang/currency/wallet/haul/account)、侧栏 nav + side-note、quick-rail、footer。",["产出：所有视图共享 chrome 统一到 V2","验收：切任一路由头/尾/导航一致"]],
+ ["WP-9","内页逐个采纳(分批)","铺开",false,"强 Journey 母题：shipping/qc/orders/haul 用 Route Node ○──○ 做进度/追踪，砍半同质卡片。仪表盘化：workspace/wallet/creator。表单/内容：account/addresses/trust/guide/community/login/register。",["产出：每批一个 PR/一次运行","验收：逐视图 1440/390 对照信息层级+节奏"]],
+ ["WP-10","后台 admin 采纳 token(可选)","可选",false,"admin 保持工具性，引入 V2 token 层与卡片分级(蓝/紫 accent 保留职责含义)，去掉一次性 hex。最低优先级。",["产出：admin 采纳 token","验收：无一次性 hex，风格与买家端呼应"]]
+];
+document.getElementById("wps").innerHTML=WPS.map(([id,title,phase,flag,body,items])=>
+ `<div class="wp${flag?" flag":""}" id="${id}"><div class="top"><span class="id">${id}</span><h4>${title}</h4><span class="phase">${phase}</span></div>
+  <div class="body">${body}</div><ul>${items.map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("");
+
+// theme
+const TK="dlv2-theme";
+const setT=t=>t&&document.documentElement.setAttribute("data-theme",t);
+setT(localStorage.getItem(TK));
+document.getElementById("theme").onclick=()=>{
+ const c=document.documentElement.getAttribute("data-theme");
+ const dark=c?c==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+ const n=dark?"light":"dark";setT(n);localStorage.setItem(TK,n);
+};
+</script>
+</body>
+</html>

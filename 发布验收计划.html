@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoatedBuy 发布验收计划 · 完整生产上线</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --panel:#ffffff; --ink:#1a1d21; --muted:#6b7280; --line:#e3e6ea;
+    --accent:#2f6bff; --accent-soft:#e8efff;
+    --block:#d92d20; --block-soft:#fdecea; --ok:#12805c; --ok-soft:#e5f4ee;
+    --rec:#8a94a6; --rec-soft:#eef0f3; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  }
+  :root[data-theme="dark"], @media (prefers-color-scheme: dark){}
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1116; --panel:#161b22; --ink:#e6e8eb; --muted:#9aa4b2; --line:#252b34;
+      --accent:#5b8cff; --accent-soft:#1a2540;
+      --block:#ff6a5e; --block-soft:#3a1f1d; --ok:#4dd2a3; --ok-soft:#12312a;
+      --rec:#8a94a6; --rec-soft:#20262f; --shadow:0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e1116; --panel:#161b22; --ink:#e6e8eb; --muted:#9aa4b2; --line:#252b34;
+    --accent:#5b8cff; --accent-soft:#1a2540;
+    --block:#ff6a5e; --block-soft:#3a1f1d; --ok:#4dd2a3; --ok-soft:#12312a;
+    --rec:#8a94a6; --rec-soft:#20262f; --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f5f7; --panel:#ffffff; --ink:#1a1d21; --muted:#6b7280; --line:#e3e6ea;
+    --accent:#2f6bff; --accent-soft:#e8efff;
+    --block:#d92d20; --block-soft:#fdecea; --ok:#12805c; --ok-soft:#e5f4ee;
+    --rec:#8a94a6; --rec-soft:#eef0f3; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+  header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:14px 0 12px;border-bottom:1px solid var(--line);margin-bottom:22px}
+  .titlerow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:22px;margin:0;letter-spacing:-.2px}
+  .target{font-size:12px;font-weight:700;color:var(--block);background:var(--block-soft);
+    padding:3px 9px;border-radius:999px;letter-spacing:.02em}
+  .sub{color:var(--muted);font-size:13px;margin:4px 0 0}
+  .dash{display:flex;gap:12px;align-items:stretch;margin-top:14px;flex-wrap:wrap}
+  .gauge{flex:1 1 300px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+  .gauge h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .bar{height:9px;border-radius:999px;background:var(--rec-soft);overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease}
+  .barmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px}
+  .verdict{flex:0 0 auto;min-width:210px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    border-radius:12px;padding:14px 18px;box-shadow:var(--shadow);border:1px solid var(--line);text-align:center}
+  .verdict.nogo{background:var(--block-soft);border-color:var(--block)}
+  .verdict.go{background:var(--ok-soft);border-color:var(--ok)}
+  .verdict .lbl{font-size:26px;font-weight:800;letter-spacing:.04em}
+  .verdict.nogo .lbl{color:var(--block)}
+  .verdict.go .lbl{color:var(--ok)}
+  .verdict .note{font-size:12px;color:var(--muted);margin-top:3px}
+  .toolbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  button.tool{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink);padding:6px 12px;border-radius:8px;box-shadow:var(--shadow)}
+  button.tool:hover{border-color:var(--accent)}
+  section.gate{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:0 0 16px;box-shadow:var(--shadow);overflow:hidden}
+  .gate-h{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+  .gate-h .gid{font-size:12px;font-weight:800;color:var(--accent);background:var(--accent-soft);border-radius:7px;padding:3px 8px;white-space:nowrap}
+  .gate-h h2{font-size:16px;margin:0;flex:1}
+  .gate-h .gcount{font-size:12px;color:var(--muted);white-space:nowrap}
+  .gate-h .chev{color:var(--muted);transition:transform .2s}
+  section.gate.collapsed .chev{transform:rotate(-90deg)}
+  section.gate.collapsed .items{display:none}
+  .items{padding:0 16px 8px}
+  .item{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+  .item:first-child{border-top:none}
+  .item input[type=checkbox]{width:18px;height:18px;margin-top:2px;accent-color:var(--accent);cursor:pointer}
+  .item .body{min-width:0}
+  .item .std{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+  .badge{font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:999px;white-space:nowrap;margin-top:1px}
+  .badge.block{color:var(--block);background:var(--block-soft)}
+  .badge.rec{color:var(--rec);background:var(--rec-soft)}
+  .item .std .txt{font-weight:600}
+  .item.done .std .txt{text-decoration:line-through;color:var(--muted)}
+  .how{color:var(--muted);font-size:13px;margin:5px 0 0}
+  .how code, .cmd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+  .cmd{display:block;background:var(--rec-soft);border:1px solid var(--line);border-radius:7px;
+    padding:7px 9px;margin:6px 0 0;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .note{margin-top:7px}
+  .note input{width:100%;font:inherit;font-size:13px;padding:6px 9px;border:1px dashed var(--line);
+    border-radius:7px;background:transparent;color:var(--ink)}
+  .note input::placeholder{color:var(--muted)}
+  .foot{color:var(--muted);font-size:12px;margin-top:26px;line-height:1.7}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="titlerow">
+      <h1>GoatedBuy 发布验收计划</h1>
+      <span class="target">目标：完整生产上线</span>
+    </div>
+    <p class="sub">把项目内既有的脚本、测试与 <code>deploy/production/</code> 运行手册串成一份 go/no-go 核对清单。勾选状态与备注自动保存在本机浏览器。</p>
+    <div class="dash">
+      <div class="gauge">
+        <h3>总进度</h3>
+        <div class="bar"><i id="barfill"></i></div>
+        <div class="barmeta"><span id="progtext">0 / 0</span><span id="progpct">0%</span></div>
+        <div class="barmeta"><span id="blocktext" style="color:var(--block)">阻断项 0 / 0</span><span id="rectext">推荐项 0 / 0</span></div>
+      </div>
+      <div class="verdict nogo" id="verdict">
+        <div class="lbl" id="verdictlbl">NO-GO</div>
+        <div class="note" id="verdictnote">尚有阻断项未完成</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="tool" id="btn-theme">切换主题</button>
+      <button class="tool" id="btn-expand">全部展开</button>
+      <button class="tool" id="btn-collapse">全部折叠</button>
+      <button class="tool" id="btn-export">导出 JSON</button>
+      <button class="tool" id="btn-reset">重置</button>
+    </div>
+  </header>
+
+  <main id="gates"></main>
+
+  <p class="foot">
+    编号对应 PRD V2 模块与 <code>backend/tests/</code>、<code>backend/deploy/production/</code>。本清单不改动任何代码；每项的「执行方式」均为可直接运行的既有工具。<br>
+    已知硬化缺口（支付 stub、Apple 未验签 JWKS、无真实解析源、无全局限流、dev 默认密钥、lucide CDN 等）在「完整生产上线」目标下**全部作为阻断项**。若降级为 Beta/软启动，可将相应项由「阻断」改为「已知限制」。
+  </p>
+</div>
+
+<script>
+const STORAGE_KEY = "goatedbuy-release-checklist-v1";
+const THEME_KEY = "goatedbuy-release-theme";
+
+// ---- 清单数据：每项 {id, txt(验收标准), how(执行方式，可含 cmd), block(是否阻断)} ----
+const GATES = [
+  { gid:"Gate 0", title:"自动化门禁", items:[
+    { id:"g0-ci", block:true, txt:"npm run ci 全绿", how:"lint（<code>node --check</code> 全量语法）· openapi:check · <code>node --test tests/*.test.js</code>（96 文件）· build-check，四步全过。", cmd:"cd backend && npm run ci" },
+    { id:"g0-env", block:true, txt:"npm run env:check 全绿（不在 ci 中，须单独跑）", how:"5 大密钥 STORAGE_SIGNING / SHIPPING_WEBHOOK / AUTH_DEVICE_HMAC / AUTH_TOTP_ENCRYPTION / ACCOUNT_ADDRESS_HMAC + 支付/OAuth state 密钥均非 <code>local-dev-*</code> 默认、≥24 字符；CORS 非通配。", cmd:"cd backend && npm run env:check" },
+    { id:"g0-migdry", block:true, txt:"migrate:dry-run 无未批注的破坏性 DDL", how:"离线扫描 DROP/TRUNCATE/DELETE 等，未加 <code>-- @destructive-approved</code> 即非零退出。", cmd:"cd backend && npm run migrate:dry-run" },
+    { id:"g0-openapi-drill", block:true, txt:"openapi-migration-drill 通过", how:"每个写路由（POST/PATCH/PUT/DELETE）都在 OpenAPI 中；事件与错误码族齐全；无未批注破坏性迁移。", cmd:"cd backend && node --test tests/openapi-migration-drill.test.js" },
+    { id:"g0-prd", block:true, txt:"PRD 213 任务完成；V2-03-01 已决策", how:"<code>prd-v2-task-status.json</code> 显示 213 完成、1 阻塞。V2-03-01（GB-DEC-P0-004 真实解析源）须获业务/法务决策并接入，或明确豁免留档。" },
+  ]},
+
+  { gid:"Gate 1", title:"功能验收（端到端）", items:[
+    { id:"g1-e2e1-4", block:true, txt:"E2E-01~04 通过", how:"01 淘宝主链路（解析→支付→认领→确认→派单→到货自动匹配→测量→四格 QC→正式入库）· 02 1688 涨价补差与 24h 自动取消退款 · 03 部分缺货只取消受影响子单 · 04 中转预报自动匹配、未知单号 unclaimed 不臆测。", cmd:"cd backend && node --test tests/acceptance-e2e-01-04.test.js" },
+    { id:"g1-e2e5-8", block:true, txt:"E2E-05~08 通过", how:"05 仓库防错（错件 409 / 重复拣货幂等）· 06 包裹取消（打包前退费放库 / startPacking 后 409）· 07 会员折扣叠加单券、退款还原券 · 08 五日退货多角色全流程至 completed、钱包退款。", cmd:"cd backend && node --test tests/acceptance-e2e-05-08.test.js" },
+    { id:"g1-e2e9-14", block:true, txt:"E2E-09~14 通过", how:"09 钱包幂等（重放不重复入账、超额拒绝）· 10 提现冻结/失败解冻 · 11 邀请佣金（签约生成、退款仅一次 clawback、账本净零）· 12 超期销毁恰在入库满 150 天、延期不改销毁资格 · 13 角色数据范围 SELF/ORG/ASSIGNED 隔离 · 14 仅 super_admin 持通配、高风险需二次鉴权。", cmd:"cd backend && node --test tests/acceptance-e2e-09-14.test.js" },
+    { id:"g1-domain", block:false, txt:"领域 E2E 全绿", how:"after-sales · consolidation · procurement · wms · ops-support · referral-commission · user-account-risk。", cmd:"cd backend && node --test tests/after-sales-e2e.test.js tests/consolidation-e2e.test.js tests/procurement-e2e.test.js tests/wms-e2e.test.js tests/ops-support-e2e.test.js tests/referral-commission-e2e.test.js tests/user-account-risk-e2e.test.js" },
+    { id:"g1-realdb", block:true, txt:"真实库回归 + 线上 smoke（区别于内存双测）", how:"对 prod-like Postgres 跑 <code>npm run migrate</code> 后执行领域 PG 回归；对 staging 实例跑 <code>npm run smoke</code> 覆盖 client + admin 关键路径。", cmd:"# 真实库\ncd backend && DATABASE_URL=postgresql://.../goatedbuy npm run migrate\n# 线上冒烟\nSMOKE_BASE_URL=https://staging-api... npm run smoke" },
+  ]},
+
+  { gid:"Gate 2", title:"安全与权限", items:[
+    { id:"g2-baseline", block:true, txt:"security-baseline 通过", how:"RBAC 无越权（support/warehouse/campaign 角色缺相应写权，仅 super_admin 通配）· 签名私链防篡改/过期/跨对象 · SQL 注入按字面量处理 · 密钥脱敏。", cmd:"cd backend && node --test tests/security-baseline.test.js" },
+    { id:"g2-secreg", block:false, txt:"走查 security-regression-checklist", how:"auth/会话 · RBAC 与所有权 · 内容/数据暴露 · 支付/资金 · 日志/密钥，逐条签字。", cmd:"open backend/deploy/production/security-regression-checklist.md" },
+    { id:"g2-jwks", block:true, txt:"Apple/OIDC 接入 JWKS 验签", how:"<code>src/auth/oauth/oauth-service.js:72</code> 当前 <code>decodeIdToken</code> 只解 payload、不验签；Apple 走 id_token，生产必须对 provider JWKS 验签后才可信任 claims。" },
+    { id:"g2-ratelimit", block:true, txt:"全局 HTTP 限流中间件", how:"当前仅 auth 流内限流（登录失败锁、重发节流），缺应用级/网关级全局请求限流，须补齐。" },
+    { id:"g2-oauth-creds", block:true, txt:"OAuth 六家真实 client 凭证已配置并联调", how:"Google/Apple/Discord/Facebook/GitHub/Microsoft 的 client id/secret + <code>OAUTH_REDIRECT_BASE</code> / <code>OAUTH_STATE_SECRET</code> 生产值，回调 URL 在各开发者后台登记并走通。" },
+    { id:"g2-openapi-url", block:true, txt:"OpenAPI server URL 改为生产地址", how:"<code>src/openapi/document.js:19</code> 目前是 “Staging placeholder”，发布前替换为真实生产/网关地址。" },
+  ]},
+
+  { gid:"Gate 3", title:"数据与迁移完整性", items:[
+    { id:"g3-migrate", block:true, txt:"58 个迁移在 prod-like 库干净应用", how:"checksum 守卫（改动已应用迁移即抛错）+ <code>pg_advisory_lock</code> 串行化生效；应用后 <code>migrate:status</code> 无 pending。", cmd:"cd backend && DATABASE_URL=postgresql://.../goatedbuy npm run migrate && npm run migrate:status" },
+    { id:"g3-ledger", block:true, txt:"复式账完整性净额为 0", how:"<code>verifyLedgerIntegrity</code> 校验 commission / referral / ledger 逐条借贷平衡、总净额为 0。", cmd:"cd backend && node --test tests/infra-logs-integrity.test.js" },
+    { id:"g3-backup", block:true, txt:"备份 + 演练恢复达标（RPO≤5min / RTO≤30min）", how:"<code>npm run db:backup</code>（pg_dump -Fc）→ 恢复到临时库 → 跑 integrity-check 通过；PITR 已配置。见 backup-and-restore.md。", cmd:"cd backend && BACKUP_DIR=/tmp/gb npm run db:backup" },
+  ]},
+
+  { gid:"Gate 4", title:"前端验收", items:[
+    { id:"g4-modtests", block:false, txt:"前端纯逻辑模块单测全绿", how:"wallet/warehouse/consolidation/after-sales/catalog-spec/purchase-exceptions/topup + frontend-foundation，经 <code>vm.runInNewContext</code> 执行。", cmd:"cd backend && node --test tests/*-frontend.test.js tests/frontend-foundation.test.js" },
+    { id:"g4-uiuat", block:true, txt:"app.js / admin.js 人工 UI 验收", how:"两大控制器（117KB / 29KB）仅被字符串 grep，无行为测试。按 <code>V2-12_UAT签核与发布演练.md</code> 对 client / admin / index 三门面逐流程验收：空态、错误态、加载态、i18n 兜底、a11y、响应式。" },
+    { id:"g4-lucide", block:true, txt:"lucide 图标本地化", how:"<code>client.html</code> 从 <code>unpkg.com</code> 加载 lucide，是唯一外部运行时依赖且无 SRI；生产须本地 vendored 副本或加 SRI 固定。" },
+    { id:"g4-config", block:true, txt:"生产 config.js 与 admin base URL", how:"提供生产 <code>app/config.js</code>（非 <code>127.0.0.1:3000</code>，<code>environment:\"production\"</code>）；admin 目前硬编码 localhost、无校验，须接入配置并校验；admin token 存 localStorage vs client sessionStorage 的差异做硬化。" },
+    { id:"g4-cache", block:false, txt:"全资产 cache-busting 与构建/压缩", how:"当前仅 <code>app.js</code>/<code>styles.css</code> 带 <code>?v=</code>，其余 13+ 脚本与 admin 无；建议全量版本化，并引入构建/压缩（现无 build、117KB 未压缩）。" },
+    { id:"g4-oauth-handshake", block:false, txt:"staging 完整鉴权握手含 OAuth", how:"注册→验邮箱→登录→验设备→会话，以及至少一家社交登录回调，在 staging 全走通。" },
+  ]},
+
+  { gid:"Gate 5", title:"运维与发布就绪", items:[
+    { id:"g5-health", block:false, txt:"health / ready / version 正常", how:"<code>READY_REQUIRES_DATABASE</code> 与 <code>READY_REQUIRES_REDIS</code> 均为 true；依赖宕机时 /ready 返回 503。", cmd:"curl -s localhost:3000/health; curl -s localhost:3000/ready; curl -s localhost:3000/version" },
+    { id:"g5-monitor", block:false, txt:"监控告警接好", how:"5xx>1% · 支付回调失败 · 队列积压/死信 · 邮件退信 · 备份失败 · 物流停滞。见 monitoring-and-alerts.md。" },
+    { id:"g5-flags", block:false, txt:"Feature-flag kill switch 验证", how:"<code>FEATURE_PAYMENTS/SHIPPING/COUPONS/CREATORS_ENABLED</code> 关闭后对应路由返回 503 <code>FEATURE_DISABLED</code>。" },
+    { id:"g5-workers", block:false, txt:"后台 worker 与队列运行", how:"五个 worker（parse / catalog-parse / exception-cancel / storage-sweep / account-deletion）+ Redis 队列/死信正常。" },
+    { id:"g5-storage", block:true, txt:"存储三桶策略上线", how:"public / private / restricted；身份文件隔离桶、无缩略图、签名 URL ≤120s、SSE-KMS + 跨区备份；Block Public Access。见 V2-12_基础设施规格.md。" },
+    { id:"g5-envs", block:false, txt:"四套隔离环境就位", how:"dev / test / staging / prod 各自 DB/队列/桶/密钥独立，prod deny-by-default。" },
+    { id:"g5-rollback", block:true, txt:"按层回滚演练 + 金丝雀", how:"按 rollback-runbook.md 逐层演练；金丝雀 5% 流量 <1% 5xx；DB 迁移向后兼容且先行、可独立回滚。" },
+    { id:"g5-smoke", block:true, txt:"release-smoke + 线上 smoke 通过", how:"release-smoke 断言 /health、/openapi.json(>100 路径)、/openapi/events(≥15)、受保护 admin 路由拒绝匿名、公共 banner 不崩；对 live 跑 npm run smoke。", cmd:"cd backend && node --test tests/release-smoke.test.js" },
+  ]},
+
+  { gid:"Gate 6", title:"签核与决策", items:[
+    { id:"g6-payment", block:true, txt:"支付真实通道接入", how:"当前 <code>createStubPaymentProvider</code> + <code>goatedbuy-dev-payment-secret</code> 为占位。完整生产上线须接入真实支付 provider 与生产密钥，并联调回调与对账。" },
+    { id:"g6-uat", block:true, txt:"UAT 签核无 P0/P1", how:"按 V2-12-25 完成验收矩阵，无 P0/P1 遗留，业务负责人签字。" },
+    { id:"g6-report", block:false, txt:"填写发布报告", how:"按 release-report-template.md 记录版本、变更、回滚点、验收结论。" },
+    { id:"g6-gonogo", block:true, txt:"顶层 Go/No-Go 决策", how:"确认本清单所有阻断项已勾选（顶部徽标转绿 GO），召集决策人签署放行。" },
+  ]},
+];
+
+// ---- 状态 ----
+let state = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch{ return {}; } }
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+const allItems = GATES.flatMap(g=>g.items);
+const gatesEl = document.getElementById("gates");
+
+// ---- 渲染 ----
+function render(){
+  gatesEl.innerHTML = GATES.map((g,gi)=>{
+    const done = g.items.filter(it=>state[it.id]?.checked).length;
+    const collapsed = state.__collapsed?.[g.gid] ? " collapsed" : "";
+    return `<section class="gate${collapsed}" data-gid="${g.gid}">
+      <div class="gate-h" data-toggle="${g.gid}">
+        <span class="gid">${g.gid}</span>
+        <h2>${g.title}</h2>
+        <span class="gcount">${done}/${g.items.length}</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="items">
+        ${g.items.map(it=>{
+          const st = state[it.id] || {};
+          const done = st.checked ? " done":"";
+          const badge = it.block ? `<span class="badge block">阻断</span>` : `<span class="badge rec">推荐</span>`;
+          const cmd = it.cmd ? `<span class="cmd">${escapeHtml(it.cmd)}</span>` : "";
+          return `<div class="item${done}">
+            <input type="checkbox" data-check="${it.id}" ${st.checked?"checked":""}>
+            <div class="body">
+              <div class="std">${badge}<span class="txt">${it.txt}</span></div>
+              <div class="how">${it.how}${cmd}</div>
+              <div class="note"><input type="text" data-note="${it.id}" placeholder="备注 / 证据链接 / 负责人…" value="${escapeAttr(st.note||"")}"></div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </section>`;
+  }).join("");
+  updateDash();
+}
+
+function updateDash(){
+  const total = allItems.length;
+  const doneAll = allItems.filter(it=>state[it.id]?.checked).length;
+  const blockers = allItems.filter(it=>it.block);
+  const blockDone = blockers.filter(it=>state[it.id]?.checked).length;
+  const recs = allItems.filter(it=>!it.block);
+  const recDone = recs.filter(it=>state[it.id]?.checked).length;
+  const pct = total? Math.round(doneAll/total*100):0;
+  document.getElementById("barfill").style.width = pct+"%";
+  document.getElementById("progtext").textContent = `${doneAll} / ${total}`;
+  document.getElementById("progpct").textContent = pct+"%";
+  document.getElementById("blocktext").textContent = `阻断项 ${blockDone} / ${blockers.length}`;
+  document.getElementById("rectext").textContent = `推荐项 ${recDone} / ${recs.length}`;
+  const go = blockDone === blockers.length;
+  const v = document.getElementById("verdict");
+  v.className = "verdict " + (go? "go":"nogo");
+  document.getElementById("verdictlbl").textContent = go? "GO":"NO-GO";
+  document.getElementById("verdictnote").textContent = go
+    ? "全部阻断项已完成，可放行决策"
+    : `尚有 ${blockers.length-blockDone} 个阻断项未完成`;
+  // 更新每个 gate 计数
+  document.querySelectorAll("section.gate").forEach(sec=>{
+    const g = GATES.find(x=>x.gid===sec.dataset.gid);
+    const d = g.items.filter(it=>state[it.id]?.checked).length;
+    sec.querySelector(".gcount").textContent = `${d}/${g.items.length}`;
+  });
+}
+
+function escapeHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function escapeAttr(s){return escapeHtml(s).replace(/"/g,"&quot;");}
+
+// ---- 事件 ----
+gatesEl.addEventListener("change", e=>{
+  const id = e.target.dataset.check;
+  if(id){ state[id] = {...(state[id]||{}), checked:e.target.checked}; save();
+    e.target.closest(".item").classList.toggle("done", e.target.checked); updateDash(); }
+});
+gatesEl.addEventListener("input", e=>{
+  const id = e.target.dataset.note;
+  if(id){ state[id] = {...(state[id]||{}), note:e.target.value}; save(); }
+});
+gatesEl.addEventListener("click", e=>{
+  const gid = e.target.closest("[data-toggle]")?.dataset.toggle;
+  if(gid){ state.__collapsed = state.__collapsed||{}; state.__collapsed[gid]=!state.__collapsed[gid]; save();
+    document.querySelector(`section[data-gid="${gid}"]`).classList.toggle("collapsed", state.__collapsed[gid]); }
+});
+
+document.getElementById("btn-expand").onclick = ()=>{ state.__collapsed={}; save();
+  document.querySelectorAll("section.gate").forEach(s=>s.classList.remove("collapsed")); };
+document.getElementById("btn-collapse").onclick = ()=>{ state.__collapsed={}; GATES.forEach(g=>state.__collapsed[g.gid]=true); save();
+  document.querySelectorAll("section.gate").forEach(s=>s.classList.add("collapsed")); };
+document.getElementById("btn-reset").onclick = ()=>{ if(confirm("确定清空所有勾选与备注？")){ state={}; save(); render(); } };
+document.getElementById("btn-export").onclick = ()=>{
+  const out = { meta:{ title:"GoatedBuy 发布验收计划", target:"完整生产上线", exportedAt:new Date().toISOString() }, items:{} };
+  allItems.forEach(it=>{ const st=state[it.id]||{}; out.items[it.id]={ gate:gateOf(it.id), block:it.block, standard:it.txt, checked:!!st.checked, note:st.note||"" }; });
+  const total=allItems.length, done=allItems.filter(it=>state[it.id]?.checked).length;
+  const blockers=allItems.filter(it=>it.block), blockDone=blockers.filter(it=>state[it.id]?.checked).length;
+  out.meta.progress=`${done}/${total}`; out.meta.blockers=`${blockDone}/${blockers.length}`; out.meta.verdict = blockDone===blockers.length?"GO":"NO-GO";
+  const blob = new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
+  const a = document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="goatedbuy-发布验收.json"; a.click(); URL.revokeObjectURL(a.href);
+};
+function gateOf(id){ const g=GATES.find(g=>g.items.some(it=>it.id===id)); return g? `${g.gid} ${g.title}`:""; }
+
+// ---- 主题 ----
+function applyTheme(t){ if(t) document.documentElement.setAttribute("data-theme",t); }
+applyTheme(localStorage.getItem(THEME_KEY));
+document.getElementById("btn-theme").onclick = ()=>{
+  const cur = document.documentElement.getAttribute("data-theme");
+  const dark = cur ? cur==="dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = dark? "light":"dark";
+  applyTheme(next); localStorage.setItem(THEME_KEY,next);
+};
+
+render();
+</script>
+</body>
+</html>

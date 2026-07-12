@@ -30,7 +30,7 @@ const DEFAULTS = Object.freeze({
   authExposeVerificationToken: true
 });
 
-export function createAuthService({ repository, auditLogger, env = {}, notifier, clock = () => new Date() }) {
+export function createAuthService({ repository, auditLogger, env = {}, notifier, clock = () => new Date(), referralBinder = null }) {
   if (!repository) throw new Error("Auth repository is required.");
   const config = { ...DEFAULTS, ...env };
 
@@ -98,6 +98,11 @@ export function createAuthService({ repository, auditLogger, env = {}, notifier,
         email: String(input.email).trim(), emailNormalized, displayName, passwordHash: await hashPassword(password)
       });
       const token = await issueEmailToken(user, "registration", requestMeta);
+      // V2-11-03 — bind an inviter at signup. An invalid code never blocks
+      // registration (the binder records a reason instead of throwing).
+      if (referralBinder) {
+        await referralBinder(user.id, input?.ref_code ?? input?.refCode ?? null).catch(() => {});
+      }
       await auditLogger?.write({
         actorType: "user", actorUserId: user.id, action: "auth.register", resourceType: "user", resourceId: user.id,
         metadata: { email: user.email, verification_token: token }, requestId: requestMeta.requestId, ipHash: hashIp(requestMeta.ip)
@@ -129,6 +134,62 @@ export function createAuthService({ repository, auditLogger, env = {}, notifier,
         await repository.trustUserDevice(user.id, deviceHash, clock().toISOString());
       }
       return { user: publicUser(user), verified: true, idempotent: verified.idempotent };
+    },
+
+    // Social login: exchange a verified provider profile for a session. Finds the
+    // linked identity; else links to an existing account with the same verified
+    // email; else creates a new email-verified, passwordless user. A social sign-in
+    // is strong auth, so it issues a session directly (no device re-verify step).
+    async oauthLogin(profile, requestMeta = {}) {
+      const provider = String(profile?.provider || "");
+      const providerUserId = String(profile?.providerUserId || "").trim();
+      if (!provider || !providerUserId) throw badRequest("Provider profile is incomplete.", { field: "providerUserId" });
+      const emailNormalized = profile?.email ? String(profile.email).trim().toLowerCase() : "";
+
+      let user = null;
+      const identity = await repository.findOAuthIdentity(provider, providerUserId);
+      if (identity) {
+        user = await repository.findUserById(identity.userId);
+      } else {
+        // Link to an existing account by verified email, else create a new one.
+        if (emailNormalized) user = await repository.findUserByEmail(emailNormalized);
+        if (!user) {
+          const randomPassword = randomUUID() + randomUUID();
+          user = await createUserSafely(repository, {
+            email: profile.email || `${provider}_${providerUserId}@users.noreply.goatedbuy`,
+            emailNormalized: emailNormalized || `${provider}_${providerUserId}@users.noreply.goatedbuy`,
+            displayName: profile.displayName || "",
+            passwordHash: await hashPassword(randomPassword)
+          });
+          // The provider has verified the email → mark verified immediately.
+          user = await repository.markUserEmailVerified(user.id, clock().toISOString());
+        }
+        try {
+          await repository.linkOAuthIdentity({ userId: user.id, provider, providerUserId, email: profile.email || "", displayName: profile.displayName || "" });
+        } catch (error) {
+          if (error.code === "OAUTH_PROVIDER_LINKED") throw conflict("This social account is already linked to another user.", { code: "provider_linked" });
+          throw error;
+        }
+      }
+
+      if (!user) throw unauthorized("Could not resolve a user for this social login.");
+      if (user.deletionRequestedAt) throw forbidden("Account deletion is already pending.");
+      if (user.status === "risk_locked") throw forbidden("Account is locked by risk control.");
+      if (user.status !== "normal") throw forbidden("Account is not available.");
+
+      const deviceHash = getDeviceHash(requestMeta, config);
+      if (deviceHash) {
+        await repository.upsertUserDevice({ userId: user.id, deviceHash, label: requestMeta.deviceLabel, lastSeenAt: clock().toISOString() });
+        await repository.trustUserDevice(user.id, deviceHash, clock().toISOString());
+      }
+      await recordLogin("user", user.emailNormalized || emailNormalized, requestMeta, true);
+      const sessionResult = await createActorSession(repository, "user", user, { ...secureMeta(requestMeta, config), deviceHash }, clock(), config);
+      await auditLogger?.write?.({ actorType: "user", actorUserId: user.id, action: "auth.oauth_login", resourceType: "user", resourceId: user.id, metadata: { provider }, requestId: requestMeta.requestId }, { critical: false }).catch(() => {});
+      return { user: publicUser(user), session: toSessionResponse(sessionResult.tokens, sessionResult.session), new_user: !identity };
+    },
+
+    async listLinkedProviders(user) {
+      return { providers: await repository.listOAuthIdentities(user.id) };
     },
 
     async loginUser(input, requestMeta = {}) {
@@ -199,6 +260,12 @@ export function createAuthService({ repository, auditLogger, env = {}, notifier,
       if (!adminUser || adminUser.status !== "enabled" || !(await verifyPassword(password, adminUser.passwordHash))) {
         await recordLogin("admin", emailNormalized, requestMeta, false, "invalid_credentials");
         throw unauthorized(GENERIC_LOGIN_ERROR);
+      }
+      // Dev-only bypass (config.authAdminMfaBypass is force-false in production): skip TOTP
+      // and issue a session straight from valid password, so the MVP admin console is usable locally.
+      if (config.authAdminMfaBypass) {
+        await recordLogin("admin", emailNormalized, requestMeta, true, "mfa_bypassed_dev");
+        return completeAdminSession(repository, adminUser, requestMeta, clock(), config);
       }
       const challengeToken = createOpaqueToken(32);
       const challengeType = adminUser.totpEnabledAt ? "login" : "totp_setup";
