@@ -2013,11 +2013,7 @@ function renderTrust() {
 // Social login providers shown on the sign-in / register screens, in display order.
 const OAUTH_DISPLAY = [
   { id: "google", label: "Google" },
-  { id: "apple", label: "Apple" },
-  { id: "discord", label: "Discord" },
-  { id: "facebook", label: "Facebook" },
-  { id: "github", label: "GitHub" },
-  { id: "microsoft", label: "Microsoft" }
+  { id: "discord", label: "Discord" }
 ];
 let oauthProviderState = { loaded: false, configured: new Set() };
 
@@ -2042,11 +2038,8 @@ function oauthBrandMark(id) {
 
 function renderOAuthButtons() {
   const buttons = OAUTH_DISPLAY.map(({ id, label }) => {
-    const configured = oauthProviderState.configured.has(id);
-    const cls = `oauth-button${configured ? "" : " is-unconfigured"}`;
-    const hint = configured ? "" : ' <span class="oauth-setup">Setup needed</span>';
-    return `<button type="button" class="${cls}" data-oauth="${id}" ${authFlow.loading ? "disabled" : ""}>
-      <span class="oauth-mark">${oauthBrandMark(id)}</span><span>Continue with ${label}</span>${hint}
+    return `<button type="button" class="oauth-button" data-oauth="${id}" ${authFlow.loading ? "disabled" : ""}>
+      <span class="oauth-mark">${oauthBrandMark(id)}</span><span>Continue with ${label}</span>
     </button>`;
   }).join("");
   return `<div class="oauth-block"><div class="oauth-divider"><span>or continue with</span></div><div class="oauth-buttons">${buttons}</div></div>`;
