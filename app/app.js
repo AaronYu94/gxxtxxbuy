@@ -1245,27 +1245,27 @@ function renderDashboard() {
           : { copy: "Paste your first product link to start a haul.", cta: "Start an order", view: "links" };
   return `
     <div class="dl-v2 dash-v2">
-      <!-- 01 HERO (split) -->
-      <section><div class="wrap hero">
-        <div>
-          <span class="eyebrow" data-reveal>One link · one warehouse · your world</span>
-          <h1 data-reveal>Shop China.<br><em>Ship your way.</em></h1>
-          <p class="lede" data-reveal>Paste any Taobao, 1688 or Weidian link. We buy, inspect, store, and bundle it into one smart international parcel — tracked end to end.</p>
-          <form class="paste" data-action="paste" data-reveal>
-            <input name="url" type="url" placeholder="Paste a Taobao / 1688 / Weidian product link" aria-label="Item link">
-            <button class="btn btn-primary" type="submit"><i data-lucide="search" aria-hidden="true"></i>Start order</button>
-            <button class="btn btn-ghost" type="button" data-save-link title="Save link" aria-label="Save link"><i data-lucide="bookmark" aria-hidden="true"></i></button>
-          </form>
-          <div class="platforms" data-reveal><span>Works with</span><b>Taobao</b><b>1688</b><b>Weidian</b><b>Yupoo</b></div>
-          <div class="hero-actions" data-reveal style="display:flex;gap:10px;margin-top:var(--s-4);flex-wrap:wrap">
-            <button class="btn btn-ghost" type="button" data-route-button="guide"><i data-lucide="play-circle" aria-hidden="true"></i>How it works</button>
-            <button class="btn btn-ghost" type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Welcome gift</button>
+      <!-- 01 HERO (full-bleed, image background) -->
+      <section class="hero-full" style="background-image:url('./assets/gb-hero-warehouse.png')">
+        <div class="wrap hero-full-inner">
+          <div class="hero-full-copy" data-reveal>
+            <h1><em>GOATED</em> BUY.</h1>
+            <p class="sub">China at Your Fingertips,<br>Worldwide Delivery.</p>
+            <form class="hero-search" data-action="paste">
+              <i class="lk" data-lucide="link-2" aria-hidden="true"></i>
+              <input name="url" type="url" placeholder="Enter Taobao, 1688, or Micro link" aria-label="Item link">
+              <div class="chips" aria-hidden="true"><span>店</span><span>微</span><span>淘</span></div>
+              <button class="btn-search" type="submit"><i data-lucide="search" aria-hidden="true"></i>Search</button>
+            </form>
+            <div class="hero-steps">
+              <div class="st"><span class="num">1</span><b>Place orders</b><small>Paste an item link to submit an order</small></div>
+              <div class="st"><span class="num">2</span><b>QC &amp; storage</b><small>3–5 free QC photos &amp; 90 free storage</small></div>
+              <div class="st"><span class="num">3</span><b>Submit parcels</b><small>Bundle packaging &amp; check the parcel</small></div>
+              <div class="st"><span class="num">4</span><b>INTL ship</b><small>Cheaper line with 150+ shipping lines</small></div>
+            </div>
           </div>
         </div>
-        <div class="card-floating hero-display" data-reveal>
-          <img src="./assets/gb-hero-warehouse.png" alt="From our China warehouse to your doorstep — air freight, consolidated." loading="lazy">
-        </div>
-      </div></section>
+      </section>
 
       <!-- 02 PROOF ribbon -->
       <section class="proof"><div class="wrap in">
