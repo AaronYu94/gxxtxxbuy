@@ -239,9 +239,11 @@
 /* brand elements: mascot + warehouse banner. mix-blend-multiply drops the white
    jpg background against the warm-white page so the mascot reads as cut-out. */
 /* ===================================================== full-bleed image hero (responsive) */
-.dl-v2 .hero-full{position:relative;display:flex;align-items:center;min-height:clamp(440px,50vw,660px);
-  margin-top:var(--s-4);border-radius:var(--r-lg);overflow:hidden;
+.dl-v2 .hero-full{position:relative;display:flex;align-items:center;min-height:clamp(480px,58vw,820px);
+  /* full-bleed: break out of the centered .view container to span the whole viewport width */
+  margin:0 calc(50% - 50vw);border-radius:0;overflow:hidden;
   background-size:cover;background-position:70% center;background-repeat:no-repeat}
+.dl-v2.dash-v2{overflow-x:clip}
 .dl-v2 .hero-full::before{content:"";position:absolute;inset:0;
   background:linear-gradient(90deg,rgba(12,14,18,.80) 0%,rgba(12,14,18,.55) 42%,rgba(12,14,18,.20) 70%,rgba(12,14,18,.05) 100%)}
 .dl-v2 .hero-full-inner{position:relative;z-index:1;width:100%;padding-top:var(--s-6);padding-bottom:var(--s-6)}
