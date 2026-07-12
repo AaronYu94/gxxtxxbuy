@@ -1262,16 +1262,9 @@ function renderDashboard() {
             <button class="btn btn-ghost" type="button" data-welcome-gift><i data-lucide="gift" aria-hidden="true"></i>Welcome gift</button>
           </div>
         </div>
-        <div class="hero-mascot" data-reveal>
-          <img src="./assets/gb-mascot.jpg" alt="GOATEDBUY mascot" loading="lazy">
-        </div>
-      </div></section>
-
-      <!-- brand banner (elements) -->
-      <section class="section" style="padding-top:0"><div class="wrap">
-        <figure class="brand-banner" data-reveal>
+        <div class="card-floating hero-display" data-reveal>
           <img src="./assets/gb-hero-warehouse.png" alt="From our China warehouse to your doorstep — air freight, consolidated." loading="lazy">
-        </figure>
+        </div>
       </div></section>
 
       <!-- 02 PROOF ribbon -->
