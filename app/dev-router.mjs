@@ -3,12 +3,13 @@
 //   else   -> buyer client (client.html)   [www.* and bare hosts]
 //
 // Run:  node app/dev-router.mjs        (PORT defaults to 8080)
-// Then map the hostnames to loopback (once):
-//   sudo sh -c 'printf "127.0.0.1 www.goatedbuy.test ops.goatedbuy.test\n" >> /etc/hosts'
-//   www:  http://www.goatedbuy.test:8080
-//   ops:  http://ops.goatedbuy.test:8080
-// Production: point DNS ops.goatedbuy.<tld> at a host running this same routing
-// (or a separate deploy of admin.html); www serves client.html.
+// Then map the real hostnames to loopback for local testing (once):
+//   sudo sh -c 'printf "127.0.0.1 www.goated-buy.us ops.goated-buy.us\n" >> /etc/hosts'
+//   www:  http://www.goated-buy.us:8080
+//   ops:  http://ops.goated-buy.us:8080
+// Production (domain: goated-buy.us): point DNS www + ops at a host running this
+// same host-based routing (or Cloudflare in front of GitHub Pages), and run the
+// Express backend at api.goated-buy.us.
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, sep } from "node:path";

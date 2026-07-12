@@ -1,0 +1,34 @@
+# GoatedBuy · single-server reverse proxy + static host (auto-HTTPS via Let's Encrypt).
+# Routes by hostname:
+#   www / apex  -> buyer client (client.html)
+#   ops.*       -> ops / admin console (admin.html)
+#   api.*       -> Express backend (container `backend` on :3000)
+# Caddy provisions and renews TLS certs automatically for every hostname below,
+# as long as the DNS A records point at this server and ports 80/443 are open.
+
+{
+	email admin@goated-buy.us
+}
+
+# --- Buyer client -----------------------------------------------------------
+www.goated-buy.us, goated-buy.us {
+	root * /srv/app
+	encode gzip zstd
+	# serve real files; anything else falls through to the SPA entry
+	try_files {path} /client.html
+	file_server
+}
+
+# --- Ops / admin console ----------------------------------------------------
+ops.goated-buy.us {
+	root * /srv/app
+	encode gzip zstd
+	try_files {path} /admin.html
+	file_server
+}
+
+# --- Backend API ------------------------------------------------------------
+api.goated-buy.us {
+	encode gzip zstd
+	reverse_proxy backend:3000
+}

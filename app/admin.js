@@ -1,6 +1,11 @@
 const ADMIN_SESSION_KEY = "goatedbuy-admin-api-v1";
-// Staging/prod API base URL override, injectable via window.GOATEDBUY_API_BASE_URL.
-const DEFAULT_API_BASE_URL = (typeof window !== "undefined" && window.GOATEDBUY_API_BASE_URL) || "http://127.0.0.1:3000";
+// API base: explicit window override first, then host-aware default
+// (prod ops.goated-buy.us -> api.goated-buy.us; local -> 127.0.0.1:3000).
+const DEFAULT_API_BASE_URL =
+  (typeof window !== "undefined" && window.GOATEDBUY_API_BASE_URL) ||
+  (typeof location !== "undefined" && /(^|\.)goated-buy\.us$/i.test(location.hostname)
+    ? "https://api.goated-buy.us"
+    : "http://127.0.0.1:3000");
 
 const navItems = [
   ["overview", "Overview", []],

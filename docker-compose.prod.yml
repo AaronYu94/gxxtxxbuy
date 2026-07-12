@@ -1,0 +1,77 @@
+# GoatedBuy · production single-server stack.
+#   caddy   -> TLS + host routing (www/ops -> static app/, api -> backend)
+#   backend -> Express API (built from ./backend)
+#   db      -> Postgres 16   (persistent volume)
+#   redis   -> Redis 7       (persistent volume)
+#
+# Secrets/config come from a root `.env` (gitignored) — copy .env.prod.example first.
+# Bring up:   docker compose -f docker-compose.prod.yml up -d --build
+# Migrate:    docker compose -f docker-compose.prod.yml exec backend npm run migrate
+#             docker compose -f docker-compose.prod.yml exec backend npm run seed:rbac
+#             docker compose -f docker-compose.prod.yml exec backend node scripts/create-admin.mjs
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./app:/srv/app:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - .env                       # DATABASE_URL, REDIS_URL, AUTH_* secrets, CORS_ALLOWED_ORIGINS, ...
+    environment:
+      NODE_ENV: production         # also force-disables the dev admin-MFA bypass
+      PORT: "3000"
+      READY_REQUIRES_DATABASE: "true"
+      READY_REQUIRES_REDIS: "true"
+    expose:
+      - "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: goatedbuy
+      POSTGRES_USER: goatedbuy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goatedbuy -d goatedbuy"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pgdata:
+  redisdata:
