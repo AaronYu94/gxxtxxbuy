@@ -45,6 +45,15 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { "content-type": MIME[extname(filePath).toLowerCase()] || "application/octet-stream", "cache-control": "no-cache" });
     res.end(body);
   } catch {
+    // config.js is a gitignored per-env override; fall back to the committed example
+    // (mirrors the Pages build copy) so the client always loads a runtime config.
+    if (pathname === "/config.js") {
+      try {
+        const body = await readFile(join(ROOT, "config.example.js"));
+        res.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache" });
+        return res.end(body);
+      } catch { /* fall through to entry */ }
+    }
     // Unknown path with no file → serve the surface entry (SPA hash-router owns the route).
     try {
       const body = await readFile(join(ROOT, entry));
