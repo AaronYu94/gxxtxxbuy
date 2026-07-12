@@ -2090,8 +2090,20 @@ function startOAuth(provider) {
 function renderLogin() {
   return `
     <div class="dl-v2 signin-v2">
+      <div class="signin-net-bg" aria-hidden="true">
+        <svg class="signin-net" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" fill="none">
+          <path id="gbNetA" d="M120 600 C 380 470 620 380 840 400 C 1030 418 1180 520 1380 300" stroke="var(--c-coral)" stroke-width="1.6" stroke-opacity=".18" stroke-dasharray="1.5 8" stroke-linecap="round"/>
+          <path d="M80 420 C 360 470 660 520 940 400 C 1160 310 1300 340 1440 300" stroke="var(--c-ship)" stroke-width="1.4" stroke-opacity=".10" stroke-dasharray="1.5 9" stroke-linecap="round"/>
+          <path d="M200 700 C 520 640 820 620 1080 560 C 1260 520 1360 560 1440 520" stroke="var(--c-coral)" stroke-width="1.2" stroke-opacity=".08" stroke-dasharray="1.5 10" stroke-linecap="round"/>
+          <g>
+            <circle cx="840" cy="400" r="26" fill="var(--c-coral)" opacity=".05"></circle><circle cx="840" cy="400" r="4.5" fill="var(--c-coral)" opacity=".45"></circle>
+            <circle cx="1180" cy="470" r="20" fill="var(--c-ship)" opacity=".05"></circle><circle cx="1180" cy="470" r="4" fill="var(--c-ship)" opacity=".4"></circle>
+            <circle cx="360" cy="470" r="18" fill="var(--c-coral)" opacity=".05"></circle><circle cx="360" cy="470" r="3.5" fill="var(--c-coral)" opacity=".4"></circle>
+          </g>
+          <circle r="4.5" fill="var(--c-coral)"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#gbNetA"></mpath></animateMotion></circle>
+        </svg>
+      </div>
       <div class="signin-left">
-        <div class="signin-bg" aria-hidden="true"></div>
         <div class="signin-left-inner">
           <span class="eyebrow">Welcome back</span>
           <h1>Your global shipping <em>workspace</em></h1>

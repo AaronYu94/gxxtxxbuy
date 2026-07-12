@@ -423,14 +423,15 @@ body.client-body{overflow-x:clip}
 .dl-v2.auth-v2 .development-token code{display:block;margin-top:4px;font-family:ui-monospace,Menlo,monospace;color:var(--fg)}
 
 /* ===================================================== Sign-in (.signin-v2) — live logistics workspace + form on one unified light surface, responsive */
-.dl-v2.signin-v2{display:grid;grid-template-columns:1.05fr .95fr;align-items:stretch;
+.dl-v2.signin-v2{position:relative;display:grid;grid-template-columns:1.05fr .95fr;align-items:stretch;
   margin:0 calc(50% - 50vw);min-height:calc(100vh - 150px);background:linear-gradient(120deg,#fff,var(--c-warm-white))}
-/* left: product workspace on a subtle warehouse-grid + brand glow (no world map) */
-.dl-v2.signin-v2 .signin-left{position:relative;display:flex;align-items:center;padding:var(--s-9) var(--s-8);overflow:hidden}
-.dl-v2.signin-v2 .signin-bg{position:absolute;inset:0;
-  background:radial-gradient(circle at 1px 1px,rgba(23,25,29,.05) 1px,transparent 1.7px) 0 0/24px 24px,
-    radial-gradient(560px 320px at 12% 8%,rgba(240,80,61,.07),transparent 70%),
-    radial-gradient(520px 420px at 88% 92%,rgba(47,107,240,.05),transparent 70%)}
+/* logistics-network background across the whole page (grid + glow + routes + nodes) */
+.dl-v2.signin-v2 .signin-net-bg{position:absolute;inset:0;z-index:0;overflow:hidden;
+  background:radial-gradient(circle at 1px 1px,rgba(23,25,29,.045) 1px,transparent 1.7px) 0 0/26px 26px,
+    radial-gradient(700px 420px at 28% 10%,rgba(240,80,61,.06),transparent 70%),
+    radial-gradient(720px 520px at 86% 90%,rgba(47,107,240,.045),transparent 70%)}
+.dl-v2.signin-v2 .signin-net{position:absolute;inset:0;width:100%;height:100%}
+.dl-v2.signin-v2 .signin-left{position:relative;z-index:1;display:flex;align-items:center;padding:var(--s-9) var(--s-8)}
 .dl-v2.signin-v2 .signin-left-inner{position:relative;z-index:1;max-width:560px;width:100%}
 .dl-v2.signin-v2 .signin-left h1{font-size:clamp(32px,3.4vw,50px);line-height:1.05;margin:10px 0 12px;color:var(--fg)}
 .dl-v2.signin-v2 .signin-left h1 em{color:var(--c-coral);font-style:normal}
@@ -471,8 +472,11 @@ body.client-body{overflow-x:clip}
 @keyframes wk-pulse{0%{box-shadow:0 0 0 0 rgba(240,80,61,.45)}70%,100%{box-shadow:0 0 0 6px rgba(240,80,61,0)}}
 @keyframes wk-travel{0%{left:8%}46%{left:55%}56%{left:55%}100%{left:92%}}
 /* right: form column, fills full height (brand top + trust bottom) */
-.dl-v2.signin-v2 .signin-right{display:grid;grid-template-rows:1fr auto;padding:var(--s-8) var(--s-8) var(--s-6);gap:var(--s-6)}
-.dl-v2.signin-v2 .signin-card{align-self:center;justify-self:center;width:100%;max-width:400px}
+.dl-v2.signin-v2 .signin-right{position:relative;z-index:1;display:grid;grid-template-rows:1fr auto;padding:var(--s-8) var(--s-8) var(--s-6);gap:var(--s-6)}
+.dl-v2.signin-v2 .signin-card{align-self:center;justify-self:center;width:100%;max-width:428px;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(228,231,234,.9);border-radius:var(--r-lg);
+  box-shadow:0 30px 64px rgba(23,25,29,.11),0 2px 8px rgba(23,25,29,.04);padding:var(--s-6) var(--s-6) 28px}
 .dl-v2.signin-v2 .signin-brand{width:46px;height:46px;border-radius:12px;background:#fff;border:1px solid var(--hair);display:grid;place-items:center;box-shadow:var(--e-1);margin-bottom:18px;overflow:hidden}
 .dl-v2.signin-v2 .signin-brand img{width:30px;height:30px;object-fit:contain}
 .dl-v2.signin-v2 .signin-card h2{font-size:26px;letter-spacing:-.02em}
