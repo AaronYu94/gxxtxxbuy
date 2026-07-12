@@ -1,0 +1,12 @@
+{
+  "name": "goatedbuy-web",
+  "private": true,
+  "description": "Static host for the GoatedBuy buyer client + ops console (host-based router: ops.* -> admin.html, else -> client.html).",
+  "type": "module",
+  "scripts": {
+    "start": "node app/dev-router.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
