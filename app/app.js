@@ -2090,25 +2090,43 @@ function startOAuth(provider) {
 function renderLogin() {
   return `
     <div class="dl-v2 signin-v2">
-      <div class="signin-left" style="background-image:url('./assets/gb-signin-bg.png')">
+      <div class="signin-left">
+        <div class="signin-bg" aria-hidden="true"></div>
         <div class="signin-left-inner">
           <span class="eyebrow">Welcome back</span>
           <h1>Your global shipping <em>workspace</em></h1>
-          <p class="lede">One account to manage your orders, warehouse items, parcels, addresses, and everything in between.</p>
-          <ul class="signin-feats">
-            <li><span class="fi"><i data-lucide="lock" aria-hidden="true"></i></span><div><b>Secure &amp; private</b><small>Your data is encrypted and never shared.</small></div></li>
-            <li><span class="fi"><i data-lucide="shield-check" aria-hidden="true"></i></span><div><b>Verified platform</b><small>Thousands of customers ship with confidence.</small></div></li>
-            <li><span class="fi"><i data-lucide="headphones" aria-hidden="true"></i></span><div><b>24/7 support</b><small>Real humans, real fast.</small></div></li>
-          </ul>
-          <div class="signin-trust">
-            <div><span class="ti"><i data-lucide="lock" aria-hidden="true"></i></span><div><b>Bank-level Security</b><small>256-bit SSL encryption</small></div></div>
-            <div><span class="ti"><i data-lucide="shield-check" aria-hidden="true"></i></span><div><b>Trusted by 10,000+</b><small>Customers worldwide</small></div></div>
-            <div><span class="ti"><i data-lucide="star" aria-hidden="true"></i></span><div><b>Excellent 4.8/5</b><small>Based on 2,000+ reviews</small></div></div>
+          <p class="lede">One live account for orders, warehouse, parcels and shipping — tracked end to end.</p>
+          <div class="wk-stack" aria-hidden="true">
+            <div class="wk-card wk-today">
+              <div class="wk-head"><b>Today's shipments</b><span class="wk-live"><i></i>Live</span></div>
+              <div class="wk-stats">
+                <div><div class="wv">342</div><div class="wl">Packages</div></div>
+                <div><div class="wv">16</div><div class="wl">Warehouses</div></div>
+                <div><div class="wv">98.4%</div><div class="wl">Delivered today</div></div>
+              </div>
+            </div>
+            <div class="wk-card wk-track">
+              <div class="wk-head"><b>Live tracking</b><span class="wk-tn">GB1234567890</span></div>
+              <div class="wk-route"><span class="rline"><span class="rprog"></span></span><span class="rparcel"></span>
+                <div class="rnodes">
+                  <div class="rn done"><span class="rd"></span>Shanghai</div>
+                  <div class="rn cur"><span class="rd"></span>US&nbsp;Warehouse</div>
+                  <div class="rn"><span class="rd"></span>Out&nbsp;for&nbsp;delivery</div>
+                </div>
+              </div>
+              <div class="wk-eta">ETA <b>Jul&nbsp;15</b> · Air freight · 2.4&nbsp;kg</div>
+            </div>
+            <div class="wk-card wk-orders">
+              <div class="wk-row"><span class="oid"><i data-lucide="package"></i>GB12345</span><span class="ochip proc">Processing</span></div>
+              <div class="wk-row"><span class="oid"><i data-lucide="package"></i>GB66771</span><span class="ochip pack">Packed</span></div>
+              <div class="wk-row"><span class="oid"><i data-lucide="package"></i>GB88192</span><span class="ochip tran">In transit</span></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="signin-right">
         <div class="signin-card">
+          <div class="signin-brand"><img src="./assets/gb-logo-symbol.jpg" alt="GOATEDBUY"></div>
           <h2>Sign in to your account</h2>
           <p class="signin-sub">Welcome back! Please enter your details.</p>
           <form class="signin-form" data-action="account-login">
@@ -2120,6 +2138,11 @@ function renderLogin() {
           </form>
           ${renderOAuthButtons()}
           <p class="signin-switch">New to GOATEDBUY? <button type="button" data-route-button="register">Create account <i data-lucide="arrow-right" aria-hidden="true"></i></button></p>
+        </div>
+        <div class="signin-trustrow">
+          <span><i data-lucide="lock" aria-hidden="true"></i>256-bit SSL</span>
+          <span><i data-lucide="shield-check" aria-hidden="true"></i>10,000+ customers</span>
+          <span><i data-lucide="star" aria-hidden="true"></i>4.8/5 rating</span>
         </div>
       </div>
     </div>
