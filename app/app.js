@@ -2188,23 +2188,47 @@ function renderVerification(kind, title, body) {
   const developmentToken = runtimeConfig.environment !== "production" && authFlow.verificationToken
     ? `<p class="development-token"><strong>Local delivery token</strong><code>${escapeHtml(authFlow.verificationToken)}</code></p>` : "";
   scheduleVerificationTick(seconds);
-  return renderAuthLayout({
-    eyebrow: kind === "email" ? "Email verification" : "Device security",
-    title,
-    body,
-    content: `
-      <form class="account-form" data-action="verify-${kind}">
-        ${authErrorMarkup()}
-        <label class="field"><span>Verification token</span><input name="token" autocomplete="one-time-code" required value="${escapeHtml(authFlow.verificationToken)}"></label>
-        ${developmentToken}
-        <div class="actions">
-          <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${kind === "email" ? i18n.t("auth.verify_email") : i18n.t("auth.verify_device")}</button>
-          <button class="secondary-button" type="button" data-resend-verification="${kind}" ${seconds || authFlow.loading ? "disabled" : ""}>${seconds ? `${i18n.t("auth.resend")} (${seconds}s)` : i18n.t("auth.resend")}</button>
+  const verifyLabel = kind === "email" ? i18n.t("auth.verify_email") : i18n.t("auth.verify_device");
+  return `
+    <div class="dl-v2 signin-v2">
+      <img class="signin-hero-img" src="./assets/gb-signin-bg.png" alt="" aria-hidden="true">
+      <div class="signin-scrim" aria-hidden="true"></div>
+      <div class="signin-inner">
+      <div class="signin-left">
+        <div class="signin-left-inner">
+          <span class="eyebrow">${kind === "email" ? "Email verification" : "Device security"}</span>
+          <h1>${kind === "email" ? `Check your <em>inbox</em>` : `Verify this <em>device</em>`}</h1>
+          <p class="lede">One quick step keeps your account, wallet and parcels secure.</p>
+          <ul class="signin-points">
+            <li><i data-lucide="shield-check" aria-hidden="true"></i>One-time token — expires automatically, works once</li>
+            <li><i data-lucide="smartphone" aria-hidden="true"></i>New devices always require email confirmation</li>
+            <li><i data-lucide="lock" aria-hidden="true"></i>GOATEDBUY support never asks for your password</li>
+          </ul>
         </div>
-      </form>
-      <p class="auth-switch"><button type="button" data-route-button="login">Back to sign in</button></p>
-    `
-  });
+      </div>
+      <div class="signin-right">
+        <div class="signin-card">
+          <div class="signin-brand"><img src="./assets/gb-logo-symbol.jpg" alt="GOATEDBUY"></div>
+          <h2>${escapeHtml(title)}</h2>
+          <p class="signin-sub">${escapeHtml(body)}</p>
+          <form class="signin-form" data-action="verify-${kind}">
+            ${authErrorMarkup()}
+            <label class="signin-field"><i class="fi" data-lucide="key-round" aria-hidden="true"></i><input name="token" autocomplete="one-time-code" inputmode="numeric" required placeholder="Verification token" value="${escapeHtml(authFlow.verificationToken)}"></label>
+            ${developmentToken}
+            <button class="signin-btn" type="submit" ${authFlow.loading ? "disabled" : ""}>${verifyLabel}</button>
+            <button class="signin-btn-ghost" type="button" data-resend-verification="${kind}" ${seconds || authFlow.loading ? "disabled" : ""}>${seconds ? `${i18n.t("auth.resend")} (${seconds}s)` : i18n.t("auth.resend")}</button>
+          </form>
+          <p class="signin-switch"><button type="button" data-route-button="login"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to sign in</button></p>
+        </div>
+        <div class="signin-trustrow">
+          <span><i data-lucide="lock" aria-hidden="true"></i>256-bit SSL</span>
+          <span><i data-lucide="shield-check" aria-hidden="true"></i>10,000+ customers</span>
+          <span><i data-lucide="star" aria-hidden="true"></i>4.8/5 rating</span>
+        </div>
+      </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderAuthLayout({ eyebrow, title, body, content }) {
