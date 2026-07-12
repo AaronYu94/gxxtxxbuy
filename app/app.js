@@ -2107,7 +2107,7 @@ function renderLogin() {
       </div>
       <div class="signin-right">
         <div class="signin-card">
-          <div class="signin-brand"><img src="./assets/gb-logo-symbol.jpg" alt="GOATEDBUY"></div>
+          <div class="signin-brand"><img src="./assets/gb-symbol.svg" alt="GOATEDBUY"></div>
           <h2>Sign in to your account</h2>
           <p class="signin-sub">Welcome back! Please enter your details.</p>
           <form class="signin-form" data-action="account-login">
@@ -2151,7 +2151,7 @@ function renderRegister() {
       </div>
       <div class="signin-right">
         <div class="signin-card">
-          <div class="signin-brand"><img src="./assets/gb-logo-symbol.jpg" alt="GOATEDBUY"></div>
+          <div class="signin-brand"><img src="./assets/gb-symbol.svg" alt="GOATEDBUY"></div>
           <h2>Create your account</h2>
           <p class="signin-sub">Your email is verified before any workspace session is issued.</p>
           <form class="signin-form" data-action="account-register">
@@ -2208,7 +2208,7 @@ function renderVerification(kind, title, body) {
       </div>
       <div class="signin-right">
         <div class="signin-card">
-          <div class="signin-brand"><img src="./assets/gb-logo-symbol.jpg" alt="GOATEDBUY"></div>
+          <div class="signin-brand"><img src="./assets/gb-symbol.svg" alt="GOATEDBUY"></div>
           <h2>${escapeHtml(title)}</h2>
           <p class="signin-sub">${escapeHtml(body)}</p>
           <form class="signin-form" data-action="verify-${kind}">

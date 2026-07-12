@@ -447,8 +447,8 @@ body.client-body{overflow-x:clip}
   background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   border:1px solid rgba(228,231,234,.9);border-radius:var(--r-lg);
   box-shadow:0 30px 64px rgba(23,25,29,.11),0 2px 8px rgba(23,25,29,.04);padding:var(--s-6) var(--s-6) 28px}
-.dl-v2.signin-v2 .signin-brand{width:46px;height:46px;border-radius:12px;background:#fff;border:1px solid var(--hair);display:grid;place-items:center;box-shadow:var(--e-1);margin-bottom:18px;overflow:hidden}
-.dl-v2.signin-v2 .signin-brand img{width:30px;height:30px;object-fit:contain}
+.dl-v2.signin-v2 .signin-brand{height:38px;margin-bottom:20px}
+.dl-v2.signin-v2 .signin-brand img{height:38px;width:auto;display:block;object-fit:contain}
 .dl-v2.signin-v2 .signin-card h2{font-size:26px;letter-spacing:-.02em}
 .dl-v2.signin-v2 .signin-sub{color:var(--muted);margin:6px 0 var(--s-6)}
 .dl-v2.signin-v2 .signin-form{display:flex;flex-direction:column;gap:14px}
@@ -541,3 +541,7 @@ body.client-body{overflow-x:clip}
 /* admin content: give the primary action the ops air-purple instead of client coral */
 .dl-v2.admin-v2 .tx-v2 .primary-button{background:var(--c-air)}
 .dl-v2.admin-v2 .tx-v2 .primary-button:hover{box-shadow:0 12px 30px rgba(108,75,214,.28)}
+
+/* ===================================================== Boxless brand mark — the white rounded logo box read too templated */
+.client-body .brand-mark.has-logo{border:none;background:none;border-radius:0;overflow:visible}
+.client-body .brand-mark.has-logo img{width:100%;height:100%;object-fit:contain}
