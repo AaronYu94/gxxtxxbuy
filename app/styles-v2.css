@@ -422,6 +422,57 @@ body.client-body{overflow-x:clip}
 .dl-v2.auth-v2 .development-token{margin-top:12px;font-size:12px;background:var(--c-warm-white);border:1px dashed var(--hair);border-radius:var(--r-sm);padding:10px}
 .dl-v2.auth-v2 .development-token code{display:block;margin-top:4px;font-family:ui-monospace,Menlo,monospace;color:var(--fg)}
 
+/* ===================================================== Sign-in split screen (.signin-v2, responsive) */
+.dl-v2.signin-v2{display:grid;grid-template-columns:1.12fr .88fr;align-items:stretch;
+  margin:0 calc(50% - 50vw);min-height:calc(100vh - 150px);background:var(--c-warm-white)}
+/* left marketing panel */
+.dl-v2.signin-v2 .signin-left{position:relative;background-size:cover;background-position:center;display:flex;align-items:center;padding:var(--s-9) var(--s-8);overflow:hidden}
+.dl-v2.signin-v2 .signin-left::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.62),rgba(255,255,255,.06) 62%)}
+.dl-v2.signin-v2 .signin-left-inner{position:relative;z-index:1;max-width:540px;width:100%}
+.dl-v2.signin-v2 .signin-left h1{font-size:clamp(34px,3.6vw,54px);line-height:1.05;margin:10px 0 14px;color:var(--fg)}
+.dl-v2.signin-v2 .signin-left h1 em{color:var(--c-coral);font-style:normal}
+.dl-v2.signin-v2 .signin-left .lede{font-size:var(--t-body-lg);color:var(--muted);max-width:420px;margin:0 0 var(--s-7)}
+.dl-v2.signin-v2 .signin-feats{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:var(--s-5)}
+.dl-v2.signin-v2 .signin-feats li{display:flex;gap:14px;align-items:flex-start}
+.dl-v2.signin-v2 .signin-feats .fi{flex:none;width:40px;height:40px;border-radius:11px;background:var(--c-coral-wash);color:var(--c-coral-deep);display:grid;place-items:center}
+.dl-v2.signin-v2 .signin-feats b{display:block;font-size:15px}
+.dl-v2.signin-v2 .signin-feats small{color:var(--muted);font-size:13px}
+.dl-v2.signin-v2 .signin-trust{display:flex;gap:var(--s-6);flex-wrap:wrap;margin-top:var(--s-8);padding-top:var(--s-6);border-top:1px solid var(--hair)}
+.dl-v2.signin-v2 .signin-trust > div{display:flex;gap:10px;align-items:center}
+.dl-v2.signin-v2 .signin-trust .ti{flex:none;width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--hair);color:var(--c-coral);display:grid;place-items:center}
+.dl-v2.signin-v2 .signin-trust b{display:block;font-size:13px}
+.dl-v2.signin-v2 .signin-trust small{color:var(--muted);font-size:11.5px}
+/* right form panel */
+.dl-v2.signin-v2 .signin-right{background:linear-gradient(160deg,#fff 52%,#FFF1EE);display:flex;align-items:center;justify-content:center;padding:var(--s-8)}
+.dl-v2.signin-v2 .signin-card{width:100%;max-width:420px}
+.dl-v2.signin-v2 .signin-card h2{font-size:26px;letter-spacing:-.02em}
+.dl-v2.signin-v2 .signin-sub{color:var(--muted);margin:6px 0 var(--s-6)}
+.dl-v2.signin-v2 .signin-form{display:flex;flex-direction:column;gap:14px}
+.dl-v2.signin-v2 .signin-field{display:flex;align-items:center;gap:10px;border:1px solid var(--hair);border-radius:var(--r-sm);padding:0 14px;background:#fff}
+.dl-v2.signin-v2 .signin-field .fi{color:var(--faint);flex:none;width:18px;height:18px}
+.dl-v2.signin-v2 .signin-field input{flex:1;min-width:0;border:none;background:none;font:inherit;font-size:15px;padding:14px 0;outline:none;color:var(--fg)}
+.dl-v2.signin-v2 .signin-field:focus-within{border-color:var(--c-coral)}
+.dl-v2.signin-v2 .signin-forgot{text-align:right;margin-top:-4px}
+.dl-v2.signin-v2 .link-btn{background:none;border:none;color:var(--c-coral-deep);font:inherit;font-size:13px;font-weight:var(--fw-med);cursor:pointer;padding:0}
+.dl-v2.signin-v2 .signin-btn{background:var(--c-coral);color:#fff;border:none;border-radius:var(--r-sm);height:52px;font:inherit;font-weight:var(--fw-bold);cursor:pointer;margin-top:4px;transition:transform var(--dur-fast) var(--ease-spring)}
+.dl-v2.signin-v2 .signin-btn:hover{transform:translateY(-1px);box-shadow:var(--e-coral)}
+.dl-v2.signin-v2 .signin-switch{text-align:center;margin-top:var(--s-5);font-size:14px;color:var(--muted)}
+.dl-v2.signin-v2 .signin-switch button{background:none;border:none;color:var(--c-coral-deep);font:inherit;font-weight:var(--fw-bold);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.dl-v2.signin-v2 .form-message{margin-bottom:4px}
+/* OAuth inside the card */
+.dl-v2.signin-v2 .oauth-block{margin-top:var(--s-6)}
+.dl-v2.signin-v2 .oauth-divider{display:flex;align-items:center;gap:12px;color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 14px}
+.dl-v2.signin-v2 .oauth-divider::before,.dl-v2.signin-v2 .oauth-divider::after{content:"";flex:1;border-top:1px solid var(--hair)}
+.dl-v2.signin-v2 .oauth-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dl-v2.signin-v2 .oauth-button{display:flex;align-items:center;gap:8px;justify-content:center;border:1px solid var(--hair);border-radius:var(--r-sm);background:#fff;padding:12px 10px;font:inherit;font-size:13px;font-weight:var(--fw-med);cursor:pointer;color:var(--fg)}
+.dl-v2.signin-v2 .oauth-button:hover{border-color:var(--c-coral)}
+.dl-v2.signin-v2 .oauth-mark{display:inline-flex;align-items:center}
+@media(max-width:900px){
+  .dl-v2.signin-v2{grid-template-columns:1fr;min-height:0;margin-top:0}
+  .dl-v2.signin-v2 .signin-left{display:none}
+  .dl-v2.signin-v2 .signin-right{padding:var(--s-7) var(--s-5);min-height:calc(100vh - 150px)}
+}
+
 /* ===================================================== Stage D · account + addresses (.account-v2) */
 .dl-v2.account-v2 .account-page{display:flex;flex-direction:column;gap:var(--s-5)}
 .dl-v2.account-v2 .account-tabs{display:flex;gap:8px;flex-wrap:wrap}

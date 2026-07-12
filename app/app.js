@@ -2088,21 +2088,42 @@ function startOAuth(provider) {
 }
 
 function renderLogin() {
-  return renderAuthLayout({
-    eyebrow: "Secure account access",
-    title: "Welcome back",
-    body: "Sign in to manage orders, warehouse items, parcels, addresses, and account preferences.",
-    content: `
-      <form class="account-form" data-action="account-login">
-        ${authErrorMarkup()}
-        <label class="field"><span>${i18n.t("auth.email")}</span><input name="email" type="email" autocomplete="email" required value="${escapeHtml(authFlow.email)}"></label>
-        <label class="field"><span>${i18n.t("auth.password")}</span><input name="password" type="password" autocomplete="current-password" required minlength="10"></label>
-        <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.sign_in")}</button>
-      </form>
-      ${renderOAuthButtons()}
-      <p class="auth-switch">New to GOATEDBUY? <button type="button" data-route-button="register">${i18n.t("account.register")}</button></p>
-    `
-  });
+  return `
+    <div class="dl-v2 signin-v2">
+      <div class="signin-left" style="background-image:url('./assets/gb-signin-bg.png')">
+        <div class="signin-left-inner">
+          <span class="eyebrow">Welcome back</span>
+          <h1>Your global shipping <em>workspace</em></h1>
+          <p class="lede">One account to manage your orders, warehouse items, parcels, addresses, and everything in between.</p>
+          <ul class="signin-feats">
+            <li><span class="fi"><i data-lucide="lock" aria-hidden="true"></i></span><div><b>Secure &amp; private</b><small>Your data is encrypted and never shared.</small></div></li>
+            <li><span class="fi"><i data-lucide="shield-check" aria-hidden="true"></i></span><div><b>Verified platform</b><small>Thousands of customers ship with confidence.</small></div></li>
+            <li><span class="fi"><i data-lucide="headphones" aria-hidden="true"></i></span><div><b>24/7 support</b><small>Real humans, real fast.</small></div></li>
+          </ul>
+          <div class="signin-trust">
+            <div><span class="ti"><i data-lucide="lock" aria-hidden="true"></i></span><div><b>Bank-level Security</b><small>256-bit SSL encryption</small></div></div>
+            <div><span class="ti"><i data-lucide="shield-check" aria-hidden="true"></i></span><div><b>Trusted by 10,000+</b><small>Customers worldwide</small></div></div>
+            <div><span class="ti"><i data-lucide="star" aria-hidden="true"></i></span><div><b>Excellent 4.8/5</b><small>Based on 2,000+ reviews</small></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="signin-right">
+        <div class="signin-card">
+          <h2>Sign in to your account</h2>
+          <p class="signin-sub">Welcome back! Please enter your details.</p>
+          <form class="signin-form" data-action="account-login">
+            ${authErrorMarkup()}
+            <label class="signin-field"><i class="fi" data-lucide="mail" aria-hidden="true"></i><input name="email" type="email" autocomplete="email" required placeholder="Email address" value="${escapeHtml(authFlow.email)}"></label>
+            <label class="signin-field"><i class="fi" data-lucide="lock" aria-hidden="true"></i><input name="password" type="password" autocomplete="current-password" required minlength="10" placeholder="Password"></label>
+            <div class="signin-forgot"><button type="button" class="link-btn" data-route-button="guide">Forgot password?</button></div>
+            <button class="signin-btn" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.sign_in")}</button>
+          </form>
+          ${renderOAuthButtons()}
+          <p class="signin-switch">New to GOATEDBUY? <button type="button" data-route-button="register">Create account <i data-lucide="arrow-right" aria-hidden="true"></i></button></p>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderRegister() {
