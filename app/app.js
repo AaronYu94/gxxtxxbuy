@@ -2132,22 +2132,47 @@ function renderLogin() {
 }
 
 function renderRegister() {
-  return renderAuthLayout({
-    eyebrow: "Buyer account",
-    title: "Create your account",
-    body: "Your email must be verified before any private workspace session is issued.",
-    content: `
-      <form class="account-form" data-action="account-register">
-        ${authErrorMarkup()}
-        <label class="field"><span>Display name</span><input name="display_name" autocomplete="name" maxlength="80"></label>
-        <label class="field"><span>${i18n.t("auth.email")}</span><input name="email" type="email" autocomplete="email" required value="${escapeHtml(authFlow.email)}"></label>
-        <label class="field"><span>${i18n.t("auth.password")}</span><input name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128"><small>10-128 characters</small></label>
-        <button class="primary-button" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.register")}</button>
-      </form>
-      ${renderOAuthButtons()}
-      <p class="auth-switch">Already registered? <button type="button" data-route-button="login">${i18n.t("account.sign_in")}</button></p>
-    `
-  });
+  return `
+    <div class="dl-v2 signin-v2">
+      <img class="signin-hero-img" src="./assets/gb-signin-bg.png" alt="" aria-hidden="true">
+      <div class="signin-scrim" aria-hidden="true"></div>
+      <div class="signin-inner">
+      <div class="signin-left">
+        <div class="signin-left-inner">
+          <span class="eyebrow">Start free</span>
+          <h1>Shop China, <em>ship worldwide</em></h1>
+          <p class="lede">Create one account for orders, warehouse, parcels and shipping — tracked end to end.</p>
+          <ul class="signin-points">
+            <li><i data-lucide="gift" aria-hidden="true"></i>Welcome coupon + 90 days free storage</li>
+            <li><i data-lucide="camera" aria-hidden="true"></i>QC photos before every international parcel</li>
+            <li><i data-lucide="plane" aria-hidden="true"></i>Live tracking from China to your door</li>
+          </ul>
+        </div>
+      </div>
+      <div class="signin-right">
+        <div class="signin-card">
+          <div class="signin-brand"><img src="./assets/gb-logo-symbol.jpg" alt="GOATEDBUY"></div>
+          <h2>Create your account</h2>
+          <p class="signin-sub">Your email is verified before any workspace session is issued.</p>
+          <form class="signin-form" data-action="account-register">
+            ${authErrorMarkup()}
+            <label class="signin-field"><i class="fi" data-lucide="user" aria-hidden="true"></i><input name="display_name" autocomplete="name" maxlength="80" placeholder="Display name"></label>
+            <label class="signin-field"><i class="fi" data-lucide="mail" aria-hidden="true"></i><input name="email" type="email" autocomplete="email" required placeholder="Email address" value="${escapeHtml(authFlow.email)}"></label>
+            <label class="signin-field"><i class="fi" data-lucide="lock" aria-hidden="true"></i><input name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" placeholder="Password (10-128 characters)"></label>
+            <button class="signin-btn" type="submit" ${authFlow.loading ? "disabled" : ""}>${i18n.t("account.register")}</button>
+          </form>
+          ${renderOAuthButtons()}
+          <p class="signin-switch">Already registered? <button type="button" data-route-button="login">${i18n.t("account.sign_in")} <i data-lucide="arrow-right" aria-hidden="true"></i></button></p>
+        </div>
+        <div class="signin-trustrow">
+          <span><i data-lucide="lock" aria-hidden="true"></i>256-bit SSL</span>
+          <span><i data-lucide="shield-check" aria-hidden="true"></i>10,000+ customers</span>
+          <span><i data-lucide="star" aria-hidden="true"></i>4.8/5 rating</span>
+        </div>
+      </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderVerifyEmail() {
