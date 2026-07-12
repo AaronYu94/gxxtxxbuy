@@ -2090,50 +2090,19 @@ function startOAuth(provider) {
 function renderLogin() {
   return `
     <div class="dl-v2 signin-v2">
-      <div class="signin-net-bg" aria-hidden="true">
-        <svg class="signin-net" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" fill="none">
-          <path id="gbNetA" d="M120 600 C 380 470 620 380 840 400 C 1030 418 1180 520 1380 300" stroke="var(--c-coral)" stroke-width="1.6" stroke-opacity=".18" stroke-dasharray="1.5 8" stroke-linecap="round"/>
-          <path d="M80 420 C 360 470 660 520 940 400 C 1160 310 1300 340 1440 300" stroke="var(--c-ship)" stroke-width="1.4" stroke-opacity=".10" stroke-dasharray="1.5 9" stroke-linecap="round"/>
-          <path d="M200 700 C 520 640 820 620 1080 560 C 1260 520 1360 560 1440 520" stroke="var(--c-coral)" stroke-width="1.2" stroke-opacity=".08" stroke-dasharray="1.5 10" stroke-linecap="round"/>
-          <g>
-            <circle cx="840" cy="400" r="26" fill="var(--c-coral)" opacity=".05"></circle><circle cx="840" cy="400" r="4.5" fill="var(--c-coral)" opacity=".45"></circle>
-            <circle cx="1180" cy="470" r="20" fill="var(--c-ship)" opacity=".05"></circle><circle cx="1180" cy="470" r="4" fill="var(--c-ship)" opacity=".4"></circle>
-            <circle cx="360" cy="470" r="18" fill="var(--c-coral)" opacity=".05"></circle><circle cx="360" cy="470" r="3.5" fill="var(--c-coral)" opacity=".4"></circle>
-          </g>
-          <circle r="4.5" fill="var(--c-coral)"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#gbNetA"></mpath></animateMotion></circle>
-        </svg>
-      </div>
+      <img class="signin-hero-img" src="./assets/gb-signin-bg.png" alt="" aria-hidden="true">
+      <div class="signin-scrim" aria-hidden="true"></div>
+      <div class="signin-inner">
       <div class="signin-left">
         <div class="signin-left-inner">
           <span class="eyebrow">Welcome back</span>
           <h1>Your global shipping <em>workspace</em></h1>
           <p class="lede">One live account for orders, warehouse, parcels and shipping — tracked end to end.</p>
-          <div class="wk-stack" aria-hidden="true">
-            <div class="wk-card wk-today">
-              <div class="wk-head"><b>Today's shipments</b><span class="wk-live"><i></i>Live</span></div>
-              <div class="wk-stats">
-                <div><div class="wv">342</div><div class="wl">Packages</div></div>
-                <div><div class="wv">16</div><div class="wl">Warehouses</div></div>
-                <div><div class="wv">98.4%</div><div class="wl">Delivered today</div></div>
-              </div>
-            </div>
-            <div class="wk-card wk-track">
-              <div class="wk-head"><b>Live tracking</b><span class="wk-tn">GB1234567890</span></div>
-              <div class="wk-route"><span class="rline"><span class="rprog"></span></span><span class="rparcel"></span>
-                <div class="rnodes">
-                  <div class="rn done"><span class="rd"></span>Shanghai</div>
-                  <div class="rn cur"><span class="rd"></span>US&nbsp;Warehouse</div>
-                  <div class="rn"><span class="rd"></span>Out&nbsp;for&nbsp;delivery</div>
-                </div>
-              </div>
-              <div class="wk-eta">ETA <b>Jul&nbsp;15</b> · Air freight · 2.4&nbsp;kg</div>
-            </div>
-            <div class="wk-card wk-orders">
-              <div class="wk-row"><span class="oid"><i data-lucide="package"></i>GB12345</span><span class="ochip proc">Processing</span></div>
-              <div class="wk-row"><span class="oid"><i data-lucide="package"></i>GB66771</span><span class="ochip pack">Packed</span></div>
-              <div class="wk-row"><span class="oid"><i data-lucide="package"></i>GB88192</span><span class="ochip tran">In transit</span></div>
-            </div>
-          </div>
+          <ul class="signin-points">
+            <li><i data-lucide="package-check" aria-hidden="true"></i>Buy, warehouse &amp; consolidate in one place</li>
+            <li><i data-lucide="camera" aria-hidden="true"></i>QC photos before every international parcel</li>
+            <li><i data-lucide="plane" aria-hidden="true"></i>Live tracking from China to your door</li>
+          </ul>
         </div>
       </div>
       <div class="signin-right">
@@ -2156,6 +2125,7 @@ function renderLogin() {
           <span><i data-lucide="shield-check" aria-hidden="true"></i>10,000+ customers</span>
           <span><i data-lucide="star" aria-hidden="true"></i>4.8/5 rating</span>
         </div>
+      </div>
       </div>
     </div>
   `;
