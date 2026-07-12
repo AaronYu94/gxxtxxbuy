@@ -32,7 +32,10 @@ create trigger qc_tasks_set_updated_at
 before update on qc_tasks
 for each row execute function set_updated_at();
 
-create table if not exists qc_photos (
+-- Named qc_task_photos to avoid colliding with the V1 warehouse qc_photos table
+-- (migration 000007), which has a different schema and is still used by the
+-- warehouse/admin repositories. This WMS/QC-task photo table is a separate concern.
+create table if not exists qc_task_photos (
   id uuid primary key default gen_random_uuid(),
   qc_task_id uuid not null references qc_tasks (id) on delete cascade,
   slot text not null check (slot in ('front', 'back', 'side', 'label')),
@@ -41,4 +44,4 @@ create table if not exists qc_photos (
   created_at timestamptz not null default now()
 );
 
-create index if not exists qc_photos_task_idx on qc_photos (qc_task_id, slot, version desc);
+create index if not exists qc_task_photos_task_idx on qc_task_photos (qc_task_id, slot, version desc);

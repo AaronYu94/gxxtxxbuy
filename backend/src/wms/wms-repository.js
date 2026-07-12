@@ -132,8 +132,8 @@ export function createPgWmsRepository(env) {
     // Re-shoots keep history: each upload is a new version for its slot.
     async addQcPhoto({ qcTaskId, slot, storageKey }) {
       const result = await pool().query(
-        `insert into qc_photos (qc_task_id, slot, storage_key, version)
-         values ($1, $2, $3, coalesce((select max(version) from qc_photos where qc_task_id = $1 and slot = $2), 0) + 1)
+        `insert into qc_task_photos (qc_task_id, slot, storage_key, version)
+         values ($1, $2, $3, coalesce((select max(version) from qc_task_photos where qc_task_id = $1 and slot = $2), 0) + 1)
          returning *`,
         [qcTaskId, slot, storageKey]
       );
@@ -141,12 +141,12 @@ export function createPgWmsRepository(env) {
     },
 
     async currentQcSlots(qcTaskId) {
-      const result = await pool().query("select distinct slot from qc_photos where qc_task_id = $1", [qcTaskId]);
+      const result = await pool().query("select distinct slot from qc_task_photos where qc_task_id = $1", [qcTaskId]);
       return result.rows.map((r) => r.slot);
     },
 
     async listQcPhotos(qcTaskId) {
-      const result = await pool().query("select * from qc_photos where qc_task_id = $1 order by slot asc, version desc", [qcTaskId]);
+      const result = await pool().query("select * from qc_task_photos where qc_task_id = $1 order by slot asc, version desc", [qcTaskId]);
       return result.rows.map(normalizeQcPhoto);
     },
 
